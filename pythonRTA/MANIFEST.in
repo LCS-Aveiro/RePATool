@@ -1,0 +1,2 @@
+include reforma/bin/*.jar
+include reforma/bin/js/*.js

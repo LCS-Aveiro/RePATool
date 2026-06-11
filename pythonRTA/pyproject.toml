@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ReForma"
+version = "0.1.75"
+description = "Python bindings for the RePA/ReForma probabilistic automaton tool"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Joshua Dourado", email = "joshuadourado@ua.pt" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "networkx",
+    "matplotlib"
+]
+
+[tool.setuptools]
+packages = ["reforma", "reforma.bin", "reforma.bin.js"]
+
+[tool.setuptools.package-data]
+reforma = ["bin/*.jar", "bin/js/*.js"]

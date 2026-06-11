@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RePA Tool</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/codemirror/codemirror.css" rel="stylesheet">
+    <link href="css/codemirror/theme/elegant.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="app">
+
+    <div id="titlebar">
+        <div class="app-icon"></div>
+        <span class="title-text">RePA Tool</span>
+        <span class="title-sep">—</span>
+        <span class="title-sub" data-i18n="subtitle">Reconfigurable Probabilistic Automata: Animated Analysis</span>
+        <div class="lang-btns">
+            <button onclick="changeLanguage('pt')">PT</button>
+            <button onclick="changeLanguage('en')">EN</button>
+        </div>
+    </div>
+
+    <div id="menubar">
+        <div class="menu-item">
+            File
+            <div class="menu-dropdown">
+                <a onclick="saveUserModel()">
+                    <span class="glyphicon glyphicon-floppy-disk"></span>
+                    <span data-i18n="btn_save">Save Model</span>
+                    <span class="shortcut">Ctrl+S</span>
+                </a>
+                <a onclick="overwriteUserModel()">
+                    <span class="glyphicon glyphicon-refresh"></span>
+                    <span data-i18n="btn_overwrite">Overwrite</span>
+                </a>
+                <a onclick="deleteUserModel()">
+                    <span class="glyphicon glyphicon-trash"></span>
+                    Delete Saved
+                </a>
+                <div class="sep"></div>
+                <a onclick="downloadPrism2()">Export PRISM</a>
+                <a onclick="downloadLatex()">Export TikZ (BETA)</a>
+                <a onclick="downloadMermaidSVG()">Export SVG</a>
+                <a onclick="downloadPNG()">Export PNG</a>
+            </div>
+        </div>
+        <div class="menu-item">
+            Edit
+            <div class="menu-dropdown">
+                <a onclick="translateToGLTS()" data-i18n="btn_glts">Translate to GLTS</a>
+            </div>
+        </div>
+        <div class="menu-item">
+            View
+            <div class="menu-dropdown">
+                <a onclick="showCanvasTab('cyTab')">
+                    <span class="glyphicon glyphicon-picture"></span>
+                    Graph (Interactive)
+                </a>
+                <a onclick="showCanvasTab('mermaidTab')">
+                    <span class="glyphicon glyphicon-eye-open"></span>
+                    Mermaid Diagram
+                </a>
+                <a onclick="showCanvasTab('txtTab'); renderTextView()">
+                    <span class="glyphicon glyphicon-align-left"></span>
+                    Text View
+                </a>
+                <div class="sep"></div>
+                <a onclick="showRightTab('sim')">Simulation Panel</a>
+                <a onclick="showRightTab('pdl')">PDL Verifier</a>
+                <a onclick="showRightTab('training')">Training</a>
+            </div>
+        </div>
+        <div class="menu-item">
+            Tools
+            <div class="menu-dropdown">
+
+                <a onclick="showBottomTab('analysis')">
+                    <span class="glyphicon glyphicon-stats"></span>
+                    Analysis
+                </a>
+                <a onclick="showBottomTab('bestpath')">
+                    <span class="glyphicon glyphicon-map-marker"></span>
+                    Path Optimizer
+                </a>
+                <a onclick="showBottomTab('merge')">
+                    <span class="glyphicon glyphicon-plus"></span>
+                    Union / Intersection
+                </a>
+                <div class="sep"></div>
+                <a onclick="openPctlGenerator()">PRISM PCTL Builder</a>
+            </div>
+        </div>
+        <div class="menu-item">
+            Help
+            <div class="menu-dropdown">
+                <a href="#" onclick="alert('RePA Tool — Reconfigurable Timed Automata\n\nRight-click on graph for edit actions.')">About</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="toolbar">
+
+
+        <button class="tb-btn primary" onclick="loadAndRender()" title="Load & Simulate (F5)">
+            <span class="glyphicon glyphicon-play"></span>
+            <span data-i18n="btn_load">Load &amp; Simulate</span>
+        </button>
+
+        <button class="tb-btn" onclick="doUndo()" title="Undo last step">
+            <span class="glyphicon glyphicon-step-backward"></span>
+            Undo
+        </button>
+
+        <div class="tb-sep"></div>
+
+
+
+        <div class="tb-sep"></div>
+
+        <button class="tb-btn" onclick="showStats()"><span class="glyphicon glyphicon-stats"></span> Stats</button>
+        <button class="tb-btn" onclick="checkProblems()"><span class="glyphicon glyphicon-warning-sign"></span> Check</button>
+
+        <label style="font-size: 12px; margin: 0 5px; display:flex; align-items:center; gap:4px; cursor:pointer;" title="Abstrai valores numéricos, focando apenas na topologia">
+            <input type="checkbox" id="possibilisticToggle" onchange="window.isPossibilisticView = this.checked; if(window.applyFilters) window.applyFilters();">
+            Vista Possibilística
+        </label>
+        
+        <div class="tb-sep"></div>
+
+        <label style="font-size: 12px; margin: 0 5px; display:flex; align-items:center; gap:4px;" title="Aplica corte a eventos com probabilidade menor que o valor">
+            Δ-cut: 
+            <input type="number" id="deltaCutInput" min="0" max="1" step="0.001" value="0.000" style="width: 65px; height: 26px; padding: 2px 5px; border: 1px solid #ccc; border-radius: 3px; font-weight: bold;" onkeydown="if(event.key==='Enter') window.applyDeltaCutBtn()">
+            <button class="u-btn" onclick="window.applyDeltaCutBtn()" style="padding: 2px 8px; margin-left: 4px;">Filtrar</button>
+            <button class="u-btn primary" onclick="window.exportCutModel()" style="padding: 2px 8px; margin-left: 4px;"><span class="glyphicon glyphicon-export" style="margin-right:4px;"></span>RTA-Cut</button>
+        </label>
+
+        <div class="tb-sep"></div>
+        <button class="tb-btn" onclick="downloadPNG()"><span class="glyphicon glyphicon-download-alt"></span> PNG</button>
+        <button class="tb-btn" onclick="downloadMermaidSVG()">SVG</button>
+    </div>
+
+    <div id="main-area">
+
+        <div id="left-panel">
+            <div class="panel-titlebar">Project</div>
+            <div id="project-tree">
+            </div>
+            <div id="project-context-menu" class="custom-context-menu">
+    <ul>
+        <li onclick="createNewModel()"><span class="glyphicon glyphicon-plus"></span> Novo arquivo .rta</li>
+    </ul>
+</div>
+        </div>
+
+        <div class="h-resize"></div>
+
+        <div id="center-panel">
+
+            <div id="canvas-area">
+                <div id="canvas-tabs">
+                    <div class="canvas-tab" id="ctab-editorTab" onclick="showCanvasTab('editorTab')">
+                        <span class="glyphicon glyphicon-pencil" style="margin-right:5px;"></span>Editor
+                    </div>
+                    <div class="canvas-tab active" id="ctab-cyTab" onclick="showCanvasTab('cyTab')" data-i18n="tab_graph">Graph (Interactive)</div>
+                    <div class="canvas-tab" id="ctab-mermaidTab" onclick="showCanvasTab('mermaidTab')" data-i18n="tab_mermaid">Mermaid</div>
+                    <div class="canvas-tab" id="ctab-txtTab" onclick="showCanvasTab('txtTab'); renderTextView()" data-i18n="tab_text">Text</div>
+                </div>
+                <div id="canvas-content">
+
+                    
+
+                    <div class="canvas-pane active" id="cyTab">
+                        <div id="cytoscapeMainContainer" style="flex:1;"></div>
+                    </div>
+
+                    <div class="canvas-pane" id="editorTab" style="display: flex; flex-direction: column;">
+                        <div id="exampleDesc"></div>
+                        <div style="flex: 1; border: 1px solid #ddd; position: relative;">
+                            <textarea id="codeEditor"></textarea>
+                        </div>
+                        <div style="padding:8px; background:var(--gray-50); display:flex; gap:10px; border:1px solid #ddd; border-top:none;">
+                            <button class="u-btn primary" onclick="loadAndRender()" style="flex: 1; font-weight: bold;">
+                                <span class="glyphicon glyphicon-play"></span> EXECUTAR MODELO (F5)
+                            </button>
+                            <button class="u-btn" onclick="saveUserModel()" title="Salvar"><span class="glyphicon glyphicon-floppy-disk"></span></button>
+                        </div>
+                    </div>
+
+                    <div class="canvas-pane" id="mermaidTab">
+                        <div style="margin-bottom:10px; display:flex; gap:6px; padding: 12px; position: absolute; z-index: 5; background: rgba(255,255,255,0.8); width: 100%;">
+                            <button class="u-btn" onclick="setMermaidMode('full')" data-i18n="m_full">Current (Full)</button>
+                            <button class="u-btn" onclick="setMermaidMode('simple')" data-i18n="m_simple">Current (Simple)</button>
+                            <button class="u-btn primary" onclick="showLTS()" data-i18n="m_lts">All Steps (LTS)</button>
+                            <button class="u-btn success" onclick="resetMermaidZoom()">Reset Zoom</button>
+                        </div>
+                        
+                        <div class="mermaid-controls">
+                            <button class="u-btn" onclick="adjustMermaidZoom(1.2)">+</button>
+                            <button class="u-btn" onclick="adjustMermaidZoom(0.8)">-</button>
+                        </div>
+
+                        <div id="mermaidContainer" class="mermaid"></div>
+                    </div>
+
+                    <div class="canvas-pane" id="txtTab">
+                        <pre id="textContainer"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="v-resize"></div>
+
+            <div id="bottom-panel">
+                <div id="bottom-tabs">
+
+                 
+                    <div class="bottom-tab" onclick="showBottomTab('analysis')">
+                        <span class="glyphicon glyphicon-stats" style="margin-right:5px;"></span>Analysis
+                    </div>
+                    <div class="bottom-tab" onclick="showBottomTab('bestpath')">
+                        <span class="glyphicon glyphicon-map-marker" style="margin-right:5px;"></span>Path
+                    </div>
+                    <div class="bottom-tab" onclick="showBottomTab('merge')">
+                        <span class="glyphicon glyphicon-plus-sign" style="margin-right:5px;"></span>Operations
+                    </div>
+                    <div class="bottom-tab" onclick="showBottomTab('export')">
+                        <span class="glyphicon glyphicon-download-alt" style="margin-right:5px;"></span>Export
+                    </div>
+                </div>
+
+                <div id="bottom-content">
+
+                    <div class="bottom-pane" id="bpane-analysis">
+                        <div class="sec-label">Analysis Tools</div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button class="u-btn" onclick="showStats()"><span class="glyphicon glyphicon-stats"></span> Statistics</button>
+                            <button class="u-btn" style="border-color:#991b1b; color:#991b1b;" onclick="checkProblems()"><span class="glyphicon glyphicon-warning-sign"></span> Check Problems</button>
+                        </div>
+                        <div id="analysisResult"></div>
+                    </div>
+
+                    <div class="bottom-pane" id="bpane-bestpath">
+                        <div class="sec-label">Path Optimizer</div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                            <div>
+                                <label>Search Type</label>
+                                <select id="bpType" class="form-control" onchange="updateBPValueDropdown()">
+                                    <option value="state">Reach State</option>
+                                    <option value="variable">Variable Value</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Target</label>
+                                <select id="bpValue" class="form-control"></select>
+                            </div>
+                            <div id="bpIntContainer" style="display:none;">
+                                <label>Integer Value</label>
+                                <input type="number" id="bpInt" class="form-control" value="1">
+                            </div>
+                            <div>
+                                <label>Criterion</label>
+                                <select id="bpCriterion" class="form-control">
+                                    <option value="max">Max Probability (Best)</option>
+                                    <option value="min">Min Probability (Rare)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="u-btn primary" style="margin-top:8px;" onclick="runBestPath()">
+                            <span class="glyphicon glyphicon-search"></span> Calculate Best Path
+                        </button>
+                        <div id="bpResultBox">
+                            <div id="bpResultSummary" style="font-weight:bold; color:var(--red); margin-bottom:4px;"></div>
+                            <div id="bpResultPath" style="font-family:var(--font-mono); font-size:11px; color:var(--gray-700); word-wrap:break-word;"></div>
+                        </div>
+                    </div>
+
+                    <div class="bottom-pane" id="bpane-merge">
+                        <div class="sec-label">Union / Intersection</div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">
+                            <div>
+                                <label data-i18n="label_select_model2">Second Model</label>
+                                <select id="mergeTarget" class="form-control"></select>
+                            </div>
+                            <div>
+                                <label data-i18n="label_agg_func">Aggregation Δ</label>
+                                <select id="mergeAgg" class="form-control">
+                                    <option value="arith" data-i18n="opt_arith">Arithmetic (Mean)</option>
+                                    <option value="prod" data-i18n="opt_prod">Product</option>
+                                    <option value="max" data-i18n="opt_max">Maximum</option>
+                                    <option value="min" data-i18n="opt_min">Minimum</option>
+                                    <option value="geom" data-i18n="opt_geom">Geometric</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:6px;">
+                            <button class="u-btn primary" onclick="doMerge('union')" data-i18n="btn_union">∪ Union</button>
+                            <button class="u-btn info" onclick="doMerge('intersection')" data-i18n="btn_intersection">∩ Intersection</button>
+                            <button class="u-btn" onclick="translateToGLTS()" data-i18n="btn_glts">Translate → GLTS</button>
+                        </div>
+                    </div>
+
+                    <div class="bottom-pane" id="bpane-export">
+                        <div class="sec-label">Export</div>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button class="u-btn" onclick="downloadPrism2()"><span class="glyphicon glyphicon-download-alt"></span> PRISM</button>
+                            <button class="u-btn" onclick="downloadLatex()">TikZ (BETA)</button>
+                            <button class="u-btn" onclick="downloadMermaidSVG()">SVG</button>
+                            <button class="u-btn primary" onclick="downloadPNG()">PNG</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="h-resize"></div>
+
+        <div id="right-panel">
+            <div id="right-tabs">
+                <div class="right-tab active" id="rtab-sim" onclick="showRightTab('sim')">Sim</div>
+                <div class="right-tab" id="rtab-pdl" onclick="showRightTab('pdl')">PDL</div>
+                <div class="right-tab" id="rtab-pctl" onclick="openPctlGenerator()">PCTL</div>
+
+                <div class="right-tab" id="rtab-training" onclick="showRightTab('training')">Train</div>
+            </div>
+            <div id="right-content">
+
+                <div class="right-pane active" id="rpane-sim">
+                    <div id="sidePanel">
+                        <p class="text-muted text-center" style="margin-top:40px; font-size:12px;" data-i18n="msg_load_model">Load a model to start.</p>
+                    </div>
+                </div>
+
+                <div class="right-pane" id="rpane-pdl">
+                    <div class="sec-label" data-i18n="pdl_states">States</div>
+                    <div id="pdl-states-list"></div>
+                    <label style="margin-top:6px;">State for evaluation:</label>
+                    <input type="text" id="pdlState" class="form-control" placeholder="Click state above..." data-i18n="pdl_st_placeholder">
+
+                    <div class="sec-label" style="margin-top:8px;" data-i18n="pdl_vars">Variables</div>
+                    <div id="pdl-vars-list"></div>
+
+                    <div class="sec-label" style="margin-top:8px;" data-i18n="pdl_elements">Formula Elements</div>
+                    <div id="pdl-actions-list"></div>
+
+                    <div style="display:flex; gap:3px; flex-wrap:wrap; margin:5px 0;">
+                        <button class="u-btn" onclick="insertPdl('⟨','⟩')">⟨a⟩</button>
+                        <button class="u-btn" onclick="insertPdl('[',']')">[a]</button>
+                        <button class="u-btn" onclick="insertPdl(' = ')">=</button>
+                        <button class="u-btn" onclick="insertPdl(' ≠ ')">≠</button>
+                        <button class="u-btn" onclick="insertPdl(' ≤ ')">≤</button>
+                        <button class="u-btn" onclick="insertPdl(' ≥ ')">≥</button>
+                        <button class="u-btn" onclick="insertPdl(' < ')">&lt;</button>
+                        <button class="u-btn" onclick="insertPdl(' > ')">&gt;</button>
+                        <button class="u-btn" onclick="insertPdl('¬')">¬</button>
+                        <button class="u-btn" onclick="insertPdl(' ∧ ')">∧</button>
+                        <button class="u-btn" onclick="insertPdl(' ∨ ')">∨</button>
+                        <button class="u-btn" onclick="insertPdl(' → ')">→</button>
+                        <button class="u-btn" onclick="insertPdl('true')">⊤</button>
+                        <button class="u-btn" onclick="insertPdl('false')">⊥</button>
+                    </div>
+
+                    <input type="text" id="pdlFormula" class="form-control" placeholder="Formula (e.g. ⟨a⟩true)" data-i18n="pdl_placeholder" style="margin-bottom:6px;">
+                    <button class="u-btn success block" onclick="runPdl()" data-i18n="btn_verify">
+                        <span class="glyphicon glyphicon-ok"></span> Verify
+                    </button>
+                    <div id="pdlResult" style="margin-top:8px; font-size:12px; font-weight:bold;"></div>
+                </div>
+
+
+                <div class="right-pane" id="rpane-pctl">
+                    <div class="sec-label" data-i18n="pctl_title">PRISM Properties Builder</div>
+                    
+                    <div style="font-size:11px; font-weight:700; margin-top:10px; margin-bottom:5px; color:var(--gray-700);" data-i18n="pctl_templates">Quick Templates</div>
+                    
+                    <label style="font-size:10px; margin-bottom:2px;" data-i18n="pctl_reach_st">Reach State (F):</label>
+                    <div style="display:flex; margin-bottom:6px; width:100%;">
+                        <select id="pctlStateSelect" class="form-control" style="flex:1; min-width:0; border-radius:2px 0 0 2px;"></select>
+                        <button class="u-btn primary" style="border-radius:0 2px 2px 0; margin-left:-1px; padding:0 10px;" onclick="addPctlTemplate('F_state')">+</button>
+                    </div>
+                    
+                    <label style="font-size:10px; margin-bottom:2px;" data-i18n="pctl_act_on">Action Active (F):</label>
+                    <div style="display:flex; margin-bottom:6px; width:100%;">
+                        <select id="pctlActionSelect" class="form-control" style="flex:1; min-width:0; border-radius:2px 0 0 2px;"></select>
+                        <button class="u-btn primary" style="border-radius:0 2px 2px 0; margin-left:-1px; padding:0 10px;" onclick="addPctlTemplate('F_act1')">+</button>
+                    </div>
+                    
+                    <label style="font-size:10px; margin-bottom:2px;" data-i18n="pctl_act_off">Action Inactive (F):</label>
+                    <div style="display:flex; margin-bottom:12px; width:100%;">
+                        <select id="pctlActionOffSelect" class="form-control" style="flex:1; min-width:0; border-radius:2px 0 0 2px;"></select>
+                        <button class="u-btn primary" style="border-radius:0 2px 2px 0; margin-left:-1px; padding:0 10px;" onclick="addPctlTemplate('F_act0')">+</button>
+                    </div>
+
+                    <div class="sec-label" style="margin-bottom:6px;" data-i18n="pctl_advanced">Advanced Builder</div>
+                    <div style="background:var(--gray-50); padding:6px; border:1px solid var(--border); border-radius:3px; margin-bottom:10px;">
+                        <!-- Top Entities -->
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; margin-bottom:4px;">
+                            <button class="u-btn" style="padding:0; justify-content:center; font-size:10px;" onclick="insertPctlText(document.getElementById('pctlStateSelect').value + ' ')">State</button>
+                            <button class="u-btn success" style="padding:0; justify-content:center; font-size:10px;" onclick="insertPctlText(document.getElementById('pctlActionSelect').value + '_act=1 ')">Act On</button>
+                            <button class="u-btn warn" style="padding:0; justify-content:center; font-size:10px;" onclick="insertPctlText(document.getElementById('pctlActionSelect').value + '_act=0 ')">Act Off</button>
+                        </div>
+                        <!-- Probabilities -->
+                        <div style="display:grid; grid-template-columns:1fr 1.2fr 1fr 0.8fr; gap:4px; margin-bottom:4px;">
+                            <button class="u-btn" style="padding:0; justify-content:center; font-size:11px;" onclick="insertPctlText('P=?[ ')">P=?[</button>
+                            <button class="u-btn" style="padding:0; justify-content:center; font-size:11px; letter-spacing:-0.5px;" onclick="insertPctlText('P>=0.95 [ ')">P&gt;=.95[</button>
+                            <button class="u-btn" style="padding:0; justify-content:center; font-size:11px;" onclick="insertPctlText('P<0.1[ ')">P&lt;0.1[</button>
+                            <button class="u-btn" style="padding:0; justify-content:center; font-size:11px;" onclick="insertPctlText(' ] ')">]</button>
+                        </div>
+                        <!-- Temporal Operators -->
+                        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:4px; margin-bottom:4px;">
+                            <button class="u-btn info" style="padding:0; justify-content:center; font-size:11px;" onclick="insertPctlText('X ')">X</button>
+                            <button class="u-btn info" style="padding:0; justify-content:center; font-size:11px;" onclick="insertPctlText('F ')">F</button>
+                            <button class="u-btn info" style="padding:0; justify-content:center; font-size:11px;" onclick="insertPctlText('G ')">G</button>
+                            <button class="u-btn info" style="padding:0; justify-content:center; font-size:11px;" onclick="insertPctlText(' U ')">U</button>
+                        </div>
+                        <!-- Logic Operators -->
+                        <div style="display:grid; grid-template-columns:repeat(6, 1fr); gap:4px;">
+                            <button class="u-btn" style="padding:0; justify-content:center; font-size:11px;" onclick="insertPctlText(' && ')">&amp;</button>
+                            <button class="u-btn" style="padding:0; justify-content:center; font-size:11px;" onclick="insertPctlText(' | ')">|</button>
+                            <button class="u-btn" style="padding:0; justify-content:center; font-size:11px;" onclick="insertPctlText(' !')">!</button>
+                            <button class="u-btn" style="padding:0; justify-content:center; font-size:11px;" onclick="insertPctlText(' => ')">=&gt;</button>
+                            <button class="u-btn" style="padding:0; justify-content:center; font-size:11px;" onclick="insertPctlText(' ( ')">(</button>
+                            <button class="u-btn" style="padding:0; justify-content:center; font-size:11px;" onclick="insertPctlText(' ) ')">)</button>
+                        </div>
+                    </div>
+
+                    <label style="font-size:10px; margin-top: 5px;">Estado de Partida:</label>
+                    <input type="text" id="pctlEvalState" class="form-control" placeholder="ex: s0 (vazio = estado atual)" style="margin-bottom:8px; font-size:11px; padding:4px;">
+
+                    <label style="font-size:10px;">Properties (.pctl):</label>
+                    <textarea id="pctlTextArea" class="form-control" rows="6" style="font-family:var(--font-mono); background:#1e1e1e; color:#d4d4d4; font-size:11px; margin-bottom:8px; resize:vertical; min-height:80px;"></textarea>
+                    
+                    <div style="display:flex; flex-direction:column; gap:6px;">
+                        <button class="u-btn success block" onclick="runPctl()">
+                            <span class="glyphicon glyphicon-play" style="margin-right:4px;"></span> Avaliar Interno
+                        </button>
+                        <button class="u-btn primary block" onclick="downloadPctl()" data-i18n="btn_download_pctl">
+                            <span class="glyphicon glyphicon-download-alt" style="margin-right:4px;"></span> Exportar PRISM
+                        </button>
+                    </div>
+                    <div id="pctlResult" style="margin-top:8px; font-size:12px; font-weight:bold;"></div>
+                </div>
+
+
+                <div class="right-pane" id="rpane-training">
+                    <div class="sec-label" data-i18n="panel_training">Statistical Training</div>
+                    <label>Sessions (one per line, comma-separated events):</label>
+                    <textarea id="trainingArea" class="form-control" rows="5" style="height:90px; resize:vertical; font-family:var(--font-mono); font-size:11px;" placeholder="e1&#10;e2,e5&#10;e1,e3,e2"></textarea>
+
+                    <div id="trainingProgress">
+                        Training: <span id="currentSessionIdx">0</span> / <span id="totalSessionsIdx">0</span>
+                    </div>
+
+                    <div style="display:flex; gap:4px; margin-top:5px;">
+                        <button class="u-btn primary" onclick="runInstantTraining()" style="flex:1;" data-i18n="btn_instant">Instant</button>
+                        <button class="u-btn info" onclick="runNextLineTraining()" style="flex:1;" data-i18n="btn_next_line">Step</button>
+                    </div>
+                    <input type="file" id="trainingFileInput" accept=".txt,.csv" style="display:none;" onchange="handleTrainingFileUpload(event)">
+                    <button class="u-btn block" onclick="document.getElementById('trainingFileInput').click()" style="margin-top:3px; background-color: #6366f1; color: white; font-weight: bold;">
+                        <span class="glyphicon glyphicon-folder-open"></span> Carregar Ficheiro (Lotes)
+                    </button>
+                    <button class="u-btn block" onclick="resetTrainingUI()" style="margin-top:3px;" data-i18n="btn_reset_list">Reset</button>
+                    <button class="u-btn warn block" onclick="syncTrainedWeightsToEditor()" style="margin-top:3px;" data-i18n="btn_export_weights">Sync Weights → Editor</button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div id="statusbar">
+        <div class="sb-item accent">RePA Tool</div>
+        <div class="sb-item" id="sb-model">No model loaded</div>
+        <div class="sb-item" id="sb-states"></div>
+        <div class="sb-item sb-right">RT Engine · v2</div>
+    </div>
+
+</div>
+
+<div id="cy-context-menu">
+    <ul></ul>
+</div>
+
+
+<div class="modal" id="edgeDetailModal" tabindex="-1" role="dialog" data-backdrop="false" style="z-index:100050; background:rgba(0,0,0,0.5);">
+    <div class="modal-dialog" role="document" style="margin-top:10vh;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" data-i18n="modal_trans_title">Transition Details</h4>
+            </div>
+            <div class="modal-body" style="padding:0;">
+                <pre id="edgeDetailContent" style="margin:0; padding:18px; font-size:12px; max-height:400px; overflow:auto; font-family:var(--font-mono);"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" data-i18n="btn_close">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="quickModal" tabindex="-1" role="dialog" style="z-index:100000;">
+    <div class="modal-dialog modal-sm" role="document" style="margin-top:20vh;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h5 class="modal-title" id="quickModalTitle" style="font-weight:bold;">Action</h5>
+            </div>
+            <div class="modal-body" style="padding:14px;">
+                <form id="quickModalForm">
+                    <div id="quickModalInputs"></div>
+                </form>
+            </div>
+            <div class="modal-footer" style="padding:8px 14px;">
+                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm" id="quickModalSaveBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="js/static/jquery-1.10.2.min.js"></script>
+<script src="js/static/bootstrap.min.js"></script>
+<script src="js/static/codemirror/codemirror.js"></script>
+<script src="js/static/codemirror/addon/edit/matchbrackets.js"></script>
+<script src="js/static/codemirror/mode/caos/caos.js"></script>
+<script src="js/static/mermaid.min.js"></script>
+<script src="js/cy/cytoscape.min.js"></script>
+<script src="js/cy/dagre.min.js"></script>
+<script src="js/cy/cytoscape-dagre.js"></script>
+<script src="js/cy/konva.min.js"></script>
+<script src="js/cy/layout-base.js"></script>
+<script src="js/cy/cytoscape-edge-editing.js"></script>
+<script src="js/cy/all-cytoscape-layouts-backup.js"></script>
+
+<script src="js/main.js"></script>
+<script src="js/training.js"></script>
+<script src="js/gen/main.js"></script>
+<script src="js/cy/beatifulEditor.js"></script>
+<script src="js/export.js"></script>
+<script src="js/pdlverify.js"></script>
+<script src="js/cy/main.js"></script>
+<script src="js/merge.js"></script>
+<script src="js/mermaidConfig.js"></script>
+
+<script>
+
+function showCanvasTab(id) {
+    document.querySelectorAll('.canvas-pane').forEach(p => {
+        p.style.display = 'none';
+        p.classList.remove('active');
+    });
+    
+    document.querySelectorAll('.canvas-tab').forEach(t => {
+        t.classList.remove('active');
+    });
+
+    const targetPane = document.getElementById(id);
+    const targetTab = document.getElementById('ctab-' + id);
+
+    if (targetPane) {
+        targetPane.style.display = (id === 'editorTab' || id === 'cyTab') ? 'flex' : 'block';
+        targetPane.classList.add('active');
+    }
+    
+    if (targetTab) targetTab.classList.add('active');
+
+    if (id === 'editorTab' && typeof editor !== 'undefined') {
+        setTimeout(() => editor.refresh(), 50); 
+    }
+    if (id === 'mermaidTab') {
+        setTimeout(renderMermaidView, 10);
+    }
+}
+
+function showBottomTab(id) {
+    const tabs = document.querySelectorAll('#bottom-tabs .bottom-tab');
+    tabs.forEach(t => t.classList.remove('active'));
+
+    const panes = document.querySelectorAll('#bottom-content .bottom-pane');
+    panes.forEach(p => {
+        p.style.display = 'none';
+        p.classList.remove('active');
+    });
+
+    const targetPane = document.getElementById('bpane-' + id);
+    if (targetPane) {
+        targetPane.style.display = 'block';
+        targetPane.classList.add('active');
+    }
+
+    tabs.forEach(t => {
+        if (t.getAttribute('onclick').includes(`'${id}'`)) {
+            t.classList.add('active');
+        }
+    });
+}
+function showRightTab(id) {
+    document.querySelectorAll('.right-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.right-tab').forEach(t => t.classList.remove('active'));
+    var pane = document.getElementById('rpane-' + id);
+    if (pane) pane.classList.add('active');
+    var tab = document.getElementById('rtab-' + id);
+    if (tab) tab.classList.add('active');
+}
+
+function showLeftSection(id) {
+    document.querySelectorAll('.tree-item').forEach(i => i.classList.remove('selected'));
+    event && event.currentTarget && event.currentTarget.classList.add('selected');
+    var map = { editor: 'editor', export: 'export', merge: 'merge', translate: 'merge' };
+    if (map[id]) showBottomTab(map[id]);
+}
+
+function doUndo() {
+    if (typeof RTA !== 'undefined') {
+        var json = RTA.undo();
+        var data = JSON.parse(json);
+        if (!data.error) updateAllViews(json);
+    }
+}
+
+
+
+mermaid.initialize({ startOnLoad: false });
+
+CodeMirror.defineMode("rta", function() {
+    var keywords = ["name","init","aut","int","training","if","then","else","disabled","calibration","proportional","normalize","equal"];
+    return {
+        token: function(stream) {
+            if (stream.eatSpace()) return null;
+            if (stream.match("//")) { stream.skipToEnd(); return "comment"; }
+            if (stream.match(/->>|--!|--x|--->|----|--#--/)) return "atom";
+            if (stream.match(/:=|==|!=|<=|>=|[+\-*\/=<>&|]/)) return "operator";
+            if (stream.match(/[a-zA-Z_][\w]*/)) {
+                var word = stream.current();
+                return keywords.indexOf(word) !== -1 ? "keyword" : "variable";
+            }
+            stream.next();
+            return null;
+        }
+    };
+});
+
+var editor = CodeMirror.fromTextArea(document.getElementById("codeEditor"), {
+    lineNumbers: true,
+    mode: "rta",
+    theme: "rta-light",
+    matchBrackets: true
+});
+
+editor.setSize("100%", "100%");
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    updateProjectTree(); 
+    const projectPanel = document.getElementById('left-panel');
+    const projectMenu = document.getElementById('project-context-menu');
+
+    projectPanel.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        projectMenu.style.display = 'block';
+        projectMenu.style.left = e.clientX + 'px';
+        projectMenu.style.top = e.clientY + 'px';
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!projectMenu.contains(e.target)) {
+            projectMenu.style.display = 'none';
+        }
+    });
+    
+    try {
+        const examples = JSON.parse(RTA.getExamples());
+        if (examples["Simple"]) {
+            editor.setValue(examples["Simple"]);
+            
+            loadAndRender(); 
+            
+            showCanvasTab('cyTab');
+
+            setTimeout(() => {
+               const items = document.querySelectorAll('.tree-item');
+               items.forEach(it => { 
+                   if(it.innerText.includes("Simple.rta")) it.classList.add('selected'); 
+               });
+               document.getElementById('sb-model').textContent = "Simple.rta";
+            }, 200);
+        }
+    } catch(e) {
+        console.error("Erro na inicialização:", e);
+    }
+});
+
+</script>
+
+<script src="js/editor.js"></script>
+<script src="js/translate.js"></script>
+
+</body>
+</html>

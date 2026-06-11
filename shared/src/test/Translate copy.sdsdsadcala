@@ -1,0 +1,174 @@
+package rta.syntax
+
+import rta.syntax.Program2.{Edge, QName, RxGraph}
+import rta.syntax.{Condition, Statement, UpdateStmt, IfThenStmt}
+
+
+object RTATranslator {
+
+  private case class Effect(effectType: String, targetLabel: QName, ruleName: QName, originalTrigger: QName)
+
+  def translate_syntax(stx: RxGraph, inputScript: String): String = {
+    val builder = new StringBuilder()
+    val originalLines = inputScript.split('\n')
+
+    // --- ETAPA 1: Mapear cada regra de hiper-aresta ao seu número de linha no script original ---
+    val ruleToLineNumber = {
+      val lineMap = collection.mutable.Map[(String, QName, QName, QName), Int]()
+      // Regex para capturar: trigger, operador, alvo, e o nome opcional da regra
+      val ruleRegex = """^\s*([\w./]+)\s*(->>|--!)\s*([\w./]+)(?:\s*:\s*([\w./]+))?.*""".r
+
+      originalLines.zipWithIndex.foreach { case (line, lineNumber) =>
+        ruleRegex.findFirstMatchIn(line.trim).foreach { m =>
+          val trigger = QName(m.group(1).split('/').toList)
+          val op = m.group(2)
+          val target = QName(m.group(3).split('/').toList)
+          // O nome da regra é opcional; se não existir, é igual ao alvo.
+          val ruleName = Option(m.group(4)).map(n => QName(n.split('/').toList)).getOrElse(target)
+          
+          val effectType = if (op == "->>") "on" else "off"
+          val key = (effectType, trigger, target, ruleName)
+          lineMap(key) = lineNumber
+        }
+      }
+      lineMap.toMap
+    }
+
+
+    // --- Geração dos Cabeçalhos (sem alterações) ---
+    val allEdgeLabels = stx.lbls.keySet ++ stx.on.keySet ++ stx.off.keySet
+    builder.append("// Control variables for each edge label\n")
+    for (label <- allEdgeLabels if label.n.nonEmpty) {
+      val isInitiallyActive = stx.lbls.get(label).exists(_.exists(stx.act.contains))
+      builder.append(s"int ${label.show}_active = ${if (isInitiallyActive) 1 else 0}\n")
+    }
+    builder.append("\n")
+    builder.append("// Original variables and initial state\n")
+    originalLines.foreach { line =>
+      if (line.trim.startsWith("int ") || line.trim.startsWith("init ")) {
+        builder.append(line).append("\n")
+      }
+    }
+    builder.append("\n// --- Translated Edges ---\n")
+
+    for ((source, targets) <- stx.edg; (target, label) <- targets) {
+      val simpleEdge = (source, target, label)
+      
+      val bodyBuilder = new StringBuilder()
+
+      // 1. Adicionar atualizações originais (se existirem)
+      stx.edgeUpdates.get(simpleEdge).foreach { updates =>
+        if (updates.nonEmpty) {
+          bodyBuilder.append("    // Original updates from the simple edge\n")
+          updates.foreach(stmt => bodyBuilder.append(s"    ${statementToString(stmt)}\n"))
+        }
+      }
+
+      // 2. Encontrar todos os efeitos em cascata
+      val allEffects = findAllTriggeredEffects(label, stx)
+
+      // --- ETAPA 2: Ordenar os efeitos com base no número da linha da regra original ---
+      val sortedEffects = allEffects.sortBy { effect =>
+          val key = (effect.effectType, effect.originalTrigger, effect.targetLabel, effect.ruleName)
+          // Usar o mapa para obter a ordem. Se uma regra não for encontrada, fica no fim.
+          ruleToLineNumber.getOrElse(key, Int.MaxValue)
+      }
+      
+      if (sortedEffects.nonEmpty) {
+        if (bodyBuilder.nonEmpty) bodyBuilder.append("\n")
+      }
+
+      // 3. Gerar o código para os efeitos JÁ ORDENADOS
+      for (effect <- sortedEffects) {
+        val hyperEdge = (effect.originalTrigger, effect.targetLabel, effect.ruleName)
+        val conditionOpt = stx.edgeConditions.get(hyperEdge).flatten
+
+        val effectComment = s"// Effect from: ${effect.originalTrigger.show} ${if (effect.effectType == "on") "->>" else "--!"} ${effect.targetLabel.show}${if (!effect.ruleName.n.isEmpty) s": ${effect.ruleName.show}" else ""}"
+        
+        val updateStatement = if (effect.effectType == "on") {
+          s"${effect.targetLabel.show}_active' := 1"
+        } else {
+          s"${effect.targetLabel.show}_active' := 0"
+        }
+
+        bodyBuilder.append(s"    $effectComment\n")
+
+        val guardParts = collection.mutable.ListBuffer[String]()
+        if (!effect.ruleName.n.isEmpty) guardParts += s"${effect.ruleName.show}_active == 1"
+        conditionOpt.foreach(cond => guardParts += s"(${conditionToString(cond)})")
+        
+        if (guardParts.isEmpty) {
+          bodyBuilder.append(s"    $updateStatement\n")
+        } else {
+          val fullGuard = guardParts.mkString(" AND ")
+          bodyBuilder.append(s"    if ($fullGuard) then {\n")
+          bodyBuilder.append(s"        $updateStatement\n")
+          bodyBuilder.append(s"    }\n")
+        }
+      }
+
+      // 4. Montar a transição final
+      val edgeDefinition = if (label.n.nonEmpty) s"${source.show} --> ${target.show}: ${label.show}" else s"${source.show} --> ${target.show}"
+      val originalGuardOpt = stx.edgeConditions.get(simpleEdge).flatten.map(conditionToString)
+      val mainGuardParts = collection.mutable.ListBuffer[String]()
+      if (label.n.nonEmpty) mainGuardParts += s"${label.show}_active == 1"
+      originalGuardOpt.foreach(og => mainGuardParts += s"($og)")
+      
+      val fullGuardClause = if (mainGuardParts.nonEmpty) s"if (${mainGuardParts.mkString(" AND ")})" else ""
+      
+      if (bodyBuilder.toString.trim.isEmpty) {
+        builder.append(s"$edgeDefinition${if (fullGuardClause.nonEmpty) " " + fullGuardClause else ""}\n\n")
+      } else {
+        builder.append(s"$edgeDefinition${if (fullGuardClause.nonEmpty) " " + fullGuardClause else ""} then {\n")
+        builder.append(bodyBuilder.toString().stripSuffix("\n"))
+        builder.append("\n}\n\n")
+      }
+    }
+
+    builder.toString()
+  }
+
+  // Funções auxiliares (sem alterações)
+  private def findAllTriggeredEffects(initialLabel: QName, stx: RxGraph): List[Effect] = {
+    val effects = collection.mutable.ListBuffer[Effect]()
+    val queue = collection.mutable.Queue[QName](initialLabel)
+    val visited = collection.mutable.Set[QName]()
+
+    while (queue.nonEmpty) {
+      val currentTrigger = queue.dequeue()
+      if (!visited.contains(currentTrigger)) {
+        visited.add(currentTrigger)
+        
+        stx.on.getOrElse(currentTrigger, Set.empty).foreach { case (target, ruleName) =>
+          effects += Effect("on", target, ruleName, currentTrigger)
+          if (!ruleName.n.isEmpty) queue.enqueue(ruleName)
+        }
+        
+        stx.off.getOrElse(currentTrigger, Set.empty).foreach { case (target, ruleName) =>
+          effects += Effect("off", target, ruleName, currentTrigger)
+          if (!ruleName.n.isEmpty) queue.enqueue(ruleName)
+        }
+      }
+    }
+    effects.toList
+  }
+
+  private def conditionToString(cond: Condition): String = cond match {
+    case Condition.AtomicCond(left, op, right) =>
+      val leftStr = left.show
+      val rightStr = right match {
+        case Left(i) => i.toString
+        case Right(q) => q.show
+      }
+      s"$leftStr $op $rightStr"
+    case Condition.And(l, r) => s"(${conditionToString(l)} AND ${conditionToString(r)})"
+    case Condition.Or(l, r) => s"(${conditionToString(l)} OR ${conditionToString(r)})"
+  }
+
+  private def statementToString(stmt: Statement): String = stmt match {
+    case UpdateStmt(update) => update.toString
+    case IfThenStmt(cond, thenStmts) =>
+      val thenBlock = thenStmts.map(s => "    " + statementToString(s)).mkString("\n")
+      s"if (${conditionToString(cond)}) then {\n$thenBlock\n}"
+  }
+}
