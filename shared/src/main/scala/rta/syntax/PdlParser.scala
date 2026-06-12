@@ -17,7 +17,6 @@ object PdlParser {
   }
 
   private def tokenize(input: String): List[String] = {
-    // Adicionamos as chaves '{' e '}'
     val pattern = """(=\?|<->|->|=>|&&|\|\||&\|&|\[\]|<>|==|!=|<=|>=|≤|≥|≠|[!~\[\]\(\)\{\};\+\*<>:=\?]|[a-zA-Z_][\w\.]*(\/[a-zA-Z_][\w\.]*)*|-?\d+(\.\d+)?)""".r
     pattern.findAllIn(input).toList
   }
@@ -67,9 +66,8 @@ object PdlParser {
   private def parseUnary(reader: TokenReader): Formula = {
     val t = reader.current
     
-    // 1. CHAVES {} (Exclusivas para PCTL/Probabilidades)
     if (t == "{") {
-      reader.consume() // consome '{'
+      reader.consume() 
       reader.expect("P")
       
       if (reader.eat("=?") || (reader.current == "=" && reader.peekNext == "?")) {
@@ -89,12 +87,10 @@ object PdlParser {
         PQualitative(op, limit, path)
       }
     }
-    // 2. Negação e Modais Vazios
     else if (t == "!" || t == "~" || t == "¬") { reader.consume(); Not(parseUnary(reader)) }
     else if (t == "[]") { reader.consume(); Box(parseUnary(reader)) }
     else if (t == "<>") { reader.consume(); Diamond(parseUnary(reader)) }
     
-    // 3. BOX PDL (Exclusivo para programas PDL)
     else if (t == "[") {
       reader.consume()
       val prog = parseProgram(reader)
@@ -102,7 +98,6 @@ object PdlParser {
       BoxP(prog, parseUnary(reader))
     }
     
-    // 4. DIAMOND PDL (Exclusivo para programas PDL)
     else if (t == "<") {
       reader.consume()
       val prog = parseProgram(reader)
@@ -110,7 +105,6 @@ object PdlParser {
       DiamondP(prog, parseUnary(reader))
     }
     
-    // 5. Átomos (Estados, Booleanos ou Condições de Variável)
     else {
       parseAtom(reader)
     }

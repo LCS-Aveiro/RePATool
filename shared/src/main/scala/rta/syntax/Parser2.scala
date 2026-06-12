@@ -1,6 +1,6 @@
 package rta.syntax
 
-import rta.syntax.Program2.{RxGraph, QName}
+import rta.syntax.Program2.{RxGraph, QName,Edge}
 import rta.syntax.{Condition, CounterUpdate, UpdateExpr, Statement, UpdateStmt, IfThenStmt}
 import rta.syntax.Condition.*
 import scala.util.matching.Regex
@@ -52,24 +52,33 @@ object Parser2 {
   }
 
   private def autoInitializeWeights(rx: RxGraph): RxGraph = {
-    val allEdges = (for {
-      (src, targets) <- rx.edg
+    val allEdges: Set[Edge] = (for {
+      (src, targets) <- rx.edg.toSet
       (trg, id, lbl) <- targets
-    } yield (src, trg, id, lbl)).toSet
+    } yield (src, trg, id, lbl))
 
     val bySource = allEdges.groupBy(_._1)
-    val transitionWeights = bySource.flatMap { case (src, edges) =>
-      val EPSILON = 0.01
-      val explicitlyDefined = edges.filter(rx.weights.contains)
-      val assigned = edges.map { e =>
-        if (rx.weights.contains(e)) e -> rx.weights(e) 
-        else if (explicitlyDefined.nonEmpty) e -> EPSILON 
-        else e -> 1.0 
+
+    val transitionWeights: Map[Edge, Double] = bySource.flatMap { case (src, edges) =>
+      val activeFromSource = edges.filter(rx.act.contains)
+
+      val assigned: Map[Edge, Double] = edges.map { e =>
+        val w: Double = if (!rx.act.contains(e)) 
+          0.0 
+        else if (rx.weights.contains(e)) 
+          rx.weights(e) 
+        else 
+          1.0
+        (e, w)
       }.toMap
-      val totalSum = assigned.values.sum
-      if (totalSum > 0) assigned.map { case (e, w) => e -> (w / totalSum) }
-      else assigned
-    }
+
+      val totalSum: Double = activeFromSource.toList.map(e => assigned(e)).sum
+
+      if (totalSum > 0.0)
+        assigned.map { (e, w) => e -> (w / totalSum) }
+      else
+        assigned
+    }.toMap
 
     val ruleEdges = (for { (s, ts) <- rx.on; (t, id, l) <- ts } yield (s, t, id, l)).toSet ++
                     (for { (s, ts) <- rx.off; (t, id, l) <- ts } yield (s, t, id, l)).toSet

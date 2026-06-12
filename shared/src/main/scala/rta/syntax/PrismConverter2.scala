@@ -11,8 +11,7 @@ object PrismConverter2 {
     rx.edg.getOrElse(e._1, Set()).exists(t => t._1 == e._2 && t._2 == e._3 && t._3 == e._4)
   }
 
-  // Encontra todos os caminhos simples (sem ciclos infinitos) entre um trigger e uma regra.
-  // Permite simular a cascata em tempo de avaliação PRISM via caminhos booleanos.
+
   def getPaths(startLbl: QName, endRule: Edge, allRules: Set[Edge], visited: Set[QName] = Set()): List[List[Edge]] = {
     if (visited.contains(startLbl)) return Nil
     val directRules = allRules.filter(_._1 == startLbl)
@@ -32,7 +31,7 @@ object PrismConverter2 {
     val formulasSb = new StringBuilder
     
     sb.append("// =========================================================\n")
-    sb.append("// DTMC - RePA (Dynamic Cascades, Weights & Cycles Enabled)\n")
+    sb.append("// DTMC - RePA\n")
     sb.append("// =========================================================\n\n")
     sb.append("dtmc\n\n")
 
@@ -40,7 +39,6 @@ object PrismConverter2 {
     val stateToId = allStates.zipWithIndex.toMap
     val maxState = if (allStates.isEmpty) 0 else allStates.size - 1
 
-    // Convertemos os dicionários para Set[Edge] explícito contendo a origem: (source, target, id, label)
     val allRules: Set[Edge] = (
       rx.on.flatMap { case (src, tgts) => tgts.map(t => (src, t._1, t._2, t._3)) }.toSet ++
       rx.off.flatMap { case (src, tgts) => tgts.map(t => (src, t._1, t._2, t._3)) }.toSet
@@ -49,7 +47,6 @@ object PrismConverter2 {
     val actionLabels = rx.edg.values.flatten.map(_._3).toSet
     val toggledLabels = allRules.map(_._2).filter(_.n.nonEmpty).toSet
 
-    // Uma label tem o peso mutável se for alvo de qualquer regra, E os seus "irmãos" também se tornam mutáveis devido à calibração.
     val targetedLabels = allRules.map(_._2).filter(_.n.nonEmpty).toSet
     val mutableSourceStates = targetedLabels.flatMap(lbl => rx.lbls.getOrElse(lbl, Set())).map(_._1)
     val mutableLabels: Set[QName] = (mutableSourceStates.flatMap(s => rx.edg.getOrElse(s, Set())).map(_._3).filter(_.n.nonEmpty).filter(_.show != "-") ++ targetedLabels).toSet
@@ -63,11 +60,9 @@ object PrismConverter2 {
 
     formulasSb.append("// --- Cascade Logic & Dynamic Weights per Trigger ---\n")
 
-    // Mapear que fórmulas foram geradas para depois chamar na transição de estado
     val generatedUpdates = scala.collection.mutable.Map[(QName, QName), String]()
     val generatedNextActs = scala.collection.mutable.Map[(QName, QName), String]()
 
-    // Para cada label que pode iniciar uma transição, calculamos todas as repercussões de cascata.
     for (tLbl <- actionLabels.toList.sortBy(_.toString)) {
       val sT = sanitize(tLbl.show)
       val reachableRules = allRules.filter(r => getPaths(tLbl, r, allRules).nonEmpty)
@@ -75,7 +70,6 @@ object PrismConverter2 {
       if (reachableRules.nonEmpty) {
         formulasSb.append(s"\n// Cascades when action '$sT' is fired:\n")
 
-        // 1. FÓRMULAS DE ATIVAÇÃO DE REGRAS (Path Unrolling para resolver ciclos dinamicamente)
         for (r <- reachableRules.toList.sortBy(_._4.toString)) {
           val paths = getPaths(tLbl, r, allRules)
           val conds = paths.map { p =>
@@ -88,7 +82,6 @@ object PrismConverter2 {
           formulasSb.append(s"formula fires_${sT}_${ruleIdStr} = $firesExpr;\n")
         }
 
-        // 2. PRÓXIMO ESTADO DE ACTIVAÇÃO (next_act)
         for (lbl <- toggledLabels.toList.sortBy(_.toString)) {
           val sLbl = sanitize(lbl.show)
           val onRules = reachableRules.filter(r => r._2 == lbl && rx.on.getOrElse(r._1, Set()).contains((r._2, r._3, r._4)))
@@ -103,7 +96,6 @@ object PrismConverter2 {
           generatedNextActs((tLbl, lbl)) = nextActFormula
         }
 
-        // 3. ATUALIZAÇÕES BASE DE PESO (Acumuladas com regras consecutivas)
         val targetedEdges = reachableRules.flatMap(r => rx.lbls.getOrElse(r._2, Set()))
         for (edge <- targetedEdges.toList.sortBy(_._4.toString)) {
           val sEdge = sanitize(edge._4.show)
@@ -114,11 +106,9 @@ object PrismConverter2 {
           for ((r, i) <- rulesTargetingE.toList.sortBy(_._4.toString).zipWithIndex) {
             val rIdStr = sanitize(r._4.show) + "_" + sanitize(r._1.show) + "_" + sanitize(r._2.show)
             
-            // CORREÇÃO 1: Em RePA, o wSource é sempre o trigger ORIGINAL da transição (tLbl), não o intermediário!
             val triggerEdgeOpt = rx.lbls.get(tLbl).flatMap(_.headOption)
             val triggerW = if (mutableLabels.contains(tLbl)) s"w_int_${sanitize(tLbl.show)}" else s"${(triggerEdgeOpt.map(rx.weights.getOrElse(_, 1.0)).getOrElse(1.0) * SCALE).toInt}"
             
-            // CORREÇÃO 2: O peso da regra (rW) também pode ser mutável! (Ex: w_int_on)
             val rW = if (mutableLabels.contains(r._4)) s"w_int_${sanitize(r._4.show)}" else s"${(rx.weights.getOrElse(r, 0.1) * SCALE).toInt}"
             
             val agg = rx.edgeAggregations.getOrElse(r, "arith")
@@ -137,11 +127,9 @@ object PrismConverter2 {
           formulasSb.append(s"formula base_upd_${sT}_${sEdge} = min(10000, max(0, $currWeight));\n")
         }
 
-        // 4. DISTRIBUIÇÃO E CALIBRAÇÃO (Aplicada imediatamente baseada no next_act calculado)
         val simpleTargeted = targetedEdges.filter(e => isSimpleEdge(e, rx))
         val ruleTargeted = targetedEdges -- simpleTargeted
 
-        // CORREÇÃO 3: Para as regras, o peso não é normalizado (RePA ignora regras no distributeWeights pois não saem de estados)
         for (e <- ruleTargeted.toList.sortBy(_._4.toString)) {
           val sE = sanitize(e._4.show)
           val fName = s"final_upd_${sT}_$sE"
@@ -248,11 +236,9 @@ object PrismConverter2 {
           
           val probFormula = if (actCheck == "true") s"(w_int_$sLbl / $sumName)" else if (actCheck == "false") "0" else s"($actCheck ? (w_int_$sLbl / $sumName) : 0)"
           
-          // Efeitos resultantes deste Trigger
           val effectParts = collection.mutable.ListBuffer[String]()
           effectParts += s"(s'=${stateToId(target)})"
 
-          // 1. Toggles gerados
           for (tgtLbl <- toggledLabels.toList.sortBy(_.toString)) {
             generatedNextActs.get((label, tgtLbl)) match {
               case Some(nextFormula) => effectParts += s"(${sanitize(tgtLbl.show)}_act' = $nextFormula)"
@@ -260,7 +246,6 @@ object PrismConverter2 {
             }
           }
 
-          // 2. Atualizações de peso geradas
           for (tgtLbl <- mutableLabels.toList.sortBy(_.toString)) {
             generatedUpdates.get((label, tgtLbl)) match {
               case Some(updFormula) => effectParts += s"(w_int_${sanitize(tgtLbl.show)}' = $updFormula)"
@@ -268,7 +253,6 @@ object PrismConverter2 {
             }
           }
 
-          // 3. Variáveis de ambiente
           rx.edgeUpdates.getOrElse(edge, Nil).foreach {
             case UpdateStmt(upd) => effectParts += s"(${sanitize(upd.variable.show)}'=${updateExprToString(upd.expr)})"
             case _ => 

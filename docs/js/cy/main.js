@@ -48,7 +48,6 @@ window.applyFilters = function() {
         });
     });
 
-    // Re-renderiza o painel de simulação para refletir os cortes
     if (typeof lastModelData !== 'undefined' && lastModelData) {
         renderGlobalPanel(lastModelData, 'sidePanel');
         renderGlobalPanel(lastModelData, 'sidePanel-bottom');
@@ -431,7 +430,6 @@ function renderGlobalPanel(data, targetId) {
     
     if (panelData.enabled.length > 0) {
         panelData.enabled.forEach(function (edge) {
-            // Filtra os botões pelo Delta-cut
             if (edge.p !== undefined && edge.p < window.currentDeltaCut && !edge.isDelay && edge.label !== 'deadlock') return;
 
             var btnGroup = document.createElement('div');
@@ -496,7 +494,6 @@ function renderGlobalPanel(data, targetId) {
                 txt.innerText = displayName;
                 btn.appendChild(txt);
                 
-                // Esconde a label P=xxx se a Vista Possibilística estiver ativa
                 if (edge.p !== undefined && !window.isPossibilisticView) {
                     var pSpan = document.createElement('span');
                     pSpan.className = 'sim-prob';
@@ -910,7 +907,6 @@ function getCytoscapeStyles() {
 
         { selector: '.transition-flash', style: { 'background-color': '#F97316', 'line-color': '#F97316', 'target-arrow-color': '#F97316' } },
         
-        // --- C L A S S E   D O   D E L T A   C U T ---
         { selector: '.filtered-out', style: { 'display': 'none' } },
 
         { selector: '.compound-parent', style: { 'background-color': '#F3F4F6', 'background-opacity': 1, 'border-color': '#D1D5DB', 'border-width': 2, 'content': 'data(label)', 'text-valign': 'top', 'text-halign': 'center', 'color': '#374151', 'font-weight': 'bold', 'font-size': '16px' } }

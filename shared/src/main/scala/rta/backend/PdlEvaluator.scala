@@ -15,7 +15,6 @@ object PdlEvaluator {
   private val epsilon = 0.00001
   private val maxIterations = 1000 
 
-  // --- NÍVEL 3: Assinatura para Bisimulação/Lumping ---
   case class StateSignature(
     inits: Set[QName], 
     vars: Map[QName, Int], 
@@ -28,15 +27,12 @@ object PdlEvaluator {
     private val formulaCache = mutable.Map[(RxGraph, PdlFormula), Boolean]()
     private val programCache = mutable.Map[(RxGraph, PdlProgram), Set[RxGraph]]()
 
-    // --- NÍVEL 3: Dicionário de Estados Canónicos ---
-    // Mantém apenas uma instância na memória para cada configuração única no sistema.
     private val canonicalStates = mutable.Map[StateSignature, RxGraph]()
 
     def getSignature(rx: RxGraph): StateSignature = {
       StateSignature(rx.inits, rx.val_env, rx.act, rx.weights)
     }
 
-    // --- NÍVEL 3: Função de Canonização ---
     def getCanonical(rx: RxGraph): RxGraph = {
       val sig = getSignature(rx)
       canonicalStates.getOrElseUpdate(sig, rx)
@@ -44,9 +40,6 @@ object PdlEvaluator {
 
     def getTransitions(rx: RxGraph): Set[(Edge, RxGraph)] = {
       transCache.getOrElseUpdate(rx, {
-        // --- NÍVEL 3: Compressão imediata após a transição ---
-        // Assim que calculamos o próximo passo, forçamos o estado destino 
-        // a ser a versão comprimida (canónica).
         RxSemantics.nextEdge(rx).map { case (edge, nextRx) =>
           (edge, getCanonical(nextRx))
         }
@@ -54,13 +47,12 @@ object PdlEvaluator {
     }
 
     def evaluateRoot(config: RxGraph, formula: PdlFormula): String = {
-      // --- NÍVEL 3: O ponto de partida também tem de ser canónico ---
       val canonicalStart = getCanonical(config)
 
       formula match {
         case PQuantitative(path) => 
           val prob = calculatePathProbability(canonicalStart, path)
-          f"Result: $prob%.5f" // Retorna ex: "Result: 0.16667"
+          f"Result: $prob%.5f"
         case _ => 
           val res = evaluateFormula(canonicalStart, formula)
           s"Result: $res"
@@ -150,7 +142,6 @@ object PdlEvaluator {
 
     private def calculatePathProbability(startConfig: RxGraph, pathFormula: PathFormula): Double = {
       
-      // 1. Encontrar todos os estados alcançáveis (Exploração)
       val reachableStates = mutable.Set[RxGraph]()
       val queue = mutable.Queue[RxGraph](startConfig)
       
@@ -162,43 +153,36 @@ object PdlEvaluator {
       }
       val allStates = reachableStates.toList
 
-      // 2. Resolver consoante o Operador Temporal
       pathFormula match {
         
-        // NEXT (X): Probabilidade no passo imediato a seguir
         case PathFormula.Next(f) =>
           getTransitions(startConfig).map { case (edge, nextState) =>
             val p = startConfig.weights.getOrElse(edge, 1.0)
             if (evaluateFormula(nextState, f)) p else 0.0
           }.sum
 
-        // FUTURE / EVENTUALLY (F): É equivalente a (true U f)
         case PathFormula.Future(f) =>
           calculatePathProbability(startConfig, PathFormula.Until(True, f))
 
-        // UNTIL (a U b): Acontece 'a' até que chegue a 'b'
         case PathFormula.Until(a, b) =>
           var V = mutable.Map[RxGraph, Double]()
           
-          // Condições Iniciais do Until
           for (s <- allStates) {
-            if (evaluateFormula(s, b)) V(s) = 1.0 // Se já chegou ao objetivo, sucesso 100%
-            else if (!evaluateFormula(s, a)) V(s) = 0.0 // Se falhou a condição 'a' antes de chegar a 'b', falha 0%
-            else if (getTransitions(s).isEmpty) V(s) = 0.0 // Deadlock antes de atingir 'b'
-            else V(s) = 0.0 // Desconhecidos começam a 0
+            if (evaluateFormula(s, b)) V(s) = 1.0 
+            else if (!evaluateFormula(s, a)) V(s) = 0.0 
+            else if (getTransitions(s).isEmpty) V(s) = 0.0
+            else V(s) = 0.0 
           }
 
           iterateValues(allStates, V, s => evaluateFormula(s, b) || !evaluateFormula(s, a))
           V(startConfig)
 
-        // GLOBALLY (G f): Probabilidade de 'f' ser verdade para todo o sempre (Safety)
         case PathFormula.Globally(f) =>
           var V = mutable.Map[RxGraph, Double]()
           
-          // Condições Iniciais do Globally
           for (s <- allStates) {
-            if (!evaluateFormula(s, f)) V(s) = 0.0 // Se f é falso nalgum ponto, o caminho falha
-            else V(s) = 1.0 // Otimista: Assumimos 100% de probabilidade de ficar seguro, até provar o contrário
+            if (!evaluateFormula(s, f)) V(s) = 0.0
+            else V(s) = 1.0
           }
 
           iterateValues(allStates, V, s => !evaluateFormula(s, f))
@@ -206,19 +190,15 @@ object PdlEvaluator {
       }
     }
 
-    // --- NÍVEL 1: Iterador de Valores Otimizado com Matrizes Primitivas ---
     private def iterateValues(allStates: List[RxGraph], V: mutable.Map[RxGraph, Double], isFixed: RxGraph => Boolean): Unit = {
       val numStates = allStates.size
       
-      // Mapear cada RxGraph para um ID numérico rápido
       val stateToId = allStates.zipWithIndex.toMap
       val idToState = allStates.toArray
       
-      // Arrays primitivos para o Value Iteration (MUITO mais rápido que Mapas)
       val vArray = new Array[Double](numStates)
       val fixedArray = new Array[Boolean](numStates)
       
-      // Matriz de transições pré-calculada: Array[ Array[(DestinoID, Probabilidade)] ]
       val transitionMatrix = new Array[Array[(Int, Double)]](numStates)
 
       for (i <- 0 until numStates) {
@@ -226,7 +206,6 @@ object PdlEvaluator {
         vArray(i) = V(s)
         fixedArray(i) = isFixed(s)
         
-        // Calcula as transições APENAS UMA VEZ
         if (!fixedArray(i)) {
           transitionMatrix(i) = getTransitions(s).map { case (edge, nextState) =>
             val p = s.weights.getOrElse(edge, 1.0)
@@ -241,7 +220,6 @@ object PdlEvaluator {
       var iteration = 0
       val nextVArray = new Array[Double](numStates)
 
-      // O Loop agora faz matemática pura, sem criar objetos ou aceder a HashMaps.
       while (maxDiff > epsilon && iteration < maxIterations) {
         maxDiff = 0.0
         
@@ -266,12 +244,10 @@ object PdlEvaluator {
           i += 1
         }
         
-        // Copiar novos valores para o array antigo
         System.arraycopy(nextVArray, 0, vArray, 0, numStates)
         iteration += 1
       }
 
-      // Devolver os resultados para o formato original
       for (i <- 0 until numStates) {
         V(idToState(i)) = vArray(i)
       }
@@ -311,7 +287,6 @@ object PdlEvaluator {
       case _ => false 
     }
 
-    // --- CORREÇÃO PRISM: Aceitar sintaxe com um único "=" ---
     private def compare(v1: Double, op: String, v2: Double): Boolean = op match {
       case ">=" => v1 >= v2 - epsilon
       case "<=" => v1 <= v2 + epsilon

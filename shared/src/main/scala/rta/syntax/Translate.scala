@@ -113,7 +113,6 @@ object RTATranslator {
     val builder = new StringBuilder()
     val allSimpleEdges: List[Edge] = stx.edg.flatMap { case (src, tgts) => tgts.map(t => (src, t._1, t._2, t._3)) }.toList
     
-    // Coleta IDs que precisam de variáveis de controle
     val allHyperEdges = (stx.on.values.flatten ++ stx.off.values.flatten).toSet
     val activeIds = (allSimpleEdges.map(_._3) ++ allHyperEdges.map(_._1) ++ allHyperEdges.map(_._3)).filter(id => id.n.nonEmpty && id.show != "-")
 

@@ -570,11 +570,9 @@ function runPctl() {
     var lines = rawText.split('\n');
     var formulas = [];
     
-    // 1. Tenta pegar no texto selecionado; se não houver seleção, usa todo o texto
     var selectedText = textArea.value.substring(textArea.selectionStart, textArea.selectionEnd).trim();
     var linesToProcess = (selectedText.length > 0) ? selectedText.split('\n') : lines;
 
-    // Filtra todas as linhas válidas (ignora vazias e comentários)
     for (var i = 0; i < linesToProcess.length; i++) {
         var l = linesToProcess[i].trim();
         if (l !== "" && !l.startsWith("//")) {
@@ -587,14 +585,12 @@ function runPctl() {
         return;
     }
 
-    // 2. Descobre o Estado Inicial para o algoritmo correr
     var evalState = "";
     var evalStateInput = document.getElementById('pctlEvalState');
     if (evalStateInput) {
         evalState = evalStateInput.value.trim();
     }
     
-    // Se a caixa estiver vazia, captura o estado verde (Current) da simulação
     if (evalState === "") {
         if (currentCytoscapeInstance) {
             var currentNodes = currentCytoscapeInstance.nodes('.current-state');
@@ -613,10 +609,8 @@ function runPctl() {
     var resDiv = document.getElementById("pctlResult");
     if (!resDiv) return;
     
-    // Limpa os resultados antigos e começa uma lista
     var resultHtml = "<ul style='padding-left: 10px; margin-top: 5px; list-style-type: none;'>";
 
-    // 3. Avalia CADA fórmula encontrada e junta os resultados
     for (var j = 0; j < formulas.length; j++) {
         var originalFormula = formulas[j];
         var formulaToRun = originalFormula;
@@ -625,7 +619,6 @@ function runPctl() {
             formulaToRun = "{" + formulaToRun + "}";
         }
 
-        // Corre no Scala
         var res = RTA.runPdl(evalState, formulaToRun);
         
         var color = "#333";

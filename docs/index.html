@@ -130,9 +130,14 @@
         <button class="tb-btn" onclick="showStats()"><span class="glyphicon glyphicon-stats"></span> Stats</button>
         <button class="tb-btn" onclick="checkProblems()"><span class="glyphicon glyphicon-warning-sign"></span> Check</button>
 
-        <label style="font-size: 12px; margin: 0 5px; display:flex; align-items:center; gap:4px; cursor:pointer;" title="Abstrai valores numéricos, focando apenas na topologia">
+        <label style="font-size: 12px; margin: 0 5px; display:flex; align-items:center; gap:4px; cursor:pointer;" title="Abstracts numerical values, focusing only on topology">
             <input type="checkbox" id="possibilisticToggle" onchange="window.isPossibilisticView = this.checked; if(window.applyFilters) window.applyFilters();">
-            Vista Possibilística
+            Possibilistic View
+        </label>
+
+        <label style="font-size: 12px; margin: 0 5px; display:flex; align-items:center; gap:4px; cursor:pointer;" title="Hides invisible transitions (tau) and deadlocks for clean screenshots">
+            <input type="checkbox" onchange="if(currentCytoscapeInstance) { this.checked ? currentCytoscapeInstance.elements('[label *= \'tau\'], .deadlock-node, .deadlock-edge').hide() : currentCytoscapeInstance.elements('[label *= \'tau\'], .deadlock-node, .deadlock-edge').show(); }">
+            Hide Tau
         </label>
         
         <div class="tb-sep"></div>

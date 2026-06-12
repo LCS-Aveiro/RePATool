@@ -89,7 +89,6 @@ function createNewModel() {
     userModels[fileName] = template;
     localStorage.setItem(USER_MODELS_KEY, JSON.stringify(userModels));
 
-    // --- NOVIDADE: Passamos o fileName para a árvore saber quem selecionar ---
     updateProjectTree(fileName); 
     loadModelFromTree(template, fileName);
     
@@ -97,7 +96,6 @@ function createNewModel() {
 }
 
 
-// CÓDIGO PARA ARRASTAR E REDIMENSIONAR OS PAINÉIS
 document.addEventListener("DOMContentLoaded", function() {
     const leftPanel = document.getElementById('left-panel');
     const rightPanel = document.getElementById('right-panel');
@@ -108,13 +106,11 @@ document.addEventListener("DOMContentLoaded", function() {
     let activeResizer = null;
 
     if (hResizes.length >= 2) {
-        // Agarrar a barra esquerda
         hResizes[0].addEventListener('mousedown', function(e) {
             activeResizer = 'left';
             document.body.style.cursor = 'col-resize';
-            e.preventDefault(); // Evita a seleção acidental de texto ao arrastar
+            e.preventDefault();
         });
-        // Agarrar a barra direita
         hResizes[1].addEventListener('mousedown', function(e) {
             activeResizer = 'right';
             document.body.style.cursor = 'col-resize';
@@ -123,7 +119,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     if (vResizes.length >= 1) {
-        // Agarrar a barra de baixo
         vResizes[0].addEventListener('mousedown', function(e) {
             activeResizer = 'bottom';
             document.body.style.cursor = 'row-resize';
@@ -131,25 +126,20 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Mover o rato (Faz o redimensionamento real)
     document.addEventListener('mousemove', function(e) {
         if (!activeResizer) return;
         
         if (activeResizer === 'left') {
-            // A largura do painel esquerdo passa a ser a posição X do rato
             leftPanel.style.width = e.clientX + 'px';
         } 
         else if (activeResizer === 'right') {
-            // A largura do direito é a largura total da janela menos a posição X do rato
             rightPanel.style.width = (window.innerWidth - e.clientX) + 'px';
         } 
         else if (activeResizer === 'bottom') {
-            // A altura do painel de baixo ajusta-se com base na posição Y (descontando a barra de status de 22px)
             bottomPanel.style.height = (window.innerHeight - e.clientY - 22) + 'px';
         }
     });
 
-    // Largar o botão do rato (Pára o redimensionamento)
     document.addEventListener('mouseup', function() {
         if (activeResizer) {
             activeResizer = null;
