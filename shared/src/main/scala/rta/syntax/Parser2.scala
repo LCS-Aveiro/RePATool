@@ -63,19 +63,17 @@ object Parser2 {
       val activeFromSource = edges.filter(rx.act.contains)
 
       val assigned: Map[Edge, Double] = edges.map { e =>
-        val w: Double = if (!rx.act.contains(e)) 
-          0.0 
-        else if (rx.weights.contains(e)) 
-          rx.weights(e) 
-        else 
-          1.0
+        val w: Double = if (rx.weights.contains(e)) rx.weights(e) else 1.0
         (e, w)
       }.toMap
 
       val totalSum: Double = activeFromSource.toList.map(e => assigned(e)).sum
 
       if (totalSum > 0.0)
-        assigned.map { (e, w) => e -> (w / totalSum) }
+        assigned.map { (e, w) => 
+          if (rx.act.contains(e)) e -> (w / totalSum) 
+          else e -> w
+        }
       else
         assigned
     }.toMap
