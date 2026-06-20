@@ -1,11 +1,43 @@
+// Paste June 20, 2026 - 2:47PM
+
+// File: shared/src/main/scala/rta/backend/PrismConverter2.scala
+
 package rta.backend
 
 import rta.syntax.Program2.{QName, RxGraph, Edge}
-import rta.syntax.{Condition, UpdateExpr, UpdateStmt, Program2}
+import rta.syntax.{Condition, UpdateExpr, UpdateStmt, IfThenStmt, Statement}
 
 object PrismConverter2 {
   
   val SCALE = 10000
+
+  private def sanitize(n: String) = n.replaceAll("[^a-zA-Z0-9_]", "_")
+
+  private def conditionToPrism(c: Condition): String = c match {
+    case Condition.AtomicCond(left, op, Right(q)) => s"${sanitize(left.show)}${if(op=="==")"=" else op}${sanitize(q.show)}"
+    case Condition.AtomicCond(left, op, Left(d))  => s"${sanitize(left.show)}${if(op=="==")"=" else op}${if(d == d.toLong) d.toLong.toString else d.toString}"
+    case Condition.WeightCheck(lbl, metric, op, v) => "false" 
+    case Condition.And(c1, c2) => s"(${conditionToPrism(c1)} & ${conditionToPrism(c2)})"
+    case Condition.Or(c1, c2)  => s"(${conditionToPrism(c1)} | ${conditionToPrism(c2)})"
+  }
+
+  private def updateExprToString(e: UpdateExpr): String = e match {
+    case UpdateExpr.Lit(i) => i.toString
+    case UpdateExpr.Var(q) => sanitize(q.show)
+    case UpdateExpr.Add(v, Right(q)) => s"${sanitize(v.show)} + ${sanitize(q.show)}"
+    case UpdateExpr.Add(v, Left(i))  => s"${sanitize(v.show)} + $i"
+    case UpdateExpr.Sub(v, Right(q)) => s"${sanitize(v.show)} - ${sanitize(q.show)}"
+    case UpdateExpr.Sub(v, Left(i))  => s"${sanitize(v.show)} - $i"
+  }
+
+  private def getVariableUpdates(stmts: List[Statement], ctxCond: Option[Condition] = None): List[(QName, String, Option[Condition])] = {
+    stmts.flatMap {
+      case UpdateStmt(upd) => List((upd.variable, updateExprToString(upd.expr), ctxCond))
+      case IfThenStmt(c, ts) =>
+        val newCond = ctxCond.map(ctx => Condition.And(ctx, c)).getOrElse(c)
+        getVariableUpdates(ts, Some(newCond))
+    }
+  }
 
   def isSimpleEdge(e: Edge, rx: RxGraph): Boolean = {
     rx.edg.getOrElse(e._1, Set()).exists(t => t._1 == e._2 && t._2 == e._3 && t._3 == e._4)
@@ -36,7 +68,7 @@ object PrismConverter2 {
 
     val allStates = rx.states.toList.sortBy(_.toString)
     val stateToId = allStates.zipWithIndex.toMap
-    val maxState = if (allStates.isEmpty) 0 else allStates.size - 1
+    val maxState = Math.max(1, allStates.size - 1)
 
     val allRules: Set[Edge] = (
       rx.on.flatMap { case (src, tgts) => tgts.map(t => (src, t._1, t._2, t._3)) }.toSet ++
@@ -57,6 +89,19 @@ object PrismConverter2 {
       else "false"
     }
 
+    def fullActCheckExpr(e: Edge): String = {
+      val baseCheck = actCheckExpr(e._4)
+      val condOpt = rx.edgeConditions.get(e).flatten
+      condOpt match {
+        case Some(c) =>
+          val cStr = conditionToPrism(c)
+          if (baseCheck == "true") cStr
+          else if (baseCheck == "false") "false"
+          else s"($baseCheck & $cStr)"
+        case None => baseCheck
+      }
+    }
+
     formulasSb.append("// --- Cascade Logic & Dynamic Weights per Trigger ---\n")
 
     val generatedUpdates = scala.collection.mutable.Map[(QName, QName), String]()
@@ -72,7 +117,7 @@ object PrismConverter2 {
         for (r <- reachableRules.toList.sortBy(_._4.toString)) {
           val paths = getPaths(tLbl, r, allRules)
           val conds = paths.map { p =>
-            val pConds = p.map(e => actCheckExpr(e._4)).filter(_ != "true")
+            val pConds = p.map(e => fullActCheckExpr(e)).filter(_ != "true")
             if (pConds.isEmpty) "true" else if (pConds.contains("false")) "false" else pConds.mkString(" & ")
           }.filter(_ != "false")
           
@@ -91,13 +136,12 @@ object PrismConverter2 {
 
           val currAct = actCheckExpr(lbl)
           val nextActFormula = s"next_act_${sT}_${sLbl}"
-          formulasSb.append(s"formula $nextActFormula = ($offExpr) ? 0 : (($onExpr) ? 1 : ($currAct ? 1 : 0));\n")
+          formulasSb.append(s"formula $nextActFormula = ($offExpr) ? false : (($onExpr) ? true : ($currAct));\n")
           generatedNextActs((tLbl, lbl)) = nextActFormula
         }
 
         val targetedEdges = reachableRules.flatMap(r => rx.lbls.getOrElse(r._2, Set()))
         
-        // CORREÇÃO AQUI: Em vez de iterar sobre todas as Arestas, iteramos sobre as Labels únicas!
         val uniqueTargetedLabels = targetedEdges.map(_._4).toSet
 
         for (tgtLbl <- uniqueTargetedLabels.toList.sortBy(_.toString)) {
@@ -135,7 +179,6 @@ object PrismConverter2 {
         val simpleTargeted = targetedEdges.filter(e => isSimpleEdge(e, rx))
         val ruleTargeted = targetedEdges -- simpleTargeted
         
-        // CORREÇÃO AQUI também: Agrupamos os alvos de regras por Label única
         val ruleTargetedLabels = ruleTargeted.map(_._4).toSet
 
         for (tgtLbl <- ruleTargetedLabels.toList.sortBy(_.toString)) {
@@ -153,9 +196,20 @@ object PrismConverter2 {
 
           def activeMathCheck(e: Edge, baseExpr: String): String = {
              val nextAct = generatedNextActs.getOrElse((tLbl, e._4), actCheckExpr(e._4))
-             if (nextAct == "0" || nextAct == "false") "0"
-             else if (nextAct == "1" || nextAct == "true") baseExpr
-             else s"(($nextAct=1) ? $baseExpr : 0)"
+             val condOpt = rx.edgeConditions.get(e).flatten
+             
+             val combinedCond = condOpt match {
+               case Some(c) =>
+                 val cStr = conditionToPrism(c)
+                 if (nextAct == "false") "false"
+                 else if (nextAct == "true") cStr
+                 else s"($nextAct & $cStr)"
+               case None => nextAct
+             }
+
+             if (combinedCond == "false") "0"
+             else if (combinedCond == "true") baseExpr
+             else s"($combinedCond ? $baseExpr : 0)"
           }
 
           val sumModExp = if (modifiedOut.isEmpty) "0" else modifiedOut.map(e => activeMathCheck(e, s"base_upd_${sT}_${sanitize(e._4.show)}")).mkString(" + ")
@@ -196,7 +250,18 @@ object PrismConverter2 {
             case "equal" =>
               val nUnmodParts = unmodifiedOut.map { e =>
                 val nextAct = generatedNextActs.getOrElse((tLbl, e._4), actCheckExpr(e._4))
-                if (nextAct == "0" || nextAct == "false") "0" else if (nextAct == "1" || nextAct == "true") "1" else s"($nextAct=1 ? 1 : 0)"
+                val condOpt = rx.edgeConditions.get(e).flatten
+                
+                val combinedCond = condOpt match {
+                  case Some(c) =>
+                    val cStr = conditionToPrism(c)
+                    if (nextAct == "false") "false"
+                    else if (nextAct == "true") cStr
+                    else s"($nextAct & $cStr)"
+                  case None => nextAct
+                }
+                
+                if (combinedCond == "false") "0" else if (combinedCond == "true") "1" else s"($combinedCond ? 1 : 0)"
               }.filter(_ != "0")
               val nUnmodExpr = if (nUnmodParts.isEmpty) "0" else nUnmodParts.mkString(" + ")
 
@@ -239,9 +304,10 @@ object PrismConverter2 {
       val outgoingEdges = rx.edg.getOrElse(source, Set()).toList
       
       if (outgoingEdges.nonEmpty) {
-        val sumParts = outgoingEdges.map { case (_, _, label) => 
-          val actCheck = actCheckExpr(label)
-          val wVar = if (mutableLabels.contains(label)) s"w_int_${sanitize(label.show)}" else s"w_int_${sanitize(label.show)}"
+        val sumParts = outgoingEdges.map { case (target, id, label) => 
+          val e = (source, target, id, label)
+          val actCheck = fullActCheckExpr(e)
+          val wVar = s"w_int_${sanitize(label.show)}"
           if (actCheck == "true") wVar else if (actCheck == "false") "0" else s"($actCheck ? $wVar : 0)"
         }
         val sumName = s"sum_s$srcIdx"
@@ -250,7 +316,7 @@ object PrismConverter2 {
         val branches = outgoingEdges.map { case (target, id, label) =>
           val sLbl = sanitize(label.show)
           val edge = (source, target, id, label)
-          val actCheck = actCheckExpr(label)
+          val actCheck = fullActCheckExpr(edge)
           
           val probFormula = if (actCheck == "true") s"(w_int_$sLbl / $sumName)" else if (actCheck == "false") "0" else s"($actCheck ? (w_int_$sLbl / $sumName) : 0)"
           
@@ -259,7 +325,7 @@ object PrismConverter2 {
 
           for (tgtLbl <- toggledLabels.toList.sortBy(_.toString)) {
             generatedNextActs.get((label, tgtLbl)) match {
-              case Some(nextFormula) => effectParts += s"(${sanitize(tgtLbl.show)}_act' = $nextFormula)"
+              case Some(nextFormula) => effectParts += s"(${sanitize(tgtLbl.show)}_act' = ($nextFormula ? 1 : 0))"
               case None => 
             }
           }
@@ -271,15 +337,26 @@ object PrismConverter2 {
             }
           }
 
-          rx.edgeUpdates.getOrElse(edge, Nil).foreach {
-            case UpdateStmt(upd) => effectParts += s"(${sanitize(upd.variable.show)}'=${updateExprToString(upd.expr)})"
-            case _ => 
+          val varUpdates = getVariableUpdates(rx.edgeUpdates.getOrElse(edge, Nil))
+          val grouped = varUpdates.groupBy(_._1)
+
+          for ((v, upds) <- grouped) {
+            val vName = sanitize(v.show)
+            var currentExpr = vName
+            for ((_, expr, condOpt) <- upds) {
+              condOpt match {
+                case Some(c) => currentExpr = s"(${conditionToPrism(c)} ? $expr : $currentExpr)"
+                case None => currentExpr = expr
+              }
+            }
+            effectParts += s"($vName'=$currentExpr)"
           }
 
           s"$probFormula : ${effectParts.distinct.mkString(" & ")}"
         }
         
         commands += s"  // State: ${source.show}\n  [$source] s=$srcIdx & $sumName > 0 -> \n    ${branches.mkString("\n    + ")};"
+        commands += s"  [] s=$srcIdx & $sumName = 0 -> 1.0 : (s'=$srcIdx);"
       } else {
         commands += s"  // Deadlock \n  [] s=$srcIdx -> 1.0 : (s'=$srcIdx);"
       }
@@ -311,16 +388,5 @@ object PrismConverter2 {
     commands.result().foreach(c => sb.append(c + "\n\n"))
     sb.append("endmodule\n")
     sb.toString()
-  }
-
-  private def sanitize(n: String) = n.replaceAll("[^a-zA-Z0-9_]", "_")
-
-  private def updateExprToString(e: UpdateExpr): String = e match {
-    case UpdateExpr.Lit(i) => i.toString
-    case UpdateExpr.Var(q) => sanitize(q.show)
-    case UpdateExpr.Add(v, Right(q)) => s"${sanitize(v.show)} + ${sanitize(q.show)}"
-    case UpdateExpr.Add(v, Left(i))  => s"${sanitize(v.show)} + $i"
-    case UpdateExpr.Sub(v, Right(q)) => s"${sanitize(v.show)} - ${sanitize(q.show)}"
-    case UpdateExpr.Sub(v, Left(i))  => s"${sanitize(v.show)} - $i"
   }
 }
