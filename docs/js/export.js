@@ -460,17 +460,13 @@ function downloadPrism2() {
 
 function updatePctlDropdowns(data) {
     var stateSelect = document.getElementById('pctlStateSelect');
-    var actionSelect = document.getElementById('pctlActionSelect');
-    var actionOffSelect = document.getElementById('pctlActionOffSelect');
     
-    if(!stateSelect || !actionSelect || !actionOffSelect || !data || !data.graphElements) return;
+    if(!stateSelect ||  !data || !data.graphElements) return;
 
     stateSelect.innerHTML = '';
-    actionSelect.innerHTML = '';
-    actionOffSelect.innerHTML = '';
+
     
     var uniqueStates = new Set();
-    var uniqueActions = new Set();
 
     data.graphElements.forEach(function (el) {
         var cls = el.classes || "";
@@ -480,9 +476,6 @@ function updatePctlDropdowns(data) {
             uniqueStates.add(d.label);
         }
 
-        if (cls.indexOf('event-node') !== -1 && d && d.action_name) {
-            uniqueActions.add(d.action_name);
-        }
     });
 
     Array.from(uniqueStates).sort().forEach(function(st) {
@@ -492,19 +485,7 @@ function updatePctlDropdowns(data) {
         stateSelect.appendChild(opt);
     });
     
-    Array.from(uniqueActions).sort().forEach(function(act) {
-        var sanitized = act.replace(/[^a-zA-Z0-9_]/g, "_");
-        
-        var opt1 = document.createElement('option');
-        opt1.value = sanitized;
-        opt1.innerText = act;
-        actionSelect.appendChild(opt1);
-        
-        var opt2 = document.createElement('option');
-        opt2.value = sanitized;
-        opt2.innerText = act;
-        actionOffSelect.appendChild(opt2);
-    });
+
 }
 
 function openPctlGenerator() {

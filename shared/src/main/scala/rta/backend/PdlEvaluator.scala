@@ -53,6 +53,9 @@ object PdlEvaluator {
         case PQuantitative(path) => 
           val prob = calculatePathProbability(canonicalStart, path)
           f"Result: $prob%.5f"
+        case PQuantitativeProg(prog, phi) =>
+          val prob = calculateProgProbability(canonicalStart, prog, phi)
+          f"Result: $prob%.5f"
         case _ => 
           val res = evaluateFormula(canonicalStart, formula)
           s"Result: $res"
@@ -100,6 +103,68 @@ object PdlEvaluator {
       }
     }
 
+
+    def evaluateProgramProb(initialConfigs: Map[RxGraph, Double], program: PdlProgram): Map[RxGraph, Double] = {
+      val isFuzzy = initialConfigs.headOption.exists(_._1.paradigm == "fuzzy") // Descobre o paradigma
+      program match {
+        case Act(nameFromFormula) =>
+          val result = mutable.Map[RxGraph, Double]().withDefaultValue(0.0)
+          for ((config, p) <- initialConfigs) {
+            val transitions = getTransitions(config)
+            for ((edge, nextRx) <- transitions) {
+              val (from, _, id, label) = edge
+              val currentScope = from.scope
+              if (nameFromFormula == label || nameFromFormula == id ||
+                  nameFromFormula == (currentScope / label) || nameFromFormula == (currentScope / id)) {
+                val w = config.weights.getOrElse(edge, 1.0)
+                val prob = if (isFuzzy) Math.min(p, w) else p * w
+                
+                result(nextRx) = if (isFuzzy) Math.max(result(nextRx), prob) else result(nextRx) + prob
+              }
+            }
+          }
+          result.toMap
+
+        case Seq(p, q) =>
+          evaluateProgramProb(evaluateProgramProb(initialConfigs, p), q)
+
+        case Choice(p, q) =>
+          val resP = evaluateProgramProb(initialConfigs, p)
+          val resQ = evaluateProgramProb(initialConfigs, q)
+          val allKeys = resP.keySet ++ resQ.keySet
+          allKeys.map { k => 
+            val valP = resP.getOrElse(k, 0.0)
+            val valQ = resQ.getOrElse(k, 0.0)
+            val newVal = if (isFuzzy) Math.max(valP, valQ) else valP + valQ
+            k -> newVal
+          }.toMap
+
+        case Star(p) =>
+          var current = initialConfigs
+          var result = initialConfigs
+          var diff = 1.0
+          val eps = 1e-7
+          var iterations = 0
+          while (diff > eps && iterations < 1000) {
+            val nextStep = evaluateProgramProb(current, p)
+            var maxChange = 0.0
+            val newResult = mutable.Map[RxGraph, Double]().withDefaultValue(0.0)
+            for ((k, v) <- result) newResult(k) = v
+            for ((k, v) <- nextStep) {
+              val oldVal = result.getOrElse(k, 0.0)
+              val newVal = oldVal + v
+              newResult(k) = newVal
+              maxChange = Math.max(maxChange, v)
+            }
+            result = newResult.toMap
+            current = nextStep
+            diff = maxChange
+            iterations += 1
+          }
+          result
+      }
+    }
+
     def evaluateFormula(config: RxGraph, formula: PdlFormula): Boolean = {
       formulaCache.getOrElseUpdate((config, formula), {
         if (config.inits.isEmpty) false
@@ -118,10 +183,13 @@ object PdlEvaluator {
           case PQualitative(op, threshold, path) =>
             val prob = calculatePathProbability(config, path)
             compare(prob, op, threshold)
-            
-          case PQuantitative(_) => 
-            throw new RuntimeException("P=? só pode ser usado na raiz da fórmula, não aninhado.")
 
+          case PQualitativeProg(op, threshold, prog, phi) =>
+            val prob = calculateProgProbability(config, prog, phi)
+            compare(prob, op, threshold)
+            
+          case PQuantitative(_) | PQuantitativeProg(_, _) => 
+            throw new RuntimeException("P=? só pode ser usado na raiz da fórmula, não aninhado.")
           case PipeAnd(p, q) => getFinalConfigs(config, p).exists(inter => evaluateFormula(inter, q))
           case Diamond(p) => getTransitions(config).exists { case (_, nextRx) => evaluateFormula(nextRx, p) }
           case Box(p) => getTransitions(config).forall { case (_, nextRx) => evaluateFormula(nextRx, p) }
@@ -138,6 +206,12 @@ object PdlEvaluator {
             compare(totalProb, op, threshold)
         }
       })
+    }
+
+
+    def calculateProgProbability(startConfig: RxGraph, prog: PdlProgram, f: PdlFormula): Double = {
+      val finalConfigs = evaluateProgramProb(Map(startConfig -> 1.0), prog)
+      finalConfigs.filter { case (rx, _) => evaluateFormula(rx, f) }.values.sum
     }
 
     private def calculatePathProbability(startConfig: RxGraph, pathFormula: PathFormula): Double = {
@@ -160,6 +234,20 @@ object PdlEvaluator {
             val p = startConfig.weights.getOrElse(edge, 1.0)
             if (evaluateFormula(nextState, f)) p else 0.0
           }.sum
+
+        case PathFormula.NextN(n, f) =>
+          var currentDist = Map(startConfig -> 1.0)
+          for (_ <- 1 to n) {
+            val nextDist = mutable.Map[RxGraph, Double]().withDefaultValue(0.0)
+            for ((cfg, prob) <- currentDist) {
+              getTransitions(cfg).foreach { case (edge, nextCfg) =>
+                val edgeP = cfg.weights.getOrElse(edge, 1.0)
+                nextDist(nextCfg) += prob * edgeP
+              }
+            }
+            currentDist = nextDist.toMap
+          }
+          currentDist.filter { case (cfg, _) => evaluateFormula(cfg, f) }.values.sum
 
         case PathFormula.Future(f) =>
           calculatePathProbability(startConfig, PathFormula.Until(True, f))

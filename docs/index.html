@@ -395,17 +395,6 @@
                         <button class="u-btn primary" style="border-radius:0 2px 2px 0; margin-left:-1px; padding:0 10px;" onclick="addPctlTemplate('F_state')">+</button>
                     </div>
                     
-                    <label style="font-size:10px; margin-bottom:2px;" data-i18n="pctl_act_on">Action Active (F):</label>
-                    <div style="display:flex; margin-bottom:6px; width:100%;">
-                        <select id="pctlActionSelect" class="form-control" style="flex:1; min-width:0; border-radius:2px 0 0 2px;"></select>
-                        <button class="u-btn primary" style="border-radius:0 2px 2px 0; margin-left:-1px; padding:0 10px;" onclick="addPctlTemplate('F_act1')">+</button>
-                    </div>
-                    
-                    <label style="font-size:10px; margin-bottom:2px;" data-i18n="pctl_act_off">Action Inactive (F):</label>
-                    <div style="display:flex; margin-bottom:12px; width:100%;">
-                        <select id="pctlActionOffSelect" class="form-control" style="flex:1; min-width:0; border-radius:2px 0 0 2px;"></select>
-                        <button class="u-btn primary" style="border-radius:0 2px 2px 0; margin-left:-1px; padding:0 10px;" onclick="addPctlTemplate('F_act0')">+</button>
-                    </div>
 
                     <div class="sec-label" style="margin-bottom:6px;" data-i18n="pctl_advanced">Advanced Builder</div>
                     <div style="background:var(--gray-50); padding:6px; border:1px solid var(--border); border-radius:3px; margin-bottom:10px;">
@@ -641,7 +630,7 @@ function doUndo() {
 mermaid.initialize({ startOnLoad: false });
 
 CodeMirror.defineMode("rta", function() {
-    var keywords = ["name","init","aut","int","training","if","then","else","disabled","calibration","proportional","normalize","equal"];
+    var keywords = ["name","init","aut","int","training","if","then","else","disabled","calibration","proportional","normalize","equal","paradigm","fuzzy","probabilistic"];
     return {
         token: function(stream) {
             if (stream.eatSpace()) return null;

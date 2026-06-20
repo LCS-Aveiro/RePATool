@@ -880,7 +880,7 @@ function getCytoscapeStyles() {
                 }
                 return data.label || "";
             },
-            'background-color': '#E5E7EB', 'shape': 'rectangle', 'width': 'label', 'height': 'label', 'padding': 10, 'border-width': 2, 'border-color': '#9CA3AF', 'text-wrap': 'wrap', 'text-valign': 'center', 'text-halign': 'center' 
+            'background-color': '#ffffff', 'shape': 'rectangle', 'width': 'label', 'height': 'label', 'padding': 10, 'border-width': 2, 'border-color': '#9CA3AF', 'text-wrap': 'wrap', 'text-valign': 'center', 'text-halign': 'center' 
         } },
         
         { selector: 'node.event-node.hovered', style: { 
@@ -893,6 +893,8 @@ function getCytoscapeStyles() {
             },
             'z-index': 9999
         } },
+        { selector: 'node.rule-node', style: { 'background-color': '#E5E7EB' } },
+        { selector: '.enable-rule', style: { 'line-color': '#2563EB', 'target-arrow-color': '#2563EB' } },
         
         { selector: '.enable-rule', style: { 'line-color': '#2563EB', 'target-arrow-color': '#2563EB' } },
         { selector: '.disable-rule', style: { 'line-color': '#DC2626', 'target-arrow-color': '#DC2626' } },

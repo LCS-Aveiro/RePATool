@@ -152,6 +152,10 @@ function runPdl() {
         .replace(/⊤/g, 'true')
         .replace(/⊥/g, 'false');
 
+    if (finalCode.match(/^P\s*[=<>]/) && !finalCode.startsWith("{")) {
+        finalCode = "{" + finalCode + "}";
+    }
+
     console.log("Fórmula Original:", visualFormula);
     console.log("Enviando ao Backend:", finalCode);
 

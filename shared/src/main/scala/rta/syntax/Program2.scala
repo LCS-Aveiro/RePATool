@@ -129,6 +129,7 @@ object Program2:
                      weights: Map[Edge, Double],
                      edgeAggregations: Map[Edge, String],
                      trainingMode: Boolean = false,
+                     paradigm: String = "probabilistic",
                      distributionMode: String = "normalize",
                      trainingMethod: String = "laplace",
                      trainingAgg: String = "arith",
@@ -421,6 +422,7 @@ object Program2:
       weights = Map(),
       edgeAggregations = Map(), 
       trainingMode = false,
+      paradigm = "probabilistic",
       distributionMode = "normalize"
     )
 

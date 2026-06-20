@@ -1,7 +1,7 @@
 package rta.backend
 
 import rta.syntax.Program2.{Edge, Edges, QName, RxGraph}
-import rta.syntax.{Condition, Statement, UpdateExpr, UpdateStmt, IfThenStmt,Aggregation}
+import rta.syntax.{Condition, Statement, UpdateExpr, UpdateStmt, IfThenStmt, Aggregation}
 import scala.annotation.tailrec
 
 object RxSemantics {
@@ -19,6 +19,7 @@ object RxSemantics {
                                 activeEdges: Edges, 
                                 mode: String,
                                 rx: RxGraph): Map[Edge, Double] = {
+    if (rx.paradigm == "fuzzy") return newWeights
                                   
     val outgoingActive = rx.edg.getOrElse(source, Set.empty)
       .map(t => (source, t._1, t._2, t._3))
@@ -237,15 +238,17 @@ object RxSemantics {
       if (rx.trainingMode) {
         val sourceState = edge._1
         val sourceName = sourceState.show
-        val oldW = rx.weights.getOrElse(edge, 1.0)
+        
+        // CORREÇÃO: Pega o peso DEPOIS que a regra agiu ("A Foto" do VR a 20%)!
+        val preTrainW = weightsAfterRules.getOrElse(edge, rx.weights.getOrElse(edge, 1.0))
 
         if (rx.trainingMethod == "aggregation") {
-          val updatedW = clamp(Aggregation.compute(rx.trainingAgg, oldW, rx.trainingLambda, oldW))
+          val updatedW = clamp(Aggregation.compute(rx.trainingAgg, preTrainW, rx.trainingLambda, preTrainW))
           finalWeights += (edge -> updatedW)
           
           finalWeights = distributeWeights(
             source = sourceState,
-            oldWeights = rx.weights,
+            oldWeights = weightsAfterRules, // CORREÇÃO: Usa a foto de DEPOIS das regras
             newWeights = finalWeights,
             modifiedEdges = Set(edge), 
             activeEdges = currentAct,
@@ -253,22 +256,31 @@ object RxSemantics {
             rx = rx
           )
         } else {
+          // LAPLACE CORRIGIDO: Sincroniza os hits com a foto de DEPOIS das regras
           val totalVisitsVar = QName(List(s"__total_$sourceName"))
           val currentTotal = rx.val_env.getOrElse(totalVisitsVar, INITIAL_SAMPLES)
           val newActualTotal = currentTotal + 1
           nextEnv += (totalVisitsVar -> newActualTotal)
 
           val eLabel = edge._4.show
-          val eHitsVar = QName(List(s"__hits_${sourceName}_$eLabel"))
-          val oldHits = rx.val_env.getOrElse(eHitsVar, (oldW * currentTotal).toInt)
+          
+          // Calcula o número de Hits corretos baseando-se na probabilidade pós-regras
+          val oldHits = Math.round(preTrainW * currentTotal).toInt
           val updatedHits = oldHits + 1
 
           val forcedProb = clamp(updatedHits.toDouble / newActualTotal.toDouble)
           finalWeights += (edge -> forcedProb)
 
+          // Prepara a redistribuição do Laplace com a proporção de decaimento natural correta
+          val hitRatios = currentAct.map { e =>
+             val wAfter = weightsAfterRules.getOrElse(e, 0.0)
+             val h = Math.round(wAfter * currentTotal).toInt
+             e -> clamp(h.toDouble / newActualTotal.toDouble)
+          }.toMap
+
           finalWeights = distributeWeights(
             source = sourceState,
-            oldWeights = rx.weights,
+            oldWeights = hitRatios,
             newWeights = finalWeights,
             modifiedEdges = Set(edge),
             activeEdges = currentAct,
@@ -276,6 +288,7 @@ object RxSemantics {
             rx = rx
           )
 
+          // Escreve os hits recalculados de volta no ambiente para simulações futuras!
           val outgoingEdges = rx.edg.getOrElse(sourceState, Set.empty).map(t => (sourceState, t._1, t._2, t._3))
           for (e <- outgoingEdges) {
             val lbl = e._4.show

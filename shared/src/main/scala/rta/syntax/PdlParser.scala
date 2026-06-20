@@ -72,19 +72,39 @@ object PdlParser {
       
       if (reader.eat("=?") || (reader.current == "=" && reader.peekNext == "?")) {
         if (reader.current == "=") { reader.consume(); reader.consume() }
-        reader.expect("[")
-        val path = parsePathFormula(reader)
-        reader.expect("]")
-        reader.expect("}")
-        PQuantitative(path)
+        
+        if (reader.eat("[")) {
+          val path = parsePathFormula(reader)
+          reader.expect("]")
+          reader.expect("}")
+          PQuantitative(path)
+        } else if (reader.eat("<")) {
+          val prog = parseProgram(reader)
+          reader.expect(">")
+          val phi = parseFormula(reader)
+          reader.expect("}")
+          PQuantitativeProg(prog, phi)
+        } else {
+          throw new RuntimeException("Esperado '[' ou '<' após 'P=?'")
+        }
       } else {
         val op = reader.consume()
         val limit = reader.consume().toDouble
-        reader.expect("[")
-        val path = parsePathFormula(reader)
-        reader.expect("]")
-        reader.expect("}")
-        PQualitative(op, limit, path)
+        
+        if (reader.eat("[")) {
+          val path = parsePathFormula(reader)
+          reader.expect("]")
+          reader.expect("}")
+          PQualitative(op, limit, path)
+        } else if (reader.eat("<")) {
+          val prog = parseProgram(reader)
+          reader.expect(">")
+          val phi = parseFormula(reader)
+          reader.expect("}")
+          PQualitativeProg(op, limit, prog, phi)
+        } else {
+          throw new RuntimeException("Esperado '[' ou '<' após operador limite")
+        }
       }
     }
     else if (t == "!" || t == "~" || t == "¬") { reader.consume(); Not(parseUnary(reader)) }
@@ -112,7 +132,16 @@ object PdlParser {
 
   private def parsePathFormula(reader: TokenReader): PathFormula = {
     val t = reader.current
-    if (t == "X") { reader.consume(); PathFormula.Next(parseFormula(reader)) }
+    if (t == "X") { 
+      reader.consume()
+      var count = 1
+      while (reader.current == "X") {
+        reader.consume()
+        count += 1
+      }
+      if (count == 1) PathFormula.Next(parseFormula(reader))
+      else PathFormula.NextN(count, parseFormula(reader))
+    }
     else if (t == "F") { reader.consume(); PathFormula.Future(parseFormula(reader)) }
     else if (t == "G") { reader.consume(); PathFormula.Globally(parseFormula(reader)) }
     else {

@@ -6,6 +6,7 @@ import rta.syntax.Condition.*
 sealed trait PathFormula
 object PathFormula {
   case class Next(f: Formula) extends PathFormula                 // X p
+  case class NextN(n: Int, f: Formula) extends PathFormula        // X X X p (Vários Passos)
   case class Future(f: Formula) extends PathFormula               // F p
   case class Globally(f: Formula) extends PathFormula             // G p
   case class Until(left: Formula, right: Formula) extends PathFormula // p U q
@@ -19,7 +20,8 @@ object Formula {
 
   case class PQuantitative(path: PathFormula) extends Formula                       // P=? [ path ]
   case class PQualitative(op: String, limit: Double, path: PathFormula) extends Formula // P>=0.5 [ path ]
-
+  case class PQuantitativeProg(prog: PdlProgram, f: Formula) extends Formula
+  case class PQualitativeProg(op: String, limit: Double, prog: PdlProgram, f: Formula) extends Formula
   case class ProbProp(prog: PdlProgram, op: String, threshold: Double, f: Formula) extends Formula //  (Ex: [action] >= 0.5 target)
   case class StateProp(name: QName) extends Formula      //  ex: "s1"
   case class CondProp(cond: Condition) extends Formula //  ex: "[c < 2]"

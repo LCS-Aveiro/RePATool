@@ -8,7 +8,7 @@ import scala.util.matching.Regex
 object Parser2 {
 
   private def tokenize(input: String): List[String] = {
-    val pattern = """(//.*)|(->>|--!|--x|--->|---->|--#--|->)|(\b(?:AND|OR|if|then|else|disabled|training|init|aut|int|arith|prod|max|min|geom|calibration|equal|proportional|normalize)\b)|(:=|==|!=|<=|>=|&&|\|\||[{}();,:=\+\-\*\/<>])|([a-zA-Z_][\w\.]*'?)|(-?\d+(\.\d+)?)""".r
+    val pattern = """(//.*)|(->>|--!|--x|--->|---->|--#--|->)|(\b(?:AND|OR|if|then|else|disabled|training|init|aut|int|arith|prod|max|min|geom|calibration|equal|proportional|normalize|paradigm|fuzzy|probabilistic)\b)|(:=|==|!=|<=|>=|&&|\|\||[{}();,:=\+\-\*\/<>])|([a-zA-Z_][\w\.]*'?)|(-?\d+(\.\d+)?)""".r
 
     pattern.findAllMatchIn(input).flatMap { m =>
       if (m.group(1) != null) None 
@@ -66,16 +66,20 @@ object Parser2 {
         val w: Double = if (rx.weights.contains(e)) rx.weights(e) else 1.0
         (e, w)
       }.toMap
+      if (rx.paradigm == "fuzzy") {
+        assigned.map { case (e, w) => e -> Math.max(0.0, Math.min(1.0, w)) }
+      }else{
 
-      val totalSum: Double = activeFromSource.toList.map(e => assigned(e)).sum
+        val totalSum: Double = activeFromSource.toList.map(e => assigned(e)).sum
 
-      if (totalSum > 0.0)
-        assigned.map { (e, w) => 
-          if (rx.act.contains(e)) e -> (w / totalSum) 
-          else e -> w
-        }
-      else
-        assigned
+        if (totalSum > 0.0)
+          assigned.map { (e, w) => 
+            if (rx.act.contains(e)) e -> (w / totalSum) 
+            else e -> w
+          }
+        else
+          assigned
+      }
     }.toMap
 
     val ruleEdges = (for { (s, ts) <- rx.on; (t, id, l) <- ts } yield (s, t, id, l)).toSet ++
@@ -120,6 +124,14 @@ object Parser2 {
           rx = rx.copy(distributionMode = mode)
         } else {
           throw new RuntimeException(s"Syntax Error: Unknown calibration mode: $mode")
+        }
+      }
+      else if (reader.eat("paradigm")) {
+        val mode = reader.consume()
+        if (Set("probabilistic", "fuzzy").contains(mode)) {
+          rx = rx.copy(paradigm = mode)
+        } else {
+          throw new RuntimeException(s"Syntax Error: Unknown paradigm: $mode")
         }
       }
       else if (reader.eat("int")) {

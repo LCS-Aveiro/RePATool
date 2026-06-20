@@ -75,7 +75,9 @@ object TrainingEngine {
     new Session(rx, edgeList, weights, hits, totals, activeArr, initActiveArr, builder.map(kv => kv._1 -> kv._2.toList).toMap, labelToEdges, stateToEdges, rx.val_env, rx.inits, isAgg)
   }
 
-  private def distributeWeights(sess: Session, srcState: QName, modifiedIdxs: Set[Int], activeIdxs: List[Int], mode: String): Unit = {
+  // AGORA RECEBEMOS UMA FUNÇÃO getOldW PARA NÃO DEPENDER CEGAMENTE DOS HITS
+  private def distributeWeights(sess: Session, srcState: QName, modifiedIdxs: Set[Int], activeIdxs: List[Int], mode: String, getOldW: Int => Double): Unit = {
+    if (sess.rx.paradigm == "fuzzy") return
     if (activeIdxs.isEmpty) return
     val activeModified = modifiedIdxs.filter(activeIdxs.contains)
     val unmodified = activeIdxs.filterNot(activeModified.contains)
@@ -89,10 +91,10 @@ object TrainingEngine {
         } else {
           val targetUnmod = 1.0 - sMod
           if (mode == "proportional") {
-            val sUnmod = unmodified.map(i => sess.hits(i).toDouble / math.max(sess.totals(sess.edgeArr(i)._1), 1L)).sum
+            val sUnmod = unmodified.map(getOldW).sum
             if (sUnmod > EPSILON) {
               val scale = targetUnmod / sUnmod
-              for (i <- unmodified) sess.weights(i) = clamp((sess.hits(i).toDouble / math.max(sess.totals(sess.edgeArr(i)._1), 1L)) * scale)
+              for (i <- unmodified) sess.weights(i) = clamp(getOldW(i) * scale)
             } else {
               val share = targetUnmod / unmodified.size
               for (i <- unmodified) sess.weights(i) = clamp(share)
@@ -102,20 +104,20 @@ object TrainingEngine {
             var remainingTarget = targetUnmod
             var done = false
             while (!done && remaining.nonEmpty) {
-              val sUnmod = remaining.map(i => sess.hits(i).toDouble / math.max(sess.totals(sess.edgeArr(i)._1), 1L)).sum
+              val sUnmod = remaining.map(getOldW).sum
               val diff = remainingTarget - sUnmod
               val share = diff / remaining.size
               var clampedAny = false
               var next = List.empty[Int]
               for (i <- remaining) {
-                val oldW = sess.hits(i).toDouble / math.max(sess.totals(sess.edgeArr(i)._1), 1L)
+                val oldW = getOldW(i)
                 val proposed = oldW + share
                 if (proposed < 0.0) { sess.weights(i) = 0.0; clampedAny = true }
                 else if (proposed > 1.0) { sess.weights(i) = 1.0; remainingTarget -= 1.0; clampedAny = true }
                 else next = i :: next
               }
               if (!clampedAny) {
-                for (i <- next) sess.weights(i) = clamp((sess.hits(i).toDouble / math.max(sess.totals(sess.edgeArr(i)._1), 1L)) + share)
+                for (i <- next) sess.weights(i) = clamp(getOldW(i) + share)
                 done = true
               } else remaining = next
             }
@@ -149,8 +151,6 @@ object TrainingEngine {
         val dstState = firedEdge._2
         val firedLbl = firedEdge._4
 
-        val activeBeforeIdxs = sess.stateToEdges.getOrElse(srcState, Nil).filter(sess.activeArr)
-
         val edgeStmts = sess.rx.edgeUpdates.getOrElse(firedEdge, Nil)
         if (edgeStmts.nonEmpty) sess.varEnv = RxSemantics.applyUpdates(edgeStmts, sess.rx.copy(val_env = sess.varEnv))
 
@@ -160,6 +160,8 @@ object TrainingEngine {
 
         if (effects.nonEmpty) {
           val wSource = sess.weights(firedIdx)
+          val preHyperWeights = sess.weights.clone() // Foto da realidade ANTES de aplicar as regras!
+
           for (fx <- effects) {
             if (fx.conditionOpt.forall(c => Condition.evaluate(c, sess.varEnv))) {
               val newW = Aggregation.compute(fx.aggType, wSource, fx.ruleWeight, sess.weights(fx.targetEdgeIdx))
@@ -169,24 +171,48 @@ object TrainingEngine {
               sess.activeArr(fx.targetEdgeIdx) = fx.activate
             }
           }
-          for (st <- dirtyStates) {
-            val stActiveIdxs = sess.stateToEdges.getOrElse(st, Nil).filter(sess.activeArr)
-            distributeWeights(sess, st, modifiedByHyper.toSet, stActiveIdxs, sess.rx.distributionMode)
+          if (sess.rx.paradigm == "probabilistic") {
+            for (st <- dirtyStates) {
+              val stActiveIdxs = sess.stateToEdges.getOrElse(st, Nil).filter(sess.activeArr)
+              // Redistribui respeitando os pesos reais que existiam antes
+              distributeWeights(sess, st, modifiedByHyper.toSet, stActiveIdxs, sess.rx.distributionMode, i => preHyperWeights(i))
+              
+              // SINCRONIZAÇÃO: Força o Laplace a aceitar as mudanças das regras (HyperEdges)!
+              for (idx <- stActiveIdxs) {
+                sess.hits(idx) = Math.round(sess.weights(idx) * sess.totals(st))
+              }
+            }
           }
         }
+
+        // PEGA A LISTA DE ATIVADOS APÓS AS REGRAS (OVR entra na conta do Treino agora!)
+        val activeAfterIdxs = sess.stateToEdges.getOrElse(srcState, Nil).filter(sess.activeArr)
+        val preTrainWeights = sess.weights.clone() // Foto da realidade ANTES do Treino agir
 
         if (sess.isAggregation) {
           val oldW = sess.weights(firedIdx)
           sess.weights(firedIdx) = clamp(Aggregation.compute(sess.rx.trainingAgg, oldW, sess.rx.trainingLambda, oldW))
-          distributeWeights(sess, srcState, Set(firedIdx), activeBeforeIdxs, sess.rx.distributionMode)
+          if (sess.rx.paradigm == "probabilistic") {
+            // Como é aggregation, o "oldW" na redistribuição é o peso exato antes desse treino.
+            distributeWeights(sess, srcState, Set(firedIdx), activeAfterIdxs, sess.rx.distributionMode, i => preTrainWeights(i))
+            
+            // Sincroniza por segurança
+            for (idx <- activeAfterIdxs) {
+              sess.hits(idx) = Math.round(sess.weights(idx) * sess.totals(srcState))
+            }
+          }
         } else {
           val newTotal = sess.totals(srcState) + 1L
           sess.totals(srcState) = newTotal
           sess.hits(firedIdx) += 1L
           sess.weights(firedIdx) = clamp(sess.hits(firedIdx).toDouble / newTotal.toDouble)
-          distributeWeights(sess, srcState, Set(firedIdx), activeBeforeIdxs, sess.rx.distributionMode)
-          for (idx <- activeBeforeIdxs) {
-            sess.hits(idx) = Math.round(sess.weights(idx) * newTotal.toDouble).toLong
+          
+          // Como é Laplace, usamos a proporção de decaimento natural baseada em hits como base antiga
+          distributeWeights(sess, srcState, Set(firedIdx), activeAfterIdxs, sess.rx.distributionMode, i => sess.hits(i).toDouble / newTotal.toDouble)
+          
+          // Atualiza qualquer variação de peso (devido ao clamp/equal) de volta para os hits.
+          for (idx <- activeAfterIdxs) {
+            sess.hits(idx) = Math.round(sess.weights(idx) * newTotal.toDouble)
           }
         }
 

@@ -11,7 +11,6 @@ object PrismConverter2 {
     rx.edg.getOrElse(e._1, Set()).exists(t => t._1 == e._2 && t._2 == e._3 && t._3 == e._4)
   }
 
-
   def getPaths(startLbl: QName, endRule: Edge, allRules: Set[Edge], visited: Set[QName] = Set()): List[List[Edge]] = {
     if (visited.contains(startLbl)) return Nil
     val directRules = allRules.filter(_._1 == startLbl)
@@ -97,11 +96,17 @@ object PrismConverter2 {
         }
 
         val targetedEdges = reachableRules.flatMap(r => rx.lbls.getOrElse(r._2, Set()))
-        for (edge <- targetedEdges.toList.sortBy(_._4.toString)) {
-          val sEdge = sanitize(edge._4.show)
-          val rulesTargetingE = reachableRules.filter(r => r._2 == edge._4)
+        
+        // CORREÇÃO AQUI: Em vez de iterar sobre todas as Arestas, iteramos sobre as Labels únicas!
+        val uniqueTargetedLabels = targetedEdges.map(_._4).toSet
+
+        for (tgtLbl <- uniqueTargetedLabels.toList.sortBy(_.toString)) {
+          val sEdge = sanitize(tgtLbl.show)
+          val rulesTargetingE = reachableRules.filter(r => r._2 == tgtLbl)
           
-          var currWeight = if (mutableLabels.contains(edge._4)) s"w_int_$sEdge" else s"${(rx.weights.getOrElse(edge, 1.0) * SCALE).toInt}"
+          val repEdgeOpt = rx.lbls.getOrElse(tgtLbl, Set()).headOption
+          var currWeight = if (mutableLabels.contains(tgtLbl)) s"w_int_$sEdge" 
+                           else s"${(repEdgeOpt.map(rx.weights.getOrElse(_, 1.0)).getOrElse(1.0) * SCALE).toInt}"
 
           for ((r, i) <- rulesTargetingE.toList.sortBy(_._4.toString).zipWithIndex) {
             val rIdStr = sanitize(r._4.show) + "_" + sanitize(r._1.show) + "_" + sanitize(r._2.show)
@@ -129,12 +134,15 @@ object PrismConverter2 {
 
         val simpleTargeted = targetedEdges.filter(e => isSimpleEdge(e, rx))
         val ruleTargeted = targetedEdges -- simpleTargeted
+        
+        // CORREÇÃO AQUI também: Agrupamos os alvos de regras por Label única
+        val ruleTargetedLabels = ruleTargeted.map(_._4).toSet
 
-        for (e <- ruleTargeted.toList.sortBy(_._4.toString)) {
-          val sE = sanitize(e._4.show)
+        for (tgtLbl <- ruleTargetedLabels.toList.sortBy(_.toString)) {
+          val sE = sanitize(tgtLbl.show)
           val fName = s"final_upd_${sT}_$sE"
           formulasSb.append(s"formula $fName = base_upd_${sT}_$sE;\n")
-          generatedUpdates((tLbl, e._4)) = fName
+          generatedUpdates((tLbl, tgtLbl)) = fName
         }
 
         val dirtyStates = simpleTargeted.map(_._1).toSet
@@ -157,26 +165,32 @@ object PrismConverter2 {
             case "normalize" =>
               val totalSumExp = s"max(1, $sumModExp + $sumUnmodBase)"
               for (e <- outEdges.sortBy(_._4.toString)) {
-                val sE = sanitize(e._4.show)
-                val base = if (modifiedOut.contains(e)) s"base_upd_${sT}_$sE" else s"w_int_$sE"
-                val fName = s"final_upd_${sT}_$sE"
-                formulasSb.append(s"formula $fName = min(10000, max(0, floor(($base * 10000) / $totalSumExp)));\n")
-                generatedUpdates((tLbl, e._4)) = fName
+                if (!generatedUpdates.contains((tLbl, e._4))) {
+                  val sE = sanitize(e._4.show)
+                  val base = if (modifiedOut.contains(e)) s"base_upd_${sT}_$sE" else s"w_int_$sE"
+                  val fName = s"final_upd_${sT}_$sE"
+                  formulasSb.append(s"formula $fName = min(10000, max(0, floor(($base * 10000) / $totalSumExp)));\n")
+                  generatedUpdates((tLbl, e._4)) = fName
+                }
               }
 
             case "proportional" =>
               for (e <- modifiedOut.sortBy(_._4.toString)) {
-                val sE = sanitize(e._4.show)
-                val fName = s"final_upd_${sT}_$sE"
-                formulasSb.append(s"formula $fName = base_upd_${sT}_$sE;\n")
-                generatedUpdates((tLbl, e._4)) = fName
+                if (!generatedUpdates.contains((tLbl, e._4))) {
+                  val sE = sanitize(e._4.show)
+                  val fName = s"final_upd_${sT}_$sE"
+                  formulasSb.append(s"formula $fName = base_upd_${sT}_$sE;\n")
+                  generatedUpdates((tLbl, e._4)) = fName
+                }
               }
               for (e <- unmodifiedOut.sortBy(_._4.toString)) {
-                val sE = sanitize(e._4.show)
-                val newExpr = s"floor(w_int_$sE * (10000 - ($sumModExp)) / max(1, $sumUnmodBase))"
-                val fName = s"final_upd_${sT}_$sE"
-                formulasSb.append(s"formula $fName = min(10000, max(0, $newExpr));\n")
-                generatedUpdates((tLbl, e._4)) = fName
+                if (!generatedUpdates.contains((tLbl, e._4))) {
+                  val sE = sanitize(e._4.show)
+                  val newExpr = s"floor(w_int_$sE * (10000 - ($sumModExp)) / max(1, $sumUnmodBase))"
+                  val fName = s"final_upd_${sT}_$sE"
+                  formulasSb.append(s"formula $fName = min(10000, max(0, $newExpr));\n")
+                  generatedUpdates((tLbl, e._4)) = fName
+                }
               }
 
             case "equal" =>
@@ -187,17 +201,21 @@ object PrismConverter2 {
               val nUnmodExpr = if (nUnmodParts.isEmpty) "0" else nUnmodParts.mkString(" + ")
 
               for (e <- modifiedOut.sortBy(_._4.toString)) {
-                val sE = sanitize(e._4.show)
-                val fName = s"final_upd_${sT}_$sE"
-                formulasSb.append(s"formula $fName = base_upd_${sT}_$sE;\n")
-                generatedUpdates((tLbl, e._4)) = fName
+                if (!generatedUpdates.contains((tLbl, e._4))) {
+                  val sE = sanitize(e._4.show)
+                  val fName = s"final_upd_${sT}_$sE"
+                  formulasSb.append(s"formula $fName = base_upd_${sT}_$sE;\n")
+                  generatedUpdates((tLbl, e._4)) = fName
+                }
               }
               for (e <- unmodifiedOut.sortBy(_._4.toString)) {
-                val sE = sanitize(e._4.show)
-                val newExpr = s"floor(w_int_$sE + (10000 - ($sumModExp) - ($sumUnmodBase)) / max(1, $nUnmodExpr))"
-                val fName = s"final_upd_${sT}_$sE"
-                formulasSb.append(s"formula $fName = min(10000, max(0, $newExpr));\n")
-                generatedUpdates((tLbl, e._4)) = fName
+                if (!generatedUpdates.contains((tLbl, e._4))) {
+                  val sE = sanitize(e._4.show)
+                  val newExpr = s"floor(w_int_$sE + (10000 - ($sumModExp) - ($sumUnmodBase)) / max(1, $nUnmodExpr))"
+                  val fName = s"final_upd_${sT}_$sE"
+                  formulasSb.append(s"formula $fName = min(10000, max(0, $newExpr));\n")
+                  generatedUpdates((tLbl, e._4)) = fName
+                }
               }
           }
         }

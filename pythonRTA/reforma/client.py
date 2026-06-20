@@ -79,6 +79,111 @@ class ReForma:
         """
         print(msg)
 
+    
+    def create_from_dataframe(
+        self, 
+        df, 
+        session_col: str = 'user_session', 
+        event_col: str = 'event_type', 
+        time_col: str = 'event_time', 
+        model_name: str = "MinedModel",
+        save_model_path: Optional[str] = None,
+        save_traces_path: Optional[str] = None
+    ) -> list[list[str]]:
+        """
+        Descobre o modelo RePA diretamente de um DataFrame Pandas.
+        
+        :param df: DataFrame do Pandas com os dados.
+        :param session_col: Nome da coluna que identifica as sessões dos utilizadores.
+        :param event_col: Nome da coluna com a ação/evento.
+        :param time_col: Nome da coluna com o timestamp.
+        :param model_name: Nome a dar ao autómato.
+        :param save_model_path: Se preenchido, guarda o código .rta gerado neste ficheiro.
+        :param save_traces_path: Se preenchido, guarda o log de sessões .txt neste ficheiro.
+        :return: Uma lista de sessões (cada sessão é uma lista de IDs de transições).
+        """
+        try:
+            import pandas as pd
+            import re
+        except ImportError:
+            raise RuntimeError("Para usar o process mining precisas de instalar: pip install pandas")
+
+        def sanitize(text):
+            return re.sub(r'[^a-zA-Z0-9_]', '_', str(text))
+
+        df = df.dropna(subset=[session_col])
+        df = df.sort_values(by=[session_col, time_col])
+
+        df['next_event'] = df.groupby(session_col)[event_col].shift(-1).fillna('exit')
+
+        df['clean_event'] = df[event_col].apply(sanitize)
+        df['clean_next'] = df['next_event'].apply(sanitize)
+
+        first_events = df.groupby(session_col)['clean_event'].first().value_counts()
+        transitions = df.groupby(['clean_event', 'clean_next']).size().reset_index(name='count')
+
+        rta_output = [
+            f"name {model_name};",
+            "\n// =====================================================",
+            "// Model From Dataset",
+            "// =====================================================\n",
+            "init Start;\n"
+        ]
+
+        mapping = {}
+        edge_counter = 1
+
+        total_starts = first_events.sum()
+        for event_type, count in first_events.items():
+            label_id = f"e{edge_counter}"
+            rta_output.append(f"Start -enter_{event_type}-> {event_type} : {label_id}")
+            mapping[('Start', event_type)] = label_id
+            edge_counter += 1
+
+        rta_output.append("")
+
+        for source in transitions['clean_event'].unique():
+            df_source = transitions[transitions['clean_event'] == source]
+            total_out = df_source['count'].sum()
+            
+            for _, row in df_source.iterrows():
+                src, tgt = row['clean_event'], row['clean_next']
+                label_id = f"e{edge_counter}"
+                
+                rta_output.append(f"{src} -{tgt}-> {tgt} : {label_id}")
+                mapping[(src, tgt)] = label_id
+                edge_counter += 1
+
+        loop_edge_id = f"e{edge_counter}"
+        rta_output.append("\n// Loop no estado final para evitar deadlock no PRISM")
+        rta_output.append(f"exit -loop-> exit : {loop_edge_id} (1.0000)")
+
+        df['edge_tuple'] = list(zip(df['clean_event'], df['clean_next']))
+        df['edge_id'] = df['edge_tuple'].map(mapping)
+
+        first_in_session = df.groupby(session_col)['clean_event'].first()
+        start_edges = first_in_session.apply(lambda e: mapping.get(('Start', e)))
+        internal_edges = df.groupby(session_col)['edge_id'].apply(list)
+
+        traces = []
+        for session_id in internal_edges.index:
+            start_edge = start_edges[session_id]
+            path = [start_edge] + [e for e in internal_edges[session_id] if pd.notna(e)]
+            traces.append(path)
+
+        full_source = "\n".join(rta_output)
+        self.load(full_source, name=model_name)
+
+        if save_model_path:
+            with open(save_model_path, "w", encoding="utf-8") as f:
+                f.write(full_source)
+        
+        if save_traces_path:
+            with open(save_traces_path, "w", encoding="utf-8") as f:
+                f.write("\n".join(",".join(t) for t in traces))
+
+        return traces
+
 
     def check_problems(self) -> str:
         """Runs a random walk to find deadlocks, unreachable states, or inconsistencies."""
@@ -342,16 +447,71 @@ class ReForma:
                     elements: elementsData,
                     layout: {{ name: 'preset' }},
                     style: [
-                        {{ selector: 'node', style: {{ 'label': 'data(label)', 'text-valign': 'center', 'text-wrap': 'wrap', 'font-family': 'sans-serif', 'font-weight': 'bold', 'font-size': '12px' }} }},
-                        {{ selector: 'edge', style: {{ 'width': 2, 'curve-style': 'bezier', 'line-color': '#9CA3AF', 'target-arrow-color': '#9CA3AF', 'target-arrow-shape': 'triangle', 'label': 'data(label)', 'font-size': '10px', 'text-background-opacity': 1, 'text-background-color': '#fff' }} }},
-                        {{ selector: 'node.state-node', style: {{ 'background-color': '#BFDBFE', 'shape': 'ellipse', 'width': 45, 'height': 45, 'border-width': 2, 'border-color': '#3B82F6' }} }},
-                        {{ selector: 'node.event-node', style: {{ 'background-color': '#E5E7EB', 'shape': 'rectangle', 'width': 'label', 'height': 'label', 'padding': 5, 'border-width': 2, 'border-color': '#9CA3AF' }} }},
-                        {{ selector: '.current-state', style: {{ 'background-color': '#86EFAC', 'border-color': '#166534', 'border-width': 4 }} }},
-                        {{ selector: '.enable-rule', style: {{ 'line-color': '#2563EB', 'target-arrow-color': '#2563EB', 'line-style': 'solid', 'target-arrow-shape': 'triangle' }} }},
-                        {{ selector: '.disable-rule', style: {{ 'line-color': '#DC2626', 'target-arrow-color': '#DC2626', 'line-style': 'solid', 'target-arrow-shape': 'tee' }} }},
-                        {{ selector: '.disabled', style: {{ 'opacity': 0.3, 'line-style': 'dashed', 'border-style': 'dashed' }} }},
-                        {{ selector: '.deadlock-node', style: {{ 'background-color': '#FECACA', 'border-color': '#EF4444', 'color': '#7F1D1D' }} }}
-                    ]
+                            {{ selector: 'node', style: {{ 'label': 'data(label)', 'text-valign': 'center', 'color': '#000000', 'font-family': 'sans-serif', 'font-weight': 'bold', 'text-outline-width': 2, 'text-outline-color': '#FFFFFF' }} }},
+                            
+                            {{ selector: 'edge', style: {{ 'width': 2, 'curve-style': 'unbundled-bezier', 'line-color': '#9CA3AF','target-arrow-shape': 'none', 'label': 'data(label)','color': '#000000', 'text-outline-color': '#FFFFFF','text-outline-width': 2,'font-size': '14px'}} }}, 
+                            {{ selector: 'edge[edgeDistances]', style: {{'curve-style': 'unbundled-bezier','control-point-distances': 'data(edgeDistances)','control-point-weights': 'data(edgeWeights)','edge-distances': 'node-position'}}}},
+                            {{ selector: 'edge.from-action-node', style: {{ 'target-arrow-shape': 'triangle' }} }},
+                            
+                            {{ selector: 'edge.simple-conn', style: {{ 'text-opacity': 0 }} }},
+                            {{ selector: 'edge.simple-conn.hovered', style: {{ 'text-opacity': 1, 'z-index': 9999 }} }},
+                            
+                            {{ selector: 'node.state-node', style: {{ 'background-color': '#BFDBFE', 'shape': 'ellipse', 'width': 50, 'height': 50, 'border-width': 3, 'border-color': '#3B82F6', 'text-wrap': 'wrap', 'text-valign': 'center' }} }},
+                            {{ selector: 'node.has-invariant', style: {{ 'label': function(ele) {{ return ele.data('label') + '\\n[' + ele.data('invariant') + ']'; }} }} }},
+                            
+                            {{ selector: '.current-state', style: {{ 'background-color': '#86EFAC', 'border-color': '#166534', 'border-width': 4 }} }},
+                            
+                            {{ selector: 'node.event-node', style: {{ 
+                                'label': function(ele) {{
+                                    const data = ele.data();
+                                    const p = data.p;
+                                    let baseName = data.action_name || (data.label ? data.label.split('\\n')[0] : "");
+
+                                    if (window.isPossibilisticView) {{
+                                        return baseName;
+                                    }}
+
+                                    if (p !== undefined) {{
+                                        const isRule = ele.hasClass('rule-node'); 
+                                        const symbol = isRule ? "Δ" : "P";
+                                        if (isRule) return `${{baseName}}\\n(${{symbol}}=${{p.toFixed(3)}})`;
+                                        const nm = (data.transID == data.lbl ? "":data.transID);
+                                        return `${{nm}}\\n(${{symbol}}=${{p.toFixed(3)}})`
+                                    }}
+                                    return data.label || "";
+                                }},
+                                'background-color': '#ffffff', 'shape': 'rectangle', 'width': 'label', 'height': 'label', 'padding': 10, 'border-width': 2, 'border-color': '#9CA3AF', 'text-wrap': 'wrap', 'text-valign': 'center', 'text-halign': 'center' 
+                            }} }},
+                            
+                            {{ selector: 'node.event-node.hovered', style: {{ 
+                                'label': function(ele) {{
+                                    let hlbl = ele.data('hover_label') || "";
+                                    if (window.isPossibilisticView) {{
+                                        return hlbl.replace(/\\s*\\([PΔ]=[\\d.]+\\)/, '');
+                                    }}
+                                    return hlbl;
+                                }},
+                                'z-index': 9999
+                            }} }},
+                            {{ selector: 'node.rule-node', style: {{ 'background-color': '#E5E7EB' }} }},
+                            {{ selector: '.enable-rule', style: {{ 'line-color': '#2563EB', 'target-arrow-color': '#2563EB' }} }},
+                            
+                            {{ selector: '.disable-rule', style: {{ 'line-color': '#DC2626', 'target-arrow-color': '#DC2626' }} }},
+                            {{ selector: 'edge.enable-rule.to-target', style: {{ 'target-arrow-shape': 'triangle-tee' }} }},
+                            {{ selector: 'edge.disable-rule.to-target', style: {{ 'target-label': 'X', 'target-text-offset': 5, 'color': '#DC2626', 'font-size': '12px' }} }},
+                            
+                            {{ selector: '.disabled', style: {{ 'line-style': 'dashed', 'background-opacity': 0.6, 'border-style': 'dashed', 'opacity': 0.7 }} }},
+                            
+                            {{ selector: '.deadlock-node', style: {{ 'background-color': '#FECACA', 'border-color': '#EF4444', 'color': '#7F1D1D' }} }},
+                            {{ selector: '.deadlock-edge', style: {{ 'line-color': '#EF4444', 'target-arrow-color': '#EF4444', 'line-style': 'dashed' }} }},
+                            {{ selector: '.deadlock-edge.enabled', style: {{ 'line-style': 'solid', 'width': 3 }} }},
+
+                            {{ selector: '.transition-flash', style: {{ 'background-color': '#F97316', 'line-color': '#F97316', 'target-arrow-color': '#F97316' }} }},
+                            
+                            {{ selector: '.filtered-out', style: {{ 'display': 'none' }} }},
+
+                            {{ selector: '.compound-parent', style: {{ 'background-color': '#F3F4F6', 'background-opacity': 1, 'border-color': '#D1D5DB', 'border-width': 2, 'content': 'data(label)', 'text-valign': 'top', 'text-halign': 'center', 'color': '#374151', 'font-weight': 'bold', 'font-size': '16px' }} }}
+                        ]
                 }});
                 
                 cy.nodes().style('opacity', 0);
@@ -467,10 +627,71 @@ class ReForma:
                     elements: elementsData,
                     layout: {{ name: 'dagre', rankDir: 'LR', spacingFactor: 1.2 }},
                     style: [
-                        {{ selector: 'node', style: {{ 'label': 'data(label)', 'text-valign': 'center', 'text-wrap': 'wrap', 'font-family': 'sans-serif', 'font-weight': 'bold', 'font-size': '12px', 'background-color': '#BFDBFE', 'shape': 'round-rectangle', 'width': 'label', 'height': 'label', 'padding': 12, 'border-width': 2, 'border-color': '#3B82F6' }} }},
-                        {{ selector: 'edge', style: {{ 'width': 2, 'curve-style': 'bezier', 'line-color': '#9CA3AF', 'target-arrow-color': '#9CA3AF', 'target-arrow-shape': 'triangle', 'label': 'data(label)', 'font-size': '10px', 'text-background-opacity': 1, 'text-background-color': '#fff' }} }},
-                        {{ selector: '.root-node', style: {{ 'background-color': '#86EFAC', 'border-color': '#166534', 'border-width': 4 }} }}
-                    ]
+                            {{ selector: 'node', style: {{ 'label': 'data(label)', 'text-valign': 'center', 'color': '#000000', 'font-family': 'sans-serif', 'font-weight': 'bold', 'text-outline-width': 2, 'text-outline-color': '#FFFFFF' }} }},
+                            
+                            {{ selector: 'edge', style: {{ 'width': 2, 'curve-style': 'unbundled-bezier', 'line-color': '#9CA3AF','target-arrow-shape': 'none', 'label': 'data(label)','color': '#000000', 'text-outline-color': '#FFFFFF','text-outline-width': 2,'font-size': '14px'}} }}, 
+                            {{ selector: 'edge[edgeDistances]', style: {{'curve-style': 'unbundled-bezier','control-point-distances': 'data(edgeDistances)','control-point-weights': 'data(edgeWeights)','edge-distances': 'node-position'}}}},
+                            {{ selector: 'edge.from-action-node', style: {{ 'target-arrow-shape': 'triangle' }} }},
+                            
+                            {{ selector: 'edge.simple-conn', style: {{ 'text-opacity': 0 }} }},
+                            {{ selector: 'edge.simple-conn.hovered', style: {{ 'text-opacity': 1, 'z-index': 9999 }} }},
+                            
+                            {{ selector: 'node.state-node', style: {{ 'background-color': '#BFDBFE', 'shape': 'ellipse', 'width': 50, 'height': 50, 'border-width': 3, 'border-color': '#3B82F6', 'text-wrap': 'wrap', 'text-valign': 'center' }} }},
+                            {{ selector: 'node.has-invariant', style: {{ 'label': function(ele) {{ return ele.data('label') + '\\n[' + ele.data('invariant') + ']'; }} }} }},
+                            
+                            {{ selector: '.current-state', style: {{ 'background-color': '#86EFAC', 'border-color': '#166534', 'border-width': 4 }} }},
+                            
+                            {{ selector: 'node.event-node', style: {{ 
+                                'label': function(ele) {{
+                                    const data = ele.data();
+                                    const p = data.p;
+                                    let baseName = data.action_name || (data.label ? data.label.split('\\n')[0] : "");
+
+                                    if (window.isPossibilisticView) {{
+                                        return baseName;
+                                    }}
+
+                                    if (p !== undefined) {{
+                                        const isRule = ele.hasClass('rule-node'); 
+                                        const symbol = isRule ? "Δ" : "P";
+                                        if (isRule) return `${{baseName}}\\n(${{symbol}}=${{p.toFixed(3)}})`;
+                                        const nm = (data.transID == data.lbl ? "":data.transID);
+                                        return `${{nm}}\\n(${{symbol}}=${{p.toFixed(3)}})`
+                                    }}
+                                    return data.label || "";
+                                }},
+                                'background-color': '#ffffff', 'shape': 'rectangle', 'width': 'label', 'height': 'label', 'padding': 10, 'border-width': 2, 'border-color': '#9CA3AF', 'text-wrap': 'wrap', 'text-valign': 'center', 'text-halign': 'center' 
+                            }} }},
+                            
+                            {{ selector: 'node.event-node.hovered', style: {{ 
+                                'label': function(ele) {{
+                                    let hlbl = ele.data('hover_label') || "";
+                                    if (window.isPossibilisticView) {{
+                                        return hlbl.replace(/\\s*\\([PΔ]=[\\d.]+\\)/, '');
+                                    }}
+                                    return hlbl;
+                                }},
+                                'z-index': 9999
+                            }} }},
+                            {{ selector: 'node.rule-node', style: {{ 'background-color': '#E5E7EB' }} }},
+                            {{ selector: '.enable-rule', style: {{ 'line-color': '#2563EB', 'target-arrow-color': '#2563EB' }} }},
+                            
+                            {{ selector: '.disable-rule', style: {{ 'line-color': '#DC2626', 'target-arrow-color': '#DC2626' }} }},
+                            {{ selector: 'edge.enable-rule.to-target', style: {{ 'target-arrow-shape': 'triangle-tee' }} }},
+                            {{ selector: 'edge.disable-rule.to-target', style: {{ 'target-label': 'X', 'target-text-offset': 5, 'color': '#DC2626', 'font-size': '12px' }} }},
+                            
+                            {{ selector: '.disabled', style: {{ 'line-style': 'dashed', 'background-opacity': 0.6, 'border-style': 'dashed', 'opacity': 0.7 }} }},
+                            
+                            {{ selector: '.deadlock-node', style: {{ 'background-color': '#FECACA', 'border-color': '#EF4444', 'color': '#7F1D1D' }} }},
+                            {{ selector: '.deadlock-edge', style: {{ 'line-color': '#EF4444', 'target-arrow-color': '#EF4444', 'line-style': 'dashed' }} }},
+                            {{ selector: '.deadlock-edge.enabled', style: {{ 'line-style': 'solid', 'width': 3 }} }},
+
+                            {{ selector: '.transition-flash', style: {{ 'background-color': '#F97316', 'line-color': '#F97316', 'target-arrow-color': '#F97316' }} }},
+                            
+                            {{ selector: '.filtered-out', style: {{ 'display': 'none' }} }},
+
+                            {{ selector: '.compound-parent', style: {{ 'background-color': '#F3F4F6', 'background-opacity': 1, 'border-color': '#D1D5DB', 'border-width': 2, 'content': 'data(label)', 'text-valign': 'top', 'text-halign': 'center', 'color': '#374151', 'font-weight': 'bold', 'font-size': '16px' }} }}
+                        ]
                 }});
             </script>
         </body>
