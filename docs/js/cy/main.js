@@ -845,6 +845,9 @@ function applySavedPositions(graphElements, sourceCode) {
     return false;
 }
 
+
+
+
 function getCytoscapeStyles() {
     return [
         { selector: 'node', style: { 'label': 'data(label)', 'text-valign': 'center', 'color': '#000000', 'font-family': 'sans-serif', 'font-weight': 'bold', 'text-outline-width': 2, 'text-outline-color': '#FFFFFF' } },
@@ -911,6 +914,268 @@ function getCytoscapeStyles() {
         
         { selector: '.filtered-out', style: { 'display': 'none' } },
 
+        { selector: '.compound-parent', style: { 'background-color': '#F3F4F6', 'background-opacity': 1, 'border-color': '#D1D5DB', 'border-width': 2, 'content': 'data(label)', 'text-valign': 'top', 'text-halign': 'center', 'color': '#374151', 'font-weight': 'bold', 'font-size': '16px' } },
+    
+    
+        { selector: '.anim-visiting', style: { 'background-color': '#FDE047', 'line-color': '#FDE047', 'target-arrow-color': '#FDE047', 'border-color': '#EAB308', 'transition-property': 'background-color, line-color, target-arrow-color', 'transition-duration': '0.2s' } },
+        { selector: '.anim-visited', style: { 'background-color': '#FEF08A', 'line-color': '#FEF08A', 'target-arrow-color': '#FEF08A', 'transition-property': 'background-color, line-color', 'transition-duration': '0.5s' } },
+        { selector: '.anim-target', style: { 'background-color': '#4ADE80', 'line-color': '#4ADE80', 'target-arrow-color': '#4ADE80', 'border-color': '#166534', 'border-width': 4, 'transition-property': 'background-color, line-color, border-color', 'transition-duration': '0.3s' } },
+        
+        { selector: '.compound-parent', style: { 'background-color': '#F3F4F6', 'background-opacity': 1, 'border-color': '#D1D5DB', 'border-width': 2, 'content': 'data(label)', 'text-valign': 'top', 'text-halign': 'center', 'color': '#374151', 'font-weight': 'bold', 'font-size': '16px' } },
+    
+        { selector: '.anim-vi-node', style: { 
+            'background-color': 'mapData(vi_val, 0, 1, #FFFFFF, #22C55E)', 
+            'transition-property': 'background-color', 
+            'transition-duration': '0.3s', 
+            'label': 'data(vi_label)' 
+        }},
+        { selector: '.anim-vi-node', style: { 
+            'background-color': 'mapData(vi_val, 0, 1, #FFFFFF, #22C55E)', 
+            'transition-property': 'background-color', 
+            'transition-duration': '0.3s', 
+            'label': 'data(vi_label)' 
+        }},
+        { selector: '.vi-updated', style: {
+            'border-color': '#F97316', // Laranja que indica Atualização
+            'border-width': 5,
+            'transition-property': 'border-color, border-width',
+            'transition-duration': '0.1s'
+        }},
+        { selector: '.vi-edge-flow', style: {
+            'line-color': '#F97316', // Linha laranja (Fluxo da matemática)
+            'target-arrow-color': '#F97316',
+            'width': 4,
+            'transition-property': 'line-color, target-arrow-color, width',
+            'transition-duration': '0.1s'
+        }},
+
         { selector: '.compound-parent', style: { 'background-color': '#F3F4F6', 'background-opacity': 1, 'border-color': '#D1D5DB', 'border-width': 2, 'content': 'data(label)', 'text-valign': 'top', 'text-halign': 'center', 'color': '#374151', 'font-weight': 'bold', 'font-size': '16px' } }
     ];
 }
+
+
+window.runGraphAnimationTrace = function(traceData, startNodeId) {
+    if (!currentCytoscapeInstance || !traceData) return;
+
+    currentCytoscapeInstance.elements().removeClass('anim-visiting anim-visited anim-target anim-vi-node vi-updated vi-edge-flow');
+
+    let startNode = currentCytoscapeInstance.getElementById(startNodeId);
+    if (!startNode || startNode.length === 0) startNode = currentCytoscapeInstance.nodes('.current-state');
+    if (startNode.length === 0) return;
+
+    // ========================================================================
+    // A) FILME: VALUE ITERATION (O Robô Bebé - Backwards Propagation)
+    // ========================================================================
+    console.log(traceData);
+    if (traceData.valueIterationTrace && traceData.valueIterationTrace.length > 0) {
+        let cy = currentCytoscapeInstance;
+        let viTrace = traceData.valueIterationTrace;
+
+  
+        let overlay = document.getElementById('vi-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'vi-overlay';
+            // Usa position fixed para garantir que flutua acima de tudo na janela
+            overlay.style.position = 'fixed';
+            overlay.style.top = '120px';
+            overlay.style.left = '50%';
+            overlay.style.transform = 'translateX(-50%)';
+            overlay.style.backgroundColor = '#1E293B';
+            overlay.style.color = '#fff';
+            overlay.style.padding = '10px 24px';
+            overlay.style.borderRadius = '30px';
+            overlay.style.fontFamily = 'sans-serif';
+            overlay.style.fontSize = '16px';
+            overlay.style.fontWeight = 'bold';
+            // Z-Index máximo absoluto
+            overlay.style.zIndex = '2147483647'; 
+            overlay.style.pointerEvents = 'none';
+            overlay.style.boxShadow = '0px 10px 25px rgba(0,0,0,0.6)';
+            
+            document.body.appendChild(overlay);
+        }
+
+        cy.animate({}, { 
+            duration: 500,
+            complete: function() {
+                cy.nodes('.state-node').addClass('anim-vi-node').forEach(n => {
+                    n.data('vi_val', 0);
+                    let baseName = n.data('label') ? n.data('label').split('\n')[0] : n.id();
+                    n.data('vi_label', baseName + '\n[ V=0.000 ]');
+                });
+
+                let step = 0;
+                let prevSnapshot = {};
+                const frameRate = 700; // 700ms por iteração para dar tempo ao cérebro de ver o caminho
+
+                let interval = setInterval(() => {
+                    if (step >= viTrace.length) {
+                        clearInterval(interval);
+                        overlay.innerText = "✨ Convergência Alcançada!";
+                        overlay.style.backgroundColor = '#16A34A';
+                        
+                        if (startNode && startNode.length > 0) startNode.addClass('anim-target');
+                        
+                        setTimeout(() => {
+                            cy.nodes().removeClass('anim-vi-node anim-target vi-updated');
+                            cy.edges().removeClass('vi-edge-flow');
+                            cy.nodes('.state-node').forEach(n => {
+                                n.removeData('vi_label');
+                                n.removeData('vi_val');
+                            });
+                            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                        }, 6000);
+                        return;
+                    }
+
+                    let snapshot = viTrace[step];
+                    overlay.innerText = `🔄 Value Iteration: T${step}`;
+                    
+                    cy.batch(() => {
+                        cy.nodes('.state-node').forEach(n => {
+                            let baseName = n.data('label') ? n.data('label').split('\n')[0] : n.id();
+                            let val = snapshot[n.id()];
+                            if (val === undefined) val = snapshot[baseName];
+                            
+                            if (val !== undefined) {
+                                let prevVal = prevSnapshot[baseName] || 0;
+                                n.data('vi_val', val);
+                                n.data('vi_label', baseName + '\n[ V=' + val.toFixed(3) + ' ]');
+                                
+                                // Detetou que o valor deste estado mudou significativamente!
+                                if (Math.abs(val - prevVal) > 0.0001) {
+                                    n.addClass('vi-updated');
+                                    setTimeout(() => n.removeClass('vi-updated'), frameRate - 100);
+
+                                    // Iluminar as arestas que puxaram este valor (Caminhos úteis)
+                                    n.outgoers('edge').forEach(e1 => {
+                                        let eventNode = e1.target();
+                                        if(eventNode.hasClass('event-node')) {
+                                            let e2s = eventNode.outgoers('edge');
+                                            let contributes = false;
+                                            
+                                            e2s.forEach(e2 => {
+                                                let tgt = e2.target();
+                                                let tBaseName = tgt.data('label') ? tgt.data('label').split('\n')[0] : tgt.id();
+                                                let tVal = snapshot[tgt.id()] !== undefined ? snapshot[tgt.id()] : snapshot[tBaseName];
+                                                if (tVal > 0) contributes = true; // Se o estado da frente tem valor, a aresta contribuiu!
+                                            });
+                                            
+                                            // Se o caminho alimentou o estado, desenha o fluxo a laranja!
+                                            if (contributes) {
+                                                e1.addClass('vi-edge-flow');
+                                                eventNode.addClass('vi-updated');
+                                                e2s.forEach(e2 => e2.addClass('vi-edge-flow'));
+                                                
+                                                setTimeout(() => {
+                                                    e1.removeClass('vi-edge-flow');
+                                                    eventNode.removeClass('vi-updated');
+                                                    e2s.forEach(e2 => e2.removeClass('vi-edge-flow'));
+                                                }, frameRate - 100);
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    });
+                    
+                    // Guarda o snapshot atual para comparar no próximo ciclo
+                    prevSnapshot = {};
+                    for(let k in snapshot) prevSnapshot[k] = snapshot[k];
+                    
+                    step++;
+                }, frameRate);
+            }
+        });
+        return;
+    }
+
+    // ========================================================================
+    // B) EFEITO DOMINÓ (Linear / PDL)
+    // ========================================================================
+    const visitedNodes = new Set(traceData.visitedNodes);
+    const visitedEventNodes = new Set(traceData.visitedEdges); 
+    const targetNodes = new Set(traceData.targetNodes);
+    const targetEventNodes = new Set(traceData.targetEdges); 
+
+    const stepDelay = 300; 
+
+    currentCytoscapeInstance.animate({
+        center: { eles: startNode },
+        zoom: Math.min(currentCytoscapeInstance.zoom(), 1.5)
+    }, { 
+        duration: 500,
+        complete: function() {
+            let queue = [ startNode ];
+            let localVisitedStates = new Set([startNode.id()]);
+            let localVisitedEvents = new Set();
+
+            function processLevel() {
+                if (queue.length === 0) {
+                    currentCytoscapeInstance.nodes().forEach(n => {
+                        if (targetNodes.has(n.id())) n.addClass('anim-target');
+                        if (targetEventNodes.has(n.id())) n.addClass('anim-target');
+                    });
+                    setTimeout(() => {
+                        currentCytoscapeInstance.elements().removeClass('anim-visiting anim-visited anim-target');
+                    }, 5000);
+                    return;
+                }
+
+                let nextQueue = [];
+                queue.forEach(stateNode => {
+                    if (targetNodes.has(stateNode.id())) {
+                        stateNode.addClass('anim-target');
+                    } else {
+                        stateNode.addClass('anim-visiting');
+                        setTimeout(() => stateNode.removeClass('anim-visiting').addClass('anim-visited'), stepDelay);
+                    }
+
+                    let outEdgesToEvents = stateNode.outgoers('edge');
+                    outEdgesToEvents.forEach(edgeToEvent => {
+                        let eventNode = edgeToEvent.target();
+                        if (visitedEventNodes.has(eventNode.id())) {
+                            if (localVisitedEvents.has(eventNode.id())) return;
+                            localVisitedEvents.add(eventNode.id());
+
+                            let isTarget = targetEventNodes.has(eventNode.id());
+                            let edgeFromEvent = eventNode.outgoers('edge');
+
+                            setTimeout(() => {
+                                edgeToEvent.addClass(isTarget ? 'anim-target' : 'anim-visiting');
+                                if (!isTarget) setTimeout(() => edgeToEvent.removeClass('anim-visiting').addClass('anim-visited'), stepDelay);
+                            }, stepDelay / 3);
+
+                            setTimeout(() => {
+                                eventNode.addClass(isTarget ? 'anim-target' : 'anim-visiting');
+                                if (!isTarget) setTimeout(() => eventNode.removeClass('anim-visiting').addClass('anim-visited'), stepDelay);
+                            }, (stepDelay / 3) * 2);
+
+                            setTimeout(() => {
+                                edgeFromEvent.forEach(e => {
+                                    e.addClass(isTarget ? 'anim-target' : 'anim-visiting');
+                                    if (!isTarget) setTimeout(() => e.removeClass('anim-visiting').addClass('anim-visited'), stepDelay);
+                                });
+                            }, stepDelay);
+
+                            edgeFromEvent.forEach(e => {
+                                let tgtState = e.target();
+                                if (!localVisitedStates.has(tgtState.id()) && visitedNodes.has(tgtState.id())) {
+                                    localVisitedStates.add(tgtState.id());
+                                    nextQueue.push(tgtState);
+                                }
+                            });
+                        }
+                    });
+                });
+
+                queue = nextQueue;
+                setTimeout(processLevel, stepDelay * 1.5);
+            }
+
+            processLevel();
+        }
+    });
+};

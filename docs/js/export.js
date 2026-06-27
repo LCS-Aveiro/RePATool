@@ -591,7 +591,7 @@ function runPctl() {
     if (!resDiv) return;
     
     var resultHtml = "<ul style='padding-left: 10px; margin-top: 5px; list-style-type: none;'>";
-
+    window.lastPctlTraces = [];
     for (var j = 0; j < formulas.length; j++) {
         var originalFormula = formulas[j];
         var formulaToRun = originalFormula;
@@ -600,7 +600,18 @@ function runPctl() {
             formulaToRun = "{" + formulaToRun + "}";
         }
 
-        var res = RTA.runPdl(evalState, formulaToRun);
+        var rawRes = RTA.runPdl(evalState, formulaToRun);
+        var resObj;
+        var res = rawRes;
+        try {
+            resObj = JSON.parse(rawRes);
+            if (resObj.error) {
+                res = resObj.error;
+            } else {
+                res = resObj.result;
+                window.lastPctlTraces.push(resObj);
+            }
+        } catch(e) {}
         
         var color = "#333";
         var icon = "";
@@ -637,4 +648,33 @@ function runPctl() {
     
     resultHtml += "</ul>";
     resDiv.innerHTML = resultHtml;
+}
+
+
+
+function animatePctl() {
+    var evalState = "";
+    var evalStateInput = document.getElementById('pctlEvalState');
+    if (evalStateInput) evalState = evalStateInput.value.trim();
+    
+    if (evalState === "" && typeof currentCytoscapeInstance !== 'undefined' && currentCytoscapeInstance) {
+        var currentNodes = currentCytoscapeInstance.nodes('.current-state');
+        if (currentNodes.length > 0) evalState = currentNodes[0].data('label');
+    }
+
+    var textArea = document.getElementById('pctlTextArea');
+    var rawText = textArea.value;
+    var selectedText = rawText.substring(textArea.selectionStart, textArea.selectionEnd).trim();
+    var formulaText = selectedText.length > 0 ? selectedText : rawText;
+
+    if (formulaText.trim() === "" || formulaText.startsWith("//")) return;
+
+    runPctl(); 
+
+    if (typeof runGraphAnimationTrace === 'function' && window.lastPctlTraces && window.lastPctlTraces.length > 0) {
+        console.log("ok");
+        runGraphAnimationTrace(window.lastPctlTraces[0], evalState);
+    } else if (evalState === "") {
+        alert("Estado de partida não definido.");
+    }
 }

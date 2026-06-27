@@ -306,23 +306,35 @@ object RTAAPI {
         try {
           val adaptedState = stateStr.replace('/', '.')
           Parser2.pp[QName](Parser2.qname, adaptedState) match {
-            case Left(err) => s"Error parsing state '$stateStr': $err"
+            case Left(err) => s"""{"error": "Error parsing state '$stateStr': $err"}"""
             case Right(startState) =>
-              if (!rx.states.contains(startState)) {
-                 s"State '${startState.show}' not found in the current model."
+              if (!rx.states.contains(startState) && !rx.inits.contains(startState)) {
+                 s"""{"error": "State '${startState.show}' not found in the current model."}"""
               } else {
                  val formula = PdlParser.parsePdlFormula(formulaStr)
-                 println(formula)
-                 val result = PdlEvaluator.evaluateFormula(startState, formula, rx)
-                 result 
+                 val (resStr, vN, vE, tN, tE, viTrace) = PdlEvaluator.evaluateFormulaWithTrace(startState, formula, rx)
+                 
+                 val viTraceJson = viTrace.map { stepMap =>
+                   val entries = stepMap.map { case (k, v) => s""""$k": $v""" }.mkString(",")
+                   s"{$entries}"
+                 }.mkString("[", ",", "]")
+
+                 s"""{
+                   "result": "${escapeJson(resStr)}",
+                   "visitedNodes": [${vN.map(s => s""""$s"""").mkString(",")}],
+                   "visitedEdges": [${vE.map(s => s""""$s"""").mkString(",")}],
+                   "targetNodes": [${tN.map(s => s""""$s"""").mkString(",")}],
+                   "targetEdges": [${tE.map(s => s""""$s"""").mkString(",")}],
+                   "valueIterationTrace": $viTraceJson
+                 }"""
               }
           }
         } catch {
           case e: Throwable => 
             val msg = if (e.getMessage != null) e.getMessage else e.toString
-            s"Evaluation Error: $msg"
+            s"""{"error": "Evaluation Error: ${escapeJson(msg)}"}"""
         }
-      case None => "Model not loaded."
+      case None => """{"error": "Model not loaded."}"""
     }
   }
 

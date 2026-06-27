@@ -16,34 +16,35 @@ function getSelectedUserModelName() {
     const selectedItem = document.querySelector('#project-tree .tree-item.selected');
     if (!selectedItem) return null;
 
-
-    const isUserItem = selectedItem.innerText.includes('.r'); 
+    let rawName = selectedItem.innerText.replace('📄', '').trim();
     
-    const rawName = selectedItem.innerText.replace('📄', '').replace('.r', '').trim();
+    rawName = rawName.replace(/\.(Re|rta|r)$/i, '');
     
     let userModels = JSON.parse(localStorage.getItem(USER_MODELS_KEY) || '{}');
     return userModels[rawName] !== undefined ? rawName : null;
 }
 
-
 function deleteUserModel() {
-    const select = document.getElementById("examplesSelect");
-    const selectedOpt = select.options[select.selectedIndex];
+    const name = getSelectedUserModelName();
     
-    if (!selectedOpt || !selectedOpt.hasAttribute('data-user-model')) {
-        alert(currentLang === 'pt' ? "Você só pode excluir seus próprios modelos." : "You can only delete your own models.");
+    if (!name) {
+        alert(currentLang === 'pt' ? 
+            "Selecione um dos SEUS modelos (em 'My Models') na árvore à esquerda para excluir." : 
+            "Please select one of YOUR models (in 'My Models') on the left tree to delete.");
         return;
     }
 
-    const name = selectedOpt.getAttribute('data-raw-name');
-    if (confirm((currentLang === 'pt' ? "Excluir " : "Delete ") + name + "?")) {
+    if (confirm((currentLang === 'pt' ? "Tem a certeza que deseja excluir o modelo: " : "Are you sure you want to delete: ") + name + "?")) {
         let userModels = JSON.parse(localStorage.getItem(USER_MODELS_KEY) || '{}');
+        
         delete userModels[name];
         localStorage.setItem(USER_MODELS_KEY, JSON.stringify(userModels));
+        
         updateProjectTree();
+        
+        document.getElementById('sb-model').textContent = currentLang === 'pt' ? "Nenhum modelo carregado" : "No model loaded";
     }
 }
-
 
 function overwriteUserModel() {
     const name = getSelectedUserModelName();

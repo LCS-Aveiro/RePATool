@@ -29,6 +29,13 @@ object PdlEvaluator {
 
     private val canonicalStates = mutable.Map[StateSignature, RxGraph]()
 
+    val visitedNodes = mutable.Set[String]()
+    val visitedEdges = mutable.Set[String]()
+    val targetNodes = mutable.Set[String]()
+    val targetEdges = mutable.Set[String]()
+
+    val valueIterationTrace = mutable.ListBuffer[Map[String, Double]]()
+
     def getSignature(rx: RxGraph): StateSignature = {
       StateSignature(rx.inits, rx.val_env, rx.act, rx.weights)
     }
@@ -40,9 +47,18 @@ object PdlEvaluator {
 
     def getTransitions(rx: RxGraph): Set[(Edge, RxGraph)] = {
       transCache.getOrElseUpdate(rx, {
-        RxSemantics.nextEdge(rx).map { case (edge, nextRx) =>
+        val nexts = RxSemantics.nextEdge(rx).map { case (edge, nextRx) =>
           (edge, getCanonical(nextRx))
         }
+        
+        rx.inits.headOption.foreach(s => visitedNodes.add(s.toString))
+        nexts.foreach { case (edge, nRx) =>
+          val (from, to, id, lbl) = edge
+          visitedEdges.add(s"event_${from}_${to}_${id}_${lbl}")
+          nRx.inits.headOption.foreach(s => visitedNodes.add(s.toString))
+        }
+        
+        nexts
       })
     }
 
@@ -67,7 +83,8 @@ object PdlEvaluator {
         case Act(nameFromFormula) =>
           initialConfigs.flatMap { config =>
             getTransitions(config)
-              .filter { case ((from, _, id, label), _) =>
+              .filter { case (edge, _) =>
+                val (from, to, id, label) = edge
                 val currentScope = from.scope
                 nameFromFormula == label || nameFromFormula == id ||
                 nameFromFormula == (currentScope / label) || nameFromFormula == (currentScope / id)
@@ -103,9 +120,8 @@ object PdlEvaluator {
       }
     }
 
-
     def evaluateProgramProb(initialConfigs: Map[RxGraph, Double], program: PdlProgram): Map[RxGraph, Double] = {
-      val isFuzzy = initialConfigs.headOption.exists(_._1.paradigm == "fuzzy") // Descobre o paradigma
+      val isFuzzy = initialConfigs.headOption.exists(_._1.paradigm == "fuzzy") 
       program match {
         case Act(nameFromFormula) =>
           val result = mutable.Map[RxGraph, Double]().withDefaultValue(0.0)
@@ -116,9 +132,9 @@ object PdlEvaluator {
               val currentScope = from.scope
               if (nameFromFormula == label || nameFromFormula == id ||
                   nameFromFormula == (currentScope / label) || nameFromFormula == (currentScope / id)) {
+                
                 val w = config.weights.getOrElse(edge, 1.0)
                 val prob = if (isFuzzy) Math.min(p, w) else p * w
-                
                 result(nextRx) = if (isFuzzy) Math.max(result(nextRx), prob) else result(nextRx) + prob
               }
             }
@@ -145,6 +161,15 @@ object PdlEvaluator {
           var diff = 1.0
           val eps = 1e-7
           var iterations = 0
+          
+          def takeSnapshot(dist: Map[RxGraph, Double]): Map[String, Double] = {
+            val m = mutable.Map[String, Double]().withDefaultValue(0.0)
+            dist.foreach { case (cfg, prob) => cfg.inits.foreach(init => m(init.toString) += prob) }
+            m.toMap
+          }
+          
+          valueIterationTrace += takeSnapshot(result)
+
           while (diff > eps && iterations < 1000) {
             val nextStep = evaluateProgramProb(current, p)
             var maxChange = 0.0
@@ -160,6 +185,8 @@ object PdlEvaluator {
             current = nextStep
             diff = maxChange
             iterations += 1
+            
+            valueIterationTrace += takeSnapshot(result)
           }
           result
       }
@@ -171,8 +198,14 @@ object PdlEvaluator {
         else formula match {
           case True => true
           case False => false
-          case StateProp(name) => config.inits.contains(name)
-          case CondProp(cond)  => Condition.evaluate(cond, config)
+          case StateProp(name) => 
+            val res = config.inits.contains(name)
+            if (res) config.inits.foreach(s => targetNodes.add(s.toString))
+            res
+          case CondProp(cond)  => 
+            val res = Condition.evaluate(cond, config)
+            if (res) config.inits.foreach(s => targetNodes.add(s.toString))
+            res
 
           case Not(p)    => !evaluateFormula(config, p)
           case And(p, q) => evaluateFormula(config, p) && evaluateFormula(config, q)
@@ -208,14 +241,12 @@ object PdlEvaluator {
       })
     }
 
-
     def calculateProgProbability(startConfig: RxGraph, prog: PdlProgram, f: PdlFormula): Double = {
       val finalConfigs = evaluateProgramProb(Map(startConfig -> 1.0), prog)
       finalConfigs.filter { case (rx, _) => evaluateFormula(rx, f) }.values.sum
     }
 
     private def calculatePathProbability(startConfig: RxGraph, pathFormula: PathFormula): Double = {
-      
       val reachableStates = mutable.Set[RxGraph]()
       val queue = mutable.Queue[RxGraph](startConfig)
       
@@ -228,15 +259,37 @@ object PdlEvaluator {
       val allStates = reachableStates.toList
 
       pathFormula match {
-        
         case PathFormula.Next(f) =>
-          getTransitions(startConfig).map { case (edge, nextState) =>
+          var currentDist = Map(startConfig -> 1.0)
+          
+          def takeSnapshot(dist: Map[RxGraph, Double]): Map[String, Double] = {
+            val m = mutable.Map[String, Double]().withDefaultValue(0.0)
+            dist.foreach { case (cfg, p) => cfg.inits.foreach(init => m(init.toString) += p) }
+            m.toMap
+          }
+          valueIterationTrace += takeSnapshot(currentDist)
+
+          val nextDist = mutable.Map[RxGraph, Double]().withDefaultValue(0.0)
+          getTransitions(startConfig).foreach { case (edge, nextState) =>
             val p = startConfig.weights.getOrElse(edge, 1.0)
-            if (evaluateFormula(nextState, f)) p else 0.0
-          }.sum
+            nextDist(nextState) += p
+          }
+          
+          currentDist = nextDist.toMap
+          valueIterationTrace += takeSnapshot(currentDist)
+          
+          currentDist.filter { case (cfg, _) => evaluateFormula(cfg, f) }.values.sum
 
         case PathFormula.NextN(n, f) =>
           var currentDist = Map(startConfig -> 1.0)
+          
+          def takeSnapshot(dist: Map[RxGraph, Double]): Map[String, Double] = {
+            val m = mutable.Map[String, Double]().withDefaultValue(0.0)
+            dist.foreach { case (cfg, p) => cfg.inits.foreach(init => m(init.toString) += p) }
+            m.toMap
+          }
+          valueIterationTrace += takeSnapshot(currentDist)
+          
           for (_ <- 1 to n) {
             val nextDist = mutable.Map[RxGraph, Double]().withDefaultValue(0.0)
             for ((cfg, prob) <- currentDist) {
@@ -246,7 +299,9 @@ object PdlEvaluator {
               }
             }
             currentDist = nextDist.toMap
+            valueIterationTrace += takeSnapshot(currentDist)
           }
+          
           currentDist.filter { case (cfg, _) => evaluateFormula(cfg, f) }.values.sum
 
         case PathFormula.Future(f) =>
@@ -280,13 +335,11 @@ object PdlEvaluator {
 
     private def iterateValues(allStates: List[RxGraph], V: mutable.Map[RxGraph, Double], isFixed: RxGraph => Boolean): Unit = {
       val numStates = allStates.size
-      
       val stateToId = allStates.zipWithIndex.toMap
       val idToState = allStates.toArray
       
       val vArray = new Array[Double](numStates)
       val fixedArray = new Array[Boolean](numStates)
-      
       val transitionMatrix = new Array[Array[(Int, Double)]](numStates)
 
       for (i <- 0 until numStates) {
@@ -303,6 +356,20 @@ object PdlEvaluator {
           transitionMatrix(i) = Array.empty
         }
       }
+
+      def takeSnapshot(): Map[String, Double] = {
+        val m = mutable.Map[String, Double]()
+        for (i <- 0 until numStates) {
+          val s = idToState(i)
+          for (init <- s.inits) {
+            val str = init.toString
+            m(str) = Math.max(m.getOrElse(str, 0.0), vArray(i))
+          }
+        }
+        m.toMap
+      }
+
+      valueIterationTrace += takeSnapshot()
 
       var maxDiff = 1.0
       var iteration = 0
@@ -326,18 +393,19 @@ object PdlEvaluator {
             
             val diff = Math.abs(vArray(i) - sumProb)
             if (diff > maxDiff) maxDiff = diff
-            
             nextVArray(i) = sumProb
           }
           i += 1
         }
         
         System.arraycopy(nextVArray, 0, vArray, 0, numStates)
-        iteration += 1
-      }
+        
+        for (i <- 0 until numStates) {
+          V(idToState(i)) = vArray(i)
+        }
+        valueIterationTrace += takeSnapshot()
 
-      for (i <- 0 until numStates) {
-        V(idToState(i)) = vArray(i)
+        iteration += 1
       }
     }
 
@@ -398,6 +466,13 @@ object PdlEvaluator {
           if (evaluateFormula(config, formula)) Set(config) else Set.empty
       }
     }
+  }
+
+  def evaluateFormulaWithTrace(startState: QName, formula: PdlFormula, rx: RxGraph): (String, Set[String], Set[String], Set[String], Set[String], List[Map[String, Double]]) = {
+    val initialConfig = rx.copy(inits = Set(startState))
+    val session = new EvaluatorSession()
+    val resStr = session.evaluateRoot(initialConfig, formula)
+    (resStr, session.visitedNodes.toSet, session.visitedEdges.toSet, session.targetNodes.toSet, session.targetEdges.toSet, session.valueIterationTrace.toList)
   }
 
   def evaluateFormula(startState: QName, formula: PdlFormula, rx: RxGraph): String = {

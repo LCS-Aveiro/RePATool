@@ -159,7 +159,19 @@ function runPdl() {
     console.log("Fórmula Original:", visualFormula);
     console.log("Enviando ao Backend:", finalCode);
 
-    var res = RTA.runPdl(s, finalCode);
+    var rawRes = RTA.runPdl(s, finalCode);
+    var resObj;
+    var res = rawRes;
+    try {
+        resObj = JSON.parse(rawRes);
+        if (resObj.error) {
+             res = resObj.error;
+        } else {
+             res = resObj.result;
+             window.lastPdlTrace = resObj;
+        }
+    } catch(e) {}
+
     var resDiv = document.getElementById("pdlResult");
 
     if (res.includes("true") || res.includes("Result: true")) {
@@ -169,10 +181,30 @@ function runPdl() {
         resDiv.style.color = "red";
         resDiv.innerHTML = '<span class="glyphicon glyphicon-remove"></span> Falso';
     } else if (res.includes("Result:")) {
-        resDiv.style.color = "#0056b3"; // Azul Prism
+        resDiv.style.color = "#0056b3";
         resDiv.innerHTML = '<span class="glyphicon glyphicon-stats"></span> ' + res.replace("Result: ", "Probabilidade = ");
     } else {
         resDiv.style.color = "#991b1b";
         resDiv.innerText = res;
+    }
+}
+
+function animatePdl() {
+    var s = document.getElementById("pdlState").value;
+    if (!s && typeof currentCytoscapeInstance !== 'undefined' && currentCytoscapeInstance) {
+        var currentNodes = currentCytoscapeInstance.nodes('.current-state');
+        if (currentNodes.length > 0) s = currentNodes[0].data('label');
+    }
+
+    var visualFormula = document.getElementById("pdlFormula").value;
+    if (!visualFormula || visualFormula.trim() === "") {
+        alert("Escreva uma fórmula PDL para animar.");
+        return;
+    }
+
+    runPdl();
+    
+    if (typeof runGraphAnimationTrace === 'function' && window.lastPdlTrace) {
+        runGraphAnimationTrace(window.lastPdlTrace, s);
     }
 }

@@ -377,9 +377,14 @@
                     </div>
 
                     <input type="text" id="pdlFormula" class="form-control" placeholder="Formula (e.g. ⟨a⟩true)" data-i18n="pdl_placeholder" style="margin-bottom:6px;">
-                    <button class="u-btn success block" onclick="runPdl()" data-i18n="btn_verify">
-                        <span class="glyphicon glyphicon-ok"></span> Verify
-                    </button>
+                    <div style="display:flex; gap:6px;">
+                        <button class="u-btn success block" onclick="runPdl()" data-i18n="btn_verify" style="flex:2; margin:0;">
+                            <span class="glyphicon glyphicon-ok"></span> Verificar
+                        </button>
+                        <button class="u-btn info block" onclick="animatePdl()" style="flex:1; margin:0;">
+                            <span class="glyphicon glyphicon-eye-open"></span> Animar
+                        </button>
+                    </div>
                     <div id="pdlResult" style="margin-top:8px; font-size:12px; font-weight:bold;"></div>
                 </div>
 
@@ -436,10 +441,15 @@
                     <textarea id="pctlTextArea" class="form-control" rows="6" style="font-family:var(--font-mono); background:#1e1e1e; color:#d4d4d4; font-size:11px; margin-bottom:8px; resize:vertical; min-height:80px;"></textarea>
                     
                     <div style="display:flex; flex-direction:column; gap:6px;">
-                        <button class="u-btn success block" onclick="runPctl()">
-                            <span class="glyphicon glyphicon-play" style="margin-right:4px;"></span> Avaliar Interno
-                        </button>
-                        <button class="u-btn primary block" onclick="downloadPctl()" data-i18n="btn_download_pctl">
+                        <div style="display:flex; gap:6px;">
+                            <button class="u-btn success block" onclick="runPctl()" style="flex:2; margin:0;">
+                                <span class="glyphicon glyphicon-play" style="margin-right:4px;"></span> Avaliar
+                            </button>
+                            <button class="u-btn info block" onclick="animatePctl()" style="flex:1; margin:0;">
+                                <span class="glyphicon glyphicon-eye-open"></span> Animar
+                            </button>
+                        </div>
+                        <button class="u-btn primary block" onclick="downloadPctl()" data-i18n="btn_download_pctl" style="margin:0;">
                             <span class="glyphicon glyphicon-download-alt" style="margin-right:4px;"></span> Exportar PRISM
                         </button>
                     </div>
