@@ -5,10 +5,32 @@ import rta.syntax.{Condition, Statement, AssignStmt, ArrayAssignStmt, IfThenStmt
 
 object RTATranslator {
 
-  private case class Effect(effectType: String, targetId: QName, ruleId: QName, ruleLabel: QName, originalTrigger: QName)
+  private case class Effect(effectType: String, targetId: QName, ruleId: QName, ruleLabel: QName, originalTrigger: QName, ruleWeight: Double, aggType: String, wExpr: Option[UpdateExpr])
 
   private def isPhantomRule(trigger: QName, ruleLabel: QName): Boolean = {
     ruleLabel.n.nonEmpty && ruleLabel.n == trigger.n.init
+  }
+
+  private def generateWeightUpdate(effect: Effect, mutableLabels: Set[QName], stx: RxGraph): String = {
+    val wTargetVar = s"w_${sanitizeForVar(effect.targetId)}"
+    val triggerW = if (mutableLabels.contains(effect.originalTrigger)) {
+      s"w_${sanitizeForVar(effect.originalTrigger)}"
+    } else {
+      val tEdge = stx.lbls.get(effect.originalTrigger).flatMap(_.headOption)
+      val wExp = tEdge.flatMap(stx.weightExprs.get)
+      wExp.map(UpdateExpr.show).getOrElse {
+         val w = tEdge.map(e => stx.weights.getOrElse(e, 1.0)).getOrElse(1.0)
+         f"$w%.3f".replace(",", ".")
+      }
+    }
+    val ruleW = effect.wExpr.map(UpdateExpr.show).getOrElse(f"${effect.ruleWeight}%.3f".replace(",", "."))
+    
+    effect.aggType match {
+       case "prod" => s"($triggerW * $ruleW * $wTargetVar)"
+       case "max" => s"max_agg($triggerW, max_agg($ruleW, $wTargetVar))"
+       case "min" => s"min_agg($triggerW, min_agg($ruleW, $wTargetVar))"
+       case _ => s"($triggerW + $ruleW + $wTargetVar) / 3.0"
+    }
   }
 
   def translate_syntax(stx: RxGraph, inputScript: String): String = {
@@ -40,18 +62,40 @@ object RTATranslator {
       lineMap.toMap
     }
 
+    val allEffectsOverall = stx.lbls.keys.flatMap(l => findAllTriggeredEffects(l, stx)).toList
+    val mutableLabels = allEffectsOverall.map(_.targetId).toSet
+
+    builder.append("// --- Model Configurations ---\n")
+    originalLines.foreach { line =>
+      val trim = line.trim
+      if (trim.startsWith("name ") || trim.startsWith("calibration ") || trim.startsWith("training") || trim.startsWith("paradigm ")) {
+        builder.append(line).append("\n")
+      }
+    }
+
     val allEdgeIds = stx.lbls.keySet
-    builder.append("// Control variables for group activation (IDs)\n")
+    builder.append("\n// Control variables for group activation (IDs)\n")
     for (id <- allEdgeIds.toList.sortBy(_.toString) if id.n.nonEmpty && id.show != "-") {
       val isInitiallyActive = stx.lbls.get(id).exists(_.exists(stx.act.contains))
       builder.append(s"int ${sanitizeForVar(id)}_active = ${if (isInitiallyActive) 1 else 0}\n")
     }
 
-    builder.append("\n// Declarations\n")
+    if (mutableLabels.nonEmpty) {
+        builder.append("\n// Variables for dynamic weights\n")
+        for (lbl <- mutableLabels.toList.sortBy(_.toString)) {
+           val initW = stx.lbls.get(lbl).flatMap(_.headOption).map(e => stx.weights.getOrElse(e, 1.0)).getOrElse(1.0)
+           builder.append(s"float w_${sanitizeForVar(lbl)} = ${f"$initW%.3f".replace(",", ".")}\n")
+        }
+        builder.append("\n// Helper functions for aggregations\n")
+        builder.append("def max_agg(a, b) {\n    if (a >= b) then { return a }\n    return b\n}\n")
+        builder.append("def min_agg(a, b) {\n    if (a <= b) then { return a }\n    return b\n}\n")
+    }
+
+    builder.append("\n// --- Declarations ---\n")
     originalLines.foreach { line =>
       val trim = line.trim
-      if (trim.startsWith("int ") || trim.startsWith("init ")) {
-        if (!trim.contains("_active =")) builder.append(line).append("\n")
+      if (trim.startsWith("int ") || trim.startsWith("float ") || trim.startsWith("bool ") || trim.startsWith("dyn ") || trim.startsWith("init ")) {
+        if (!trim.contains("_active =") && !trim.startsWith("float w_")) builder.append(line).append("\n")
       }
     }
 
@@ -80,20 +124,33 @@ object RTATranslator {
         val updateVar = s"${sanitizeForVar(effect.targetId)}_active"
         val updateStatement = if (effect.effectType == "on") s"$updateVar' := 1" else s"$updateVar' := 0"
         
-        bodyBuilder.append(s"    // Rule from group ${effect.originalTrigger.show}\n")
+        val rWStr = effect.wExpr.map(UpdateExpr.show).getOrElse(f"${effect.ruleWeight}%.3f".replace(",", "."))
+        val rAggStr = if (effect.aggType != "arith" && effect.aggType.nonEmpty) s" ${effect.aggType}" else ""
+        bodyBuilder.append(s"    // Rule from group ${effect.originalTrigger.show} ($rWStr)$rAggStr\n")
 
         val guardParts = collection.mutable.ListBuffer[String]()
         if (effect.ruleLabel.n.nonEmpty && effect.ruleLabel.show != "-") guardParts += s"${sanitizeForVar(effect.ruleLabel)}_active == 1"
         conditionOpt.foreach(cond => guardParts += s"(${conditionToString(cond)})")
         
+        val weightUpd = s"w_${sanitizeForVar(effect.targetId)}' := ${generateWeightUpdate(effect, mutableLabels, stx)}"
+
         if (guardParts.isEmpty) {
           bodyBuilder.append(s"    $updateStatement\n")
+          bodyBuilder.append(s"    $weightUpd\n")
         } else {
-          bodyBuilder.append(s"    if (${guardParts.mkString(" AND ")}) then {\n        $updateStatement\n    }\n")
+          bodyBuilder.append(s"    if (${guardParts.mkString(" AND ")}) then {\n        $updateStatement\n        $weightUpd\n    }\n")
         }
       }
 
-      val edgeDefinition = s"${source.show} - ${transId.show} -> ${target.show} : ${label.show}"
+      val w = stx.weights.getOrElse(simpleEdge, 1.0)
+      val wExpr = stx.weightExprs.get(simpleEdge)
+      val wStr = if (mutableLabels.contains(label)) s"w_${sanitizeForVar(label)}" else wExpr.map(UpdateExpr.show).getOrElse(f"$w%.3f".replace(",", "."))
+      val agg = stx.edgeAggregations.getOrElse(simpleEdge, "arith")
+      val aggStr = if (agg != "arith" && agg.nonEmpty) s" $agg" else ""
+      
+      val edgeDefinition = if (transId.n.isEmpty || transId.show == "-") s"${source.show} ---> ${target.show} : ${label.show} ($wStr)$aggStr"
+                           else s"${source.show} - ${transId.show} -> ${target.show} : ${label.show} ($wStr)$aggStr"
+
       val mainGuard = if (transId.n.nonEmpty && transId.show != "-") s"if (${sanitizeForVar(transId)}_active == 1" else "if (true"
       val originalGuard = stx.edgeConditions.get(simpleEdge).flatten.map(c => " AND " + conditionToString(c)).getOrElse("")
       val fullGuardClause = mainGuard + originalGuard + ")"
@@ -111,15 +168,48 @@ object RTATranslator {
 
   private def translateModular(stx: RxGraph, inputScript: String): String = {
     val builder = new StringBuilder()
+    val originalLines = inputScript.split('\n')
     val allSimpleEdges: List[Edge] = stx.edg.flatMap { case (src, tgts) => tgts.map(t => (src, t._1, t._2, t._3)) }.toList
     
     val allHyperEdges = (stx.on.values.flatten ++ stx.off.values.flatten).toSet
     val activeIds = (allSimpleEdges.map(_._3) ++ allHyperEdges.map(_._1) ++ allHyperEdges.map(_._3)).filter(id => id.n.nonEmpty && id.show != "-")
 
-    builder.append("// Global control variables\n")
+    val allEffectsOverall = stx.lbls.keys.flatMap(l => findAllTriggeredEffects(l, stx)).toList
+    val mutableLabels = allEffectsOverall.map(_.targetId).toSet
+
+    builder.append("// --- Model Configurations ---\n")
+    originalLines.foreach { line =>
+      val trim = line.trim
+      if (trim.startsWith("name ") || trim.startsWith("calibration ") || trim.startsWith("training") || trim.startsWith("paradigm ")) {
+        builder.append(line).append("\n")
+      }
+    }
+
+    builder.append("\n// Global control variables\n")
     for (id <- activeIds.toList.sortBy(_.toString).distinct) {
       val isInitiallyActive = stx.lbls.get(id).exists(_.exists(stx.act.contains))
       builder.append(s"int ${sanitizeForVar(id)}_active = ${if (isInitiallyActive) 1 else 0}\n")
+    }
+
+    if (mutableLabels.nonEmpty) {
+        builder.append("\n// Variables for dynamic weights\n")
+        for (lbl <- mutableLabels.toList.sortBy(_.toString)) {
+           val initW = stx.lbls.get(lbl).flatMap(_.headOption).map(e => stx.weights.getOrElse(e, 1.0)).getOrElse(1.0)
+           builder.append(s"float w_${sanitizeForVar(lbl)} = ${f"$initW%.3f".replace(",", ".")}\n")
+        }
+        builder.append("\n// Helper functions for aggregations\n")
+        builder.append("def max_agg(a, b) {\n    if (a >= b) then { return a }\n    return b\n}\n")
+        builder.append("def min_agg(a, b) {\n    if (a <= b) then { return a }\n    return b\n}\n")
+    }
+
+    builder.append("\n// --- Global Declarations ---\n")
+    originalLines.foreach { line =>
+      val trim = line.trim
+      if (trim.startsWith("int ") || trim.startsWith("float ") || trim.startsWith("bool ") || trim.startsWith("dyn ")) {
+        if (!trim.contains("_active =") && !trim.startsWith("float w_")) {
+           builder.append(line).append("\n")
+        }
+      }
     }
 
     val edgesByAut = allSimpleEdges.groupBy(e => getScope(e._1).getOrElse(""))
@@ -130,14 +220,14 @@ object RTATranslator {
         builder.append(s"  init ${formatQName(unqualify(i))}\n\n")
       }
       for (edge <- edges.sortBy(e => (e._1.toString, e._2.toString, e._3.toString, e._4.toString))) {
-        builder.append(generateTransitionCode(edge, stx))
+        builder.append(generateTransitionCode(edge, stx, mutableLabels))
       }
       builder.append("}\n")
     }
     builder.toString()
   }
 
-  private def generateTransitionCode(edge: Edge, stx: RxGraph): String = {
+  private def generateTransitionCode(edge: Edge, stx: RxGraph, mutableLabels: Set[QName]): String = {
     val (source, target, transId, label) = edge
     val bodyBuilder = new StringBuilder()
     val baseIndent = "  "
@@ -149,7 +239,9 @@ object RTATranslator {
     val allEffects = findAllTriggeredEffects(label, stx)
     for (effect <- allEffects) {
       val updateStatement = if (effect.effectType == "on") s"${sanitizeForVar(effect.targetId)}_active' := 1" else s"${sanitizeForVar(effect.targetId)}_active' := 0"
-      bodyBuilder.append(s"$baseIndent    // Effect from label ${label.show}\n")
+      val rWStr = effect.wExpr.map(UpdateExpr.show).getOrElse(f"${effect.ruleWeight}%.3f".replace(",", "."))
+      val rAggStr = if (effect.aggType != "arith" && effect.aggType.nonEmpty) s" ${effect.aggType}" else ""
+      bodyBuilder.append(s"$baseIndent    // Effect from label ${label.show} ($rWStr)$rAggStr\n")
       val effectGuardParts = collection.mutable.ListBuffer[String]()
       
       val phantom = isPhantomRule(effect.originalTrigger, effect.ruleLabel)
@@ -158,13 +250,28 @@ object RTATranslator {
       
       stx.edgeConditions.get((effect.originalTrigger, effect.targetId, effect.ruleId, effect.ruleLabel)).flatten.foreach(cond => effectGuardParts += s"(${conditionToString(cond)})")
 
-      if (effectGuardParts.isEmpty) bodyBuilder.append(s"$baseIndent    $updateStatement\n")
-      else bodyBuilder.append(s"$baseIndent    if (${effectGuardParts.mkString(" AND ")}) then {\n$baseIndent        $updateStatement\n$baseIndent    }\n")
+      val weightUpd = s"w_${sanitizeForVar(effect.targetId)}' := ${generateWeightUpdate(effect, mutableLabels, stx)}"
+
+      if (effectGuardParts.isEmpty) {
+         bodyBuilder.append(s"$baseIndent    $updateStatement\n")
+         bodyBuilder.append(s"$baseIndent    $weightUpd\n")
+      } else {
+         bodyBuilder.append(s"$baseIndent    if (${effectGuardParts.mkString(" AND ")}) then {\n$baseIndent        $updateStatement\n$baseIndent        $weightUpd\n$baseIndent    }\n")
+      }
     }
     
+    val w = stx.weights.getOrElse(edge, 1.0)
+    val wExpr = stx.weightExprs.get(edge)
+    val wStr = if (mutableLabels.contains(label)) s"w_${sanitizeForVar(label)}" else wExpr.map(UpdateExpr.show).getOrElse(f"$w%.3f".replace(",", "."))
+    val agg = stx.edgeAggregations.getOrElse(edge, "arith")
+    val aggStr = if (agg != "arith" && agg.nonEmpty) s" $agg" else ""
+
     val uSrc = formatQName(unqualify(source)); val uDst = formatQName(unqualify(target))
     val uTid = formatQName(unqualify(transId)); val uLbl = formatQName(unqualify(label))
-    val edgeDef = s"$baseIndent$uSrc - $uTid -> $uDst : $uLbl"
+    
+    val edgeDef = if (transId.n.isEmpty || transId.show == "-") s"$baseIndent$uSrc ---> $uDst : $uLbl ($wStr)$aggStr"
+                  else s"$baseIndent$uSrc - $uTid -> $uDst : $uLbl ($wStr)$aggStr"
+
     val fullGuard = if (mainGuardParts.nonEmpty) s" if (${mainGuardParts.mkString(" AND ")})" else ""
     
     if (bodyBuilder.isEmpty) s"$edgeDef$fullGuard\n"
@@ -185,11 +292,19 @@ object RTATranslator {
       if (!visited.contains(curr)) {
         visited.add(curr)
         stx.on.getOrElse(curr, Set.empty).foreach { case (trgId, rid, rlbl) =>
-          effects += Effect("on", trgId, rid, rlbl, curr)
+          val edge = (curr, trgId, rid, rlbl)
+          val w = stx.weights.getOrElse(edge, 0.1)
+          val agg = stx.edgeAggregations.getOrElse(edge, "arith")
+          val expr = stx.weightExprs.get(edge)
+          effects += Effect("on", trgId, rid, rlbl, curr, w, agg, expr)
           if (rlbl.n.nonEmpty) queue.enqueue(rlbl)
         }
         stx.off.getOrElse(curr, Set.empty).foreach { case (trgId, rid, rlbl) =>
-          effects += Effect("off", trgId, rid, rlbl, curr)
+          val edge = (curr, trgId, rid, rlbl)
+          val w = stx.weights.getOrElse(edge, 0.1)
+          val agg = stx.edgeAggregations.getOrElse(edge, "arith")
+          val expr = stx.weightExprs.get(edge)
+          effects += Effect("off", trgId, rid, rlbl, curr, w, agg, expr)
           if (rlbl.n.nonEmpty) queue.enqueue(rlbl)
         }
       }
@@ -208,6 +323,6 @@ object RTATranslator {
     case ForeachStmt(iter, arr, body) => 
       s"foreach (${iter.show} in ${arr.show}) { ${body.map(statementToString).mkString("; ")} }"
     case ReturnStmt(expr) => s"return ${UpdateExpr.show(expr)}"
-    case PrintStmt(expr)  => s"$print(${UpdateExpr.show(expr)})"
+    case PrintStmt(expr)  => s"print(${UpdateExpr.show(expr)})"
   }
 }
