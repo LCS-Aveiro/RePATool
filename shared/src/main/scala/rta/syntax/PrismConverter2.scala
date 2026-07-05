@@ -1,12 +1,7 @@
-// Paste June 20, 2026 - 2:47PM
-
-// File: shared/src/main/scala/rta/backend/PrismConverter2.scala
-
 package rta.backend
 
 import rta.syntax.Program2.{QName, RxGraph, Edge}
-import rta.syntax.{Condition, UpdateExpr, UpdateStmt, IfThenStmt, Statement}
-
+import rta.syntax.{Condition, UpdateExpr, Statement, AssignStmt, ArrayAssignStmt, IfThenStmt, ForeachStmt, ReturnStmt}
 object PrismConverter2 {
   
   val SCALE = 10000
@@ -14,28 +9,28 @@ object PrismConverter2 {
   private def sanitize(n: String) = n.replaceAll("[^a-zA-Z0-9_]", "_")
 
   private def conditionToPrism(c: Condition): String = c match {
-    case Condition.AtomicCond(left, op, Right(q)) => s"${sanitize(left.show)}${if(op=="==")"=" else op}${sanitize(q.show)}"
-    case Condition.AtomicCond(left, op, Left(d))  => s"${sanitize(left.show)}${if(op=="==")"=" else op}${if(d == d.toLong) d.toLong.toString else d.toString}"
+    case Condition.AtomicCond(left, op, right) => s"${updateExprToString(left)}${if(op=="==")"=" else op}${updateExprToString(right)}"
     case Condition.WeightCheck(lbl, metric, op, v) => "false" 
     case Condition.And(c1, c2) => s"(${conditionToPrism(c1)} & ${conditionToPrism(c2)})"
     case Condition.Or(c1, c2)  => s"(${conditionToPrism(c1)} | ${conditionToPrism(c2)})"
   }
 
   private def updateExprToString(e: UpdateExpr): String = e match {
-    case UpdateExpr.Lit(i) => i.toString
+    case UpdateExpr.LitInt(i) => i.toString
+    case UpdateExpr.LitFloat(f) => if(f == f.toLong) f.toLong.toString else f.toString
+    case UpdateExpr.LitBool(b) => if (b) "true" else "false"
     case UpdateExpr.Var(q) => sanitize(q.show)
-    case UpdateExpr.Add(v, Right(q)) => s"${sanitize(v.show)} + ${sanitize(q.show)}"
-    case UpdateExpr.Add(v, Left(i))  => s"${sanitize(v.show)} + $i"
-    case UpdateExpr.Sub(v, Right(q)) => s"${sanitize(v.show)} - ${sanitize(q.show)}"
-    case UpdateExpr.Sub(v, Left(i))  => s"${sanitize(v.show)} - $i"
+    case UpdateExpr.MathOp(l, op, r) => s"(${updateExprToString(l)} $op ${updateExprToString(r)})"
+    case _ => "0" 
   }
 
   private def getVariableUpdates(stmts: List[Statement], ctxCond: Option[Condition] = None): List[(QName, String, Option[Condition])] = {
     stmts.flatMap {
-      case UpdateStmt(upd) => List((upd.variable, updateExprToString(upd.expr), ctxCond))
+      case AssignStmt(variable, expr) => List((variable, updateExprToString(expr), ctxCond))
       case IfThenStmt(c, ts) =>
         val newCond = ctxCond.map(ctx => Condition.And(ctx, c)).getOrElse(c)
         getVariableUpdates(ts, Some(newCond))
+      case _ => Nil 
     }
   }
 

@@ -16,4 +16,4 @@ from .client import ReForma
 from .model import ReFormaModel, Transition, SimulationState
 
 __all__ = ["ReForma", "ReFormaModel", "Transition", "SimulationState"]
-__version__ = "0.1.0"
+__version__ = "0.2.0"

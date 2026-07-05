@@ -159,7 +159,13 @@ function runPdl() {
     console.log("Fórmula Original:", visualFormula);
     console.log("Enviando ao Backend:", finalCode);
 
-    var rawRes = RTA.runPdl(s, finalCode);
+    var rawRes = RTA.runPdl(
+        s, 
+        finalCode, 
+        window.appSettings.maxStates, 
+        window.appSettings.maxIter, 
+        window.appSettings.epsilon
+    );
     var resObj;
     var res = rawRes;
     try {
@@ -178,8 +184,24 @@ function runPdl() {
         resDiv.style.color = "green";
         resDiv.innerHTML = '<span class="glyphicon glyphicon-ok"></span> Verdadeiro';
     } else if (res.includes("false") || res.includes("Result: false")) {
-        resDiv.style.color = "red";
-        resDiv.innerHTML = '<span class="glyphicon glyphicon-remove"></span> Falso';
+            resDiv.style.color = ""; 
+            
+            if (resObj && resObj.counterexample && resObj.counterexample.length > 0) {
+                window.lastCounterexample = resObj.counterexample;
+                
+                resDiv.innerHTML = 
+                    '<div style="color: #DC2626; font-size: 13px; font-weight: bold; margin-bottom: 4px;">' +
+                        '<span class="glyphicon glyphicon-remove"></span> Falso' +
+                    '</div>' +
+                    '<div style="display: flex; align-items: center; justify-content: space-between; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 3px; padding: 4px 8px;">' +
+                        '<span style="font-size: 11px; color: #991B1B; font-weight: normal;">Falha em <b>' + resObj.counterexample.length + '</b> passos</span>' +
+                        '<button class="u-btn warn" onclick="playCounterexample()" style="margin: 0; padding: 2px 8px; font-size: 11px; display: flex; align-items: center;">' +
+                            '<span class="glyphicon glyphicon-play" style="font-size: 10px; margin-right: 4px;"></span> Animar' +
+                        '</button>' +
+                    '</div>';
+            } else {
+                resDiv.innerHTML = '<div style="color: #DC2626; font-size: 13px; font-weight: bold;"><span class="glyphicon glyphicon-remove"></span> Falso</div>';
+            }
     } else if (res.includes("Result:")) {
         resDiv.style.color = "#0056b3";
         resDiv.innerHTML = '<span class="glyphicon glyphicon-stats"></span> ' + res.replace("Result: ", "Probabilidade = ");

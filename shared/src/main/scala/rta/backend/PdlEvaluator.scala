@@ -7,22 +7,21 @@ import rta.syntax.Formula.*
 import rta.syntax.PdlProgram
 import rta.syntax.PathFormula
 import rta.syntax.PdlProgram.*
+import rta.syntax.RuntimeValue
 
 import scala.annotation.tailrec
 import scala.collection.mutable
 
 object PdlEvaluator {
-  private val epsilon = 0.00001
-  private val maxIterations = 1000 
 
   case class StateSignature(
     inits: Set[QName], 
-    vars: Map[QName, Int], 
+    vars: Map[QName, RuntimeValue], 
     activeEdges: Set[Edge], 
     weights: Map[Edge, Double]
   )
 
-  class EvaluatorSession() {
+  class EvaluatorSession(maxStates: Int = 1000, maxIter: Int = 1000, eps: Double = 0.00001) {
     private val transCache = mutable.Map[RxGraph, Set[(Edge, RxGraph)]]()
     private val formulaCache = mutable.Map[(RxGraph, PdlFormula), Boolean]()
     private val programCache = mutable.Map[(RxGraph, PdlProgram), Set[RxGraph]]()
@@ -203,7 +202,7 @@ object PdlEvaluator {
             if (res) config.inits.foreach(s => targetNodes.add(s.toString))
             res
           case CondProp(cond)  => 
-            val res = Condition.evaluate(cond, config)
+            val res = RxSemantics.evalCondition(cond, config)
             if (res) config.inits.foreach(s => targetNodes.add(s.toString))
             res
 
@@ -250,7 +249,7 @@ object PdlEvaluator {
       val reachableStates = mutable.Set[RxGraph]()
       val queue = mutable.Queue[RxGraph](startConfig)
       
-      while (queue.nonEmpty) {
+      while (queue.nonEmpty && reachableStates.size < maxStates) {
         val curr = queue.dequeue()
         if (reachableStates.add(curr)) {
           getTransitions(curr).foreach { case (_, next) => queue.enqueue(next) }
@@ -375,7 +374,7 @@ object PdlEvaluator {
       var iteration = 0
       val nextVArray = new Array[Double](numStates)
 
-      while (maxDiff > epsilon && iteration < maxIterations) {
+      while (maxDiff > eps && iteration < maxIter) {
         maxDiff = 0.0
         
         var i = 0
@@ -444,12 +443,12 @@ object PdlEvaluator {
     }
 
     private def compare(v1: Double, op: String, v2: Double): Boolean = op match {
-      case ">=" => v1 >= v2 - epsilon
-      case "<=" => v1 <= v2 + epsilon
-      case ">"  => v1 > v2 + epsilon
-      case "<"  => v1 < v2 - epsilon
-      case "==" | "=" => Math.abs(v1 - v2) < epsilon
-      case "!=" => Math.abs(v1 - v2) >= epsilon
+      case ">=" => v1 >= v2 - eps
+      case "<=" => v1 <= v2 + eps
+      case ">"  => v1 > v2 + eps
+      case "<"  => v1 < v2 - eps
+      case "==" | "=" => Math.abs(v1 - v2) < eps
+      case "!=" => Math.abs(v1 - v2) >= eps
       case _    => false
     }
 
@@ -466,13 +465,61 @@ object PdlEvaluator {
           if (evaluateFormula(config, formula)) Set(config) else Set.empty
       }
     }
+
+
+    def getViolationCondition(formula: PdlFormula): Option[PdlFormula] = formula match {
+      case Box(p) => Some(Not(p))
+      case BoxP(_, p) => Some(Not(p))
+      case PQualitative(op, limit, PathFormula.Globally(p)) if (op == ">=" || op == "==") && limit > 0 => Some(Not(p))
+      case Not(Diamond(p)) => Some(p)
+      case Not(DiamondP(_, p)) => Some(p)
+      case Impl(p, q) => Some(And(p, Not(q)))
+      case _ => None
+    }
+
+    def findShortestPath(startConfig: RxGraph, targetFormula: PdlFormula): List[Edge] = {
+      val queue = mutable.Queue[(RxGraph, List[Edge])]()
+      val visited = mutable.Set[RxGraph]()
+      
+      queue.enqueue((startConfig, Nil))
+      visited.add(startConfig)
+
+      while (queue.nonEmpty) {
+        val (curr, path) = queue.dequeue()
+        
+        if (evaluateFormula(curr, targetFormula)) {
+          return path.reverse
+        }
+        
+        getTransitions(curr).foreach { case (edge, nextState) =>
+          if (visited.add(nextState)) {
+            queue.enqueue((nextState, edge :: path))
+          }
+        }
+      }
+      Nil
+    }
   }
 
-  def evaluateFormulaWithTrace(startState: QName, formula: PdlFormula, rx: RxGraph): (String, Set[String], Set[String], Set[String], Set[String], List[Map[String, Double]]) = {
+  def evaluateFormulaWithTrace(startState: QName, formula: PdlFormula, rx: RxGraph, 
+                               maxStates: Int, maxIter: Int, eps: Double): 
+    (String, Set[String], Set[String], Set[String], Set[String], List[Map[String, Double]], List[String]) = {
+    
     val initialConfig = rx.copy(inits = Set(startState))
-    val session = new EvaluatorSession()
+    val session = new EvaluatorSession(maxStates, maxIter, eps)
     val resStr = session.evaluateRoot(initialConfig, formula)
-    (resStr, session.visitedNodes.toSet, session.visitedEdges.toSet, session.targetNodes.toSet, session.targetEdges.toSet, session.valueIterationTrace.toList)
+    
+    var counterexampleEdges = List[String]()
+    if (resStr.contains("false") || resStr.contains("Result: 0.000")) {
+      session.getViolationCondition(formula).foreach { violCond =>
+        val path = session.findShortestPath(initialConfig, violCond)
+        counterexampleEdges = path.map(e => s"event_${e._1}_${e._2}_${e._3}_${e._4}")
+      }
+    }
+
+    (resStr, session.visitedNodes.toSet, session.visitedEdges.toSet, 
+     session.targetNodes.toSet, session.targetEdges.toSet, 
+     session.valueIterationTrace.toList, counterexampleEdges)
   }
 
   def evaluateFormula(startState: QName, formula: PdlFormula, rx: RxGraph): String = {

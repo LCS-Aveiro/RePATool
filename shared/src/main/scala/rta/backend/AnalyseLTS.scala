@@ -116,7 +116,7 @@ object AnalyseLTS:
     rx => rx.inits.exists(_.show == name)
 
   def goalVariable(varName: String, value: Int): RxGraph => Boolean = 
-    rx => rx.val_env.get(QName(List(varName))).contains(value)
+    rx => rx.val_env.get(QName(List(varName))).exists(rv => Condition.extractDouble(rv) == value.toDouble)
 
   def goalCondition(cond: Condition): RxGraph => Boolean =
-    rx => Condition.evaluate(cond, rx)
+    rx => RxSemantics.evalCondition(cond, rx)

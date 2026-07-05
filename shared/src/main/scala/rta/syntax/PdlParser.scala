@@ -208,7 +208,11 @@ object PdlParser {
     val validOps = Set("==", "!=", "<=", ">=", "<", ">", "=")
     if (!validOps.contains(op)) throw new RuntimeException(s"Operador inválido: $op")
     val rhsToken = reader.consume()
-    val rhs = if (rhsToken.matches("-?\\d+(\\.\\d+)?")) Left(rhsToken.toDouble) else Right(parseQName(reader))
-    Condition.AtomicCond(lhs, op, rhs)
+    val rightExpr = if (rhsToken.matches("-?\\d+(\\.\\d+)?")) 
+      UpdateExpr.LitFloat(rhsToken.toDouble) 
+    else 
+      UpdateExpr.Var(parseQName(reader))
+    
+    Condition.AtomicCond(UpdateExpr.Var(lhs), op, rightExpr)
   }
 }

@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReLang Reference — RePA Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red:        #c08429;
+    --red-dark:   #966b1b;
+    --red-light:  #fdf6ea;
+    --black:      #1a1a1a;
+    --gray-900:   #2d2d2d;
+    --gray-700:   #4b5563;
+    --gray-500:   #6b7280;
+    --gray-300:   #d1d5db;
+    --gray-200:   #e5e7eb;
+    --gray-100:   #f3f4f6;
+    --gray-50:    #f9fafb;
+    --white:      #ffffff;
+    --border:     #dde1e7;
+
+    --font-ui:    'IBM Plex Sans', system-ui, sans-serif;
+    --font-mono:  'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100vh; 
+    width: 100vw;
+    overflow: hidden;
+    background: #dde1e7;
+    color: var(--black);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gray-500); }
+
+  /* ── NAV ── */
+  nav {
+    height: 34px;
+    background: #f0f0f0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    flex-shrink: 0;
+    user-select: none;
+    z-index: 1000;
+  }
+  .nav-brand {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--black);
+    text-decoration: none;
+    letter-spacing: 0.3px;
+  }
+  .nav-brand span { color: var(--red); }
+  
+  .nav-links {
+    display: flex;
+    list-style: none;
+    height: 100%;
+  }
+  .nav-links li {
+    display: flex;
+    align-items: center;
+  }
+  .nav-links a {
+    padding: 0 12px;
+    font-size: 12px;
+    color: var(--gray-900);
+    text-decoration: none;
+    font-weight: 500;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border-right: 1px solid transparent;
+    border-left: 1px solid transparent;
+  }
+  .nav-links a:hover { 
+    background: var(--red); 
+    color: var(--white); 
+  }
+
+  /* ── LAYOUT ── */
+  .wrapper {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    gap: 2px;
+    padding: 2px;
+    background: #dde1e7;
+    min-height: 0;
+  }
+
+  /* ── SIDEBAR ── */
+  aside {
+    width: 220px;
+    min-width: 200px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+
+  .side-section {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 8px;
+  }
+  .side-label {
+    height: 26px;
+    background: #e8e8e8;
+    border-bottom: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-700);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    margin-bottom: 4px;
+    margin-top: -1px;
+  }
+  .side-link {
+    display: flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 10px 0 16px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--black);
+    text-decoration: none;
+    white-space: nowrap;
+    border-left: 3px solid transparent;
+  }
+  .side-link:hover { 
+    background: #e8f0fe; 
+  }
+  .side-link.active {
+    background: var(--red-light);
+    color: var(--red);
+    border-left-color: var(--red);
+    font-weight: 600;
+  }
+
+  /* ── MAIN ── */
+  main {
+    flex: 1;
+    background: var(--white);
+    border: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 40px 60px;
+    position: relative;
+    scroll-behavior: smooth;
+  }
+  .doc-container {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray-500);
+    margin-bottom: 8px;
+  }
+  .hero h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: 12px;
+    line-height: 1.2;
+    letter-spacing: -0.5px;
+  }
+  .hero h1 span { color: var(--red); }
+  .hero-sub {
+    font-size: 14px;
+    color: var(--gray-700);
+    max-width: 600px;
+    line-height: 1.6;
+  }
+
+  /* ── SECTIONS ── */
+  .doc-section {
+    margin-bottom: 60px;
+    scroll-margin-top: 30px;
+  }
+  .section-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--red);
+    margin-bottom: 6px;
+  }
+  .doc-section > h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: 16px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--red);
+    display: inline-block;
+  }
+  .doc-section > h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--black);
+    margin: 30px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .doc-section p {
+    color: var(--black);
+    margin-bottom: 16px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .doc-section ul {
+    color: var(--black);
+    padding-left: 20px;
+    margin-bottom: 16px;
+  }
+  .doc-section li { margin-bottom: 6px; }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    margin: 16px 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .code-header {
+    height: 26px;
+    background: #e8e8e8;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gray-700);
+    font-family: var(--font-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    justify-content: space-between;
+  }
+  .code-header .dots { display: none; } /* Hidden for IDE aesthetic */
+  .code-body {
+    padding: 12px;
+    overflow-x: auto;
+    background: var(--gray-50);
+  }
+  .code-body pre { 
+    margin: 0; 
+    font-family: var(--font-mono); 
+    font-size: 12px; 
+    line-height: 1.6; 
+  }
+
+  /* syntax colours mapped to CodeMirror IDE light theme */
+  .kw  { color: var(--red); font-weight: 600; }    /* keyword */
+  .st  { color: #7c3aed; font-weight: 600; }       /* state / atom */
+  .ac  { color: #1d4ed8; font-weight: 600; }       /* action/label */
+  .ar  { color: var(--gray-700); font-weight: 600;}/* arrow */
+  .nu  { color: #b45309; }                         /* number */
+  .cm  { color: #16a34a; font-style: italic; }     /* comment */
+  .op  { color: var(--gray-700); font-weight: 600;}/* operator */
+  .va  { color: #1e3a5f; }                         /* variable */
+  .rl  { color: #991b1b; font-weight: 600; }       /* rule */
+  .pdl { color: #065f46; font-weight: 600; }       /* pdl formula */
+
+  /* ── CARDS ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .card {
+    background: var(--gray-50);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 16px;
+    transition: all 0.1s;
+  }
+  .card:hover { 
+    border-color: var(--red);
+    background: var(--white);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  .card-icon { font-size: 18px; margin-bottom: 10px; }
+  .card h4 { font-size: 13px; font-weight: 600; color: var(--black); margin-bottom: 6px; }
+  .card p  { font-size: 12px; color: var(--gray-700); margin: 0; line-height: 1.5; }
+
+  /* ── TABLES ── */
+  .ref-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 12px;
+    border: 1px solid var(--border);
+  }
+  .ref-table th {
+    background: var(--gray-50);
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .ref-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--black);
+  }
+  .ref-table tr:hover td { background: var(--gray-50); }
+  .ref-table td:first-child { font-family: var(--font-mono); color: var(--red-dark); font-weight: 600; }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    padding: 12px 14px;
+    margin: 16px 0;
+    font-size: 12px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    border-left: 3px solid;
+    line-height: 1.5;
+  }
+  .callout-info  { background: #eff6ff; border-left-color: #1d4ed8; color: #1e3a8a; }
+  .callout-tip   { background: #f0fdf4; border-left-color: #16a34a; color: #14532d; }
+  .callout-warn  { background: var(--red-light); border-left-color: var(--red); color: var(--red-dark); }
+  .callout strong { 
+    font-weight: 700; 
+    color: inherit; 
+    display: block; 
+    margin-bottom: 4px; 
+    text-transform: uppercase; 
+    font-size: 10px; 
+    letter-spacing: 0.5px; 
+  }
+
+  /* ── INLINE CODE ── */
+  code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--gray-50);
+    color: var(--red-dark);
+    padding: 2px 5px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    font-weight: 500;
+  }
+
+  /* ── FORMULA BOX (Based on #analysisResult) ── */
+  .formula-box {
+    background: var(--gray-50);
+    color: var(--black);
+    padding: 12px 16px;
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    margin: 16px 0;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red);
+    line-height: 1.6;
+  }
+
+  /* ── BADGE (Based on .tv-tag) ── */
+  .badge {
+    display: inline-block;
+    padding: 1px 7px;
+    margin: 0 4px;
+    border-radius: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    border: 1px solid transparent;
+    vertical-align: middle;
+    text-transform: uppercase;
+  }
+  .badge-new  { background: #d1fae5; color: #065f46; border-color: #6ee7b7; }
+  .badge-adv  { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+  .badge-prob { background: var(--red-light); color: var(--red-dark); border-color: var(--red); }
+
+  /* ── EXAMPLE TABS (Based on #canvas-tabs) ── */
+  .tab-group { 
+    border: 1px solid var(--border); 
+    border-radius: 2px; 
+    margin: 20px 0; 
+    background: var(--white);
+  }
+  .tab-bar { 
+    height: 26px; 
+    background: #e8e8e8; 
+    border-bottom: 1px solid var(--border); 
+    display: flex; 
+  }
+  .tab-btn {
+    padding: 0 14px;
+    font-size: 11px;
+    color: var(--gray-700);
+    cursor: pointer;
+    border: none;
+    border-right: 1px solid var(--border);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: var(--font-ui);
+    background: transparent;
+    border-bottom: 2px solid transparent;
+    outline: none;
+    margin-bottom: -1px;
+    display: flex;
+    align-items: center;
+  }
+  .tab-btn:hover { background: #ddd; }
+  .tab-btn.active {
+    background: var(--white);
+    color: var(--red);
+    border-bottom: 2px solid var(--red);
+  }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+  .tab-pane .code-block { border: none; margin: 0; border-radius: 0; }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 30px;
+    color: var(--gray-500);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+  footer a { color: var(--red); text-decoration: none; font-weight: 600; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .wrapper { flex-direction: column; overflow: auto; }
+    aside { display: none; }
+    main { padding: 20px; overflow: visible; border: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#">Re<span>PA</span> Tool</a>
+  <ul class="nav-links">
+    <li><a href="#basics">Basics</a></li>
+    <li><a href="#edges">Edges</a></li>
+    <li><a href="#rules">Rules</a></li>
+    <li><a href="#variables">Variables</a></li>
+    <li><a href="#pdl">PDL</a></li>
+    <li><a href="#pctl">PCTL</a></li>
+    <li><a href="#training">Training</a></li>
+    <li><a href="#examples">Examples</a></li>
+  </ul>
+</nav>
+
+<div class="wrapper">
+
+  <!-- ── SIDEBAR ── -->
+  <aside>
+    <div class="side-section">
+      <div class="side-label">Getting Started</div>
+      <a class="side-link" href="#basics">What is ReLang?</a>
+      <a class="side-link" href="#structure">File Structure</a>
+      <a class="side-link" href="#global">Global Settings</a>
+    </div>
+    <div class="side-section">
+      <div class="side-label">Language Reference</div>
+      <a class="side-link" href="#edges">Transitions & Edges</a>
+      <a class="side-link" href="#weights">Weights</a>
+      <a class="side-link" href="#agg">Aggregation Types</a>
+      <a class="side-link" href="#rules">Hyper-Edges (Rules)</a>
+      <a class="side-link" href="#variables">Variables & Types</a>
+      <a class="side-link" href="#conditions">Conditions</a>
+      <a class="side-link" href="#updates">Updates (Actions)</a>
+      <a class="side-link" href="#functions">Functions</a>
+      <a class="side-link" href="#modules">Modules (aut)</a>
+      <a class="side-link" href="#arrays">Arrays</a>
+    </div>
+    <div class="side-section">
+      <div class="side-label">Verification</div>
+      <a class="side-link" href="#pdl">PDL Logic</a>
+      <a class="side-link" href="#pctl">PCTL / PRISM</a>
+      <a class="side-link" href="#path">Path Optimizer</a>
+    </div>
+    <div class="side-section">
+      <div class="side-label">Training</div>
+      <a class="side-link" href="#training">Statistical Training</a>
+      <a class="side-link" href="#calibration">Calibration Modes</a>
+    </div>
+    <div class="side-section">
+      <div class="side-label">Full Examples</div>
+      <a class="side-link" href="#examples">Complete Models</a>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main>
+    <div class="doc-container">
+
+      <!-- HERO -->
+      <div class="hero">
+        <div class="hero-eyebrow">RePA Tool — Language Reference</div>
+        <h1>The <span>ReLang</span> Handbook</h1>
+        <p class="hero-sub">Everything you need to model, simulate, verify and train Reconfigurable Probabilistic Automata. From your first state to advanced PDL formulae.</p>
+      </div>
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- 1. BASICS -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="basics">
+        <div class="section-eyebrow">Section 01</div>
+        <h2>What is ReLang?</h2>
+        <p>ReLang is the modelling language of the RePA Tool. It lets you describe a probabilistic system as a set of <strong>states</strong> connected by <strong>transitions</strong>, each carrying a probability weight. On top of that you can add <strong>hyper-edges</strong> (rules) that dynamically change those weights at runtime — making the system <em>reconfigurable</em>.</p>
+
+        <div class="card-grid">
+          <div class="card">
+            <div class="card-icon">🎲</div>
+            <h4>Probabilistic</h4>
+            <p>Every outgoing transition from a state carries a weight. Together they sum to 1.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">⚡</div>
+            <h4>Reconfigurable</h4>
+            <p>Hyper-edges allow transitions to activate, deactivate, or modify each other's weights live.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">🔒</div>
+            <h4>Guarded</h4>
+            <p>Any edge can carry an <code>if (condition)</code> guard evaluated at runtime.</p>
+          </div>
+          <div class="card">
+            <div class="card-icon">📐</div>
+            <h4>Verifiable</h4>
+            <p>Full PDL and probabilistic PCTL verification built in, with animation playback.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- 2. STRUCTURE -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="structure">
+        <div class="section-eyebrow">Section 02</div>
+        <h2>File Structure</h2>
+        <p>A <code>.Re</code> / <code>.rta</code> file is plain text. The order of declarations is flexible — but the recommended layout is shown below.</p>
+
+        <div class="code-block">
+          <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>my-model.Re</span></div>
+          <div class="code-body"><pre><span class="cm">// 1. Optional model name (stripped by the engine)</span>
+<span class="kw">name</span> MyModel
+
+<span class="cm">// 2. Global settings</span>
+<span class="kw">paradigm</span>    probabilistic
+<span class="kw">calibration</span> normalize
+<span class="kw">training</span>    laplace
+
+<span class="cm">// 3. Variable declarations</span>
+<span class="kw">int</span>   <span class="va">counter</span> = <span class="nu">0</span>
+<span class="kw">float</span> <span class="va">rate</span>    = <span class="nu">0.5</span>
+<span class="kw">bool</span>  <span class="va">flag</span>    = <span class="nu">false</span>
+
+<span class="cm">// 4. Initial state</span>
+<span class="kw">init</span> <span class="st">start</span>
+
+<span class="cm">// 5. Transitions</span>
+<span class="st">start</span> <span class="ar">---></span> <span class="st">end</span> : <span class="ac">doIt</span> (<span class="nu">1.0</span>)
+
+<span class="cm">// 6. Hyper-edges (rules)</span>
+<span class="ac">doIt</span> <span class="ar">->></span> <span class="ac">doIt</span> : <span class="rl">selfBuff</span> (<span class="nu">0.8</span>)</pre></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- 3. GLOBAL SETTINGS -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="global">
+        <div class="section-eyebrow">Section 03</div>
+        <h2>Global Settings</h2>
+
+        <h3>paradigm</h3>
+        <p>Controls how weights are interpreted.</p>
+        <table class="ref-table">
+          <tr><th>Value</th><th>Description</th></tr>
+          <tr><td>probabilistic</td><td>Weights are probabilities; outgoing edges from a state must sum to 1 (default).</td></tr>
+          <tr><td>fuzzy</td><td>Weights are membership degrees [0,1]; no normalisation enforced. Rule effects use min/max logic.</td></tr>
+        </table>
+
+        <h3>calibration</h3>
+        <p>How remaining probability is redistributed when a rule changes a weight.</p>
+        <table class="ref-table">
+          <tr><th>Value</th><th>Behaviour</th></tr>
+          <tr><td>normalize</td><td>All other active edges are scaled proportionally so the total remains 1 (default).</td></tr>
+          <tr><td>proportional</td><td>The remainder is shared in proportion to the unmodified edges' original weights.</td></tr>
+          <tr><td>equal</td><td>The remainder is shared equally across unmodified edges.</td></tr>
+        </table>
+
+        <h3>training</h3>
+        <p>Activates statistical learning from event sequences.</p>
+
+        <div class="code-block">
+          <div class="code-body"><pre><span class="kw">training</span>                         <span class="cm">// Laplace smoothing (default)</span>
+<span class="kw">training</span> laplace                 <span class="cm">// Explicit Laplace</span>
+<span class="kw">training</span> aggregation arith (<span class="nu">0.9</span>) <span class="cm">// Aggregation with lambda</span></pre></div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- 4. EDGES -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="edges">
+        <div class="section-eyebrow">Section 04</div>
+        <h2>Transitions &amp; Edges</h2>
+        <p>A transition moves the system from one state to another when fired. The canonical syntax is:</p>
+
+        <div class="formula-box">
+          <span class="st">SOURCE</span>  <span class="ar">---></span>  <span class="st">TARGET</span>  :  <span class="ac">label</span>  (<span class="nu">weight</span>)  [<span class="op">aggregation</span>]  [<span class="kw">disabled</span>]  [<span class="kw">if</span> (<span class="op">condition</span>)]  [<span class="kw">then</span> { <span class="va">updates</span> }]
+        </div>
+
+        <h3>Arrow styles</h3>
+        <table class="ref-table">
+          <tr><th>Arrow</th><th>Meaning</th></tr>
+          <tr><td>---></td><td>Standard transition (shorthand, auto-ID = label)</td></tr>
+          <tr><td>-transId-></td><td>Transition with an explicit transId distinct from the label</td></tr>
+          <tr><td>-transId-></td><td>Same as above with named identifier for referencing</td></tr>
+        </table>
+
+        <div class="callout callout-info">
+          <strong>transId vs label</strong>
+          When you write <code>s0 -step-> s1 : myLabel</code>, the edge has <em>transId = step</em> and <em>label = myLabel</em>. Using <code>---></code> makes both equal. The label is what rules target; the transId is used for Cytoscape IDs.
+        </div>
+
+        <h3>Basic examples</h3>
+        <div class="code-block">
+          <div class="code-body"><pre><span class="cm">// Minimal: no weight → defaults to 1.0, then normalised</span>
+<span class="st">s0</span> <span class="ar">---></span> <span class="st">s1</span> : <span class="ac">go</span>
+
+<span class="cm">// Explicit weight</span>
+<span class="st">s0</span> <span class="ar">---></span> <span class="st">s1</span> : <span class="ac">go</span>   (<span class="nu">0.7</span>)
+<span class="st">s0</span> <span class="ar">---></span> <span class="st">s2</span> : <span class="ac">stay</span> (<span class="nu">0.3</span>)
+
+<span class="cm">// With named transId</span>
+<span class="st">s0</span> -<span class="ac">t1</span>-> <span class="st">s1</span> : <span class="ac">myAction</span> (<span class="nu">0.5</span>)
+
+<span class="cm">// Starts disabled (inactive until a rule enables it)</span>
+<span class="st">s0</span> <span class="ar">---></span> <span class="st">s1</span> : <span class="ac">secret</span> (<span class="nu">0.5</span>) <span class="kw">disabled</span>
+
+<span class="cm">// Self-loop</span>
+<span class="st">s0</span> <span class="ar">---></span> <span class="st">s0</span> : <span class="ac">idle</span> (<span class="nu">1.0</span>)</pre></div>
+        </div>
+
+        <h3 id="weights">Weights</h3>
+        <p>Weights are floating-point values in <code>[0.0, 1.0]</code>. The engine automatically normalises outgoing active edges from a state at load time so they sum to 1. If you provide unnormalised values (e.g. all edges with weight 1.0), the engine will divide them evenly.</p>
+
+        <div class="callout callout-tip">
+          <strong>Tip — ratios</strong>
+          You can write weights as ratios and let the engine normalise. Three edges with (1.0, 1.0, 2.0) will become (0.25, 0.25, 0.50).
+        </div>
+
+        <h3 id="agg">Aggregation types</h3>
+        <p>Used when a hyper-edge modifies a weight. The aggregation determines <em>how</em> the new weight is computed from the trigger weight <code>wS</code>, the rule weight <code>wR</code>, and the target's current weight <code>wT</code>.</p>
+
+        <table class="ref-table">
+          <tr><th>Keyword</th><th>Formula</th><th>Effect</th></tr>
+          <tr><td>arith</td><td>(wS + wR + wT) / 3</td><td>Average — gentle (default)</td></tr>
+          <tr><td>prod</td><td>wS × wR × wT</td><td>Product — strong suppression</td></tr>
+          <tr><td>max</td><td>max(wS, wR, wT)</td><td>Takes the maximum — buff-dominant</td></tr>
+          <tr><td>min</td><td>min(wS, wR, wT)</td><td>Takes the minimum — debuff-dominant</td></tr>
+          <tr><td>geom</td><td>(wS × wR × wT)^(1/3)</td><td>Geometric mean — balanced</td></tr>
+        </table>
+
+        <div class="code-block">
+          <div class="code-body"><pre><span class="cm">// Edge declared with aggregation keyword</span>
+<span class="st">s0</span> <span class="ar">---></span> <span class="st">s1</span> : <span class="ac">boost</span> (<span class="nu">0.8</span>) <span class="op">max</span>
+
+<span class="cm">// Rule also carries its own aggregation</span>
+<span class="ac">boost</span> <span class="ar">->></span> <span class="ac">otherAction</span> : <span class="rl">buffRule</span> (<span class="nu">0.9</span>) <span class="op">prod</span></pre></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- 5. RULES -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="rules">
+        <div class="section-eyebrow">Section 05</div>
+        <h2>Hyper-Edges (Rules)</h2>
+        <p>Rules are edges between <em>labels</em>, not states. When the source label fires, the rule's effect is applied to the target label.</p>
+
+        <table class="ref-table">
+          <tr><th>Arrow</th><th>Name</th><th>Effect</th></tr>
+          <tr><td>->></td><td>Activation / Buff</td><td>Applies aggregation to increase the target edge's weight, or activates a disabled edge.</td></tr>
+          <tr><td>--!</td><td>Negation / Debuff</td><td>Applies aggregation to decrease the target edge's weight, or deactivates an active edge.</td></tr>
+          <tr><td>--x</td><td>Negation (alias)</td><td>Same as <code>--!</code></td></tr>
+        </table>
+
+        <h3>Syntax</h3>
+        <div class="formula-box">
+          <span class="ac">triggerLabel</span>  <span class="ar">->></span>  <span class="ac">targetLabel</span>  [: <span class="rl">ruleLabel</span>]  (<span class="nu">ruleWeight</span>)  [<span class="op">aggregation</span>]  [<span class="kw">if</span> (<span class="op">condition</span>)]  [<span class="kw">then</span> { <span class="va">updates</span> }]
+        </div>
+
+        <div class="code-block">
+          <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>rules.Re</span></div>
+          <div class="code-body"><pre><span class="cm">// Every time 'like' fires, it increases 'watchAgain' weight</span>
+<span class="ac">like</span>      <span class="ar">->></span>  <span class="ac">watchAgain</span> : <span class="rl">like_boost</span>  (<span class="nu">0.9</span>) <span class="op">max</span>
+
+<span class="cm">// Every time 'skip' fires, it suppresses 'watchAgain'</span>
+<span class="ac">skip</span>      <span class="ar">--!</span>  <span class="ac">watchAgain</span> : <span class="rl">skip_debuff</span> (<span class="nu">0.1</span>) <span class="op">prod</span>
+
+<span class="cm">// Rule only fires if a variable condition is met</span>
+<span class="ac">login</span>     <span class="ar">->></span>  <span class="ac">premiumOffer</span> : <span class="rl">showOffer</span>   (<span class="nu">0.8</span>) <span class="kw">if</span> (<span class="va">userTier</span> <span class="op">>=</span> <span class="nu">2</span>)
+
+<span class="cm">// Rule that also updates a variable</span>
+<span class="ac">purchase</span>  <span class="ar">->></span>  <span class="ac">upsell</span>       : <span class="rl">upsellRule</span>  (<span class="nu">0.7</span>) <span class="kw">if</span> (<span class="va">cart</span> <span class="op">></span> <span class="nu">0</span>) <span class="kw">then</span> {
+    <span class="va">revenue</span>' := <span class="va">revenue</span> + <span class="nu">1</span>
+}
+
+<span class="cm">// Short form — no explicit rule label (auto-generated)</span>
+<span class="ac">eventA</span>    <span class="ar">--!</span>  <span class="ac">eventA</span>       (<span class="nu">0.05</span>)</pre></div>
+        </div>
+
+        <div class="callout callout-warn">
+          <strong>Cascade propagation</strong>
+          Rules can target other rule labels, creating chains. If <code>a ->> b</code> and <code>b ->> c</code>, firing <code>a</code> will cascade through <code>b</code> and reach <code>c</code>. The engine detects cycles and stops.
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- 6. VARIABLES -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="variables">
+        <div class="section-eyebrow">Section 06</div>
+        <h2>Variables &amp; Types</h2>
+
+        <h3>Scalar types</h3>
+        <div class="code-block">
+          <div class="code-body"><pre><span class="kw">int</span>   <span class="va">count</span>    = <span class="nu">0</span>           <span class="cm">// integer, default 0</span>
+<span class="kw">int</span>   <span class="va">level[<span class="nu">0</span>..<span class="nu">10</span>]</span>    = <span class="nu">1</span>   <span class="cm">// bounded integer [min..max]</span>
+<span class="kw">float</span> <span class="va">ratio</span>    = <span class="nu">0.5</span>
+<span class="kw">float</span> <span class="va">prob[<span class="nu">0.0</span>..<span class="nu">1.0</span>]</span>     = <span class="nu">1.0</span> 
+<span class="kw">bool</span>  <span class="va">isActive</span> = <span class="nu">false</span></pre></div>
+        </div>
+
+        <h3 id="arrays">Arrays</h3>
+        <div class="code-block">
+          <div class="code-body"><pre><span class="cm">// Static array</span>
+<span class="kw">int</span>[] <span class="va">scores</span> = [<span class="nu">10</span>, <span class="nu">20</span>, <span class="nu">30</span>]
+
+<span class="cm">// Dynamic array (grows when you assign to index == length)</span>
+<span class="kw">dyn int</span>[] <span class="va">log</span> = []
+
+<span class="cm">// Dynamic with max size</span>
+<span class="kw">dyn int</span>[] <span class="va">recent</span> [<span class="kw">max</span>=<span class="nu">5</span>] = []   <span class="cm">// keeps only last 5 items</span>
+
+<span class="cm">// Access in an expression</span>
+<span class="va">x</span>' := <span class="va">scores</span>[<span class="nu">1</span>]          <span class="cm">// x = 20</span>
+
+<span class="cm">// Write with ArrayAssign</span>
+<span class="va">scores</span>[<span class="nu">0</span>]' := <span class="nu">99</span>         <span class="cm">// scores becomes [99, 20, 30]</span></pre></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- 7. CONDITIONS -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="conditions">
+        <div class="section-eyebrow">Section 07</div>
+        <h2>Conditions (Guards)</h2>
+        <p>A guard is an <code>if (...)</code> clause attached to any edge or rule. The transition only fires if the condition is <strong>true</strong> in the current state.</p>
+
+        <h3>Comparison operators</h3>
+        <table class="ref-table">
+          <tr><th>Operator</th><th>Meaning</th></tr>
+          <tr><td>==</td><td>Equal (also accepted as <code>=</code>)</td></tr>
+          <tr><td>!=</td><td>Not equal</td></tr>
+          <tr><td>&lt;</td><td>Less than</td></tr>
+          <tr><td>&lt;=</td><td>Less than or equal</td></tr>
+          <tr><td>&gt;</td><td>Greater than</td></tr>
+          <tr><td>&gt;=</td><td>Greater than or equal</td></tr>
+        </table>
+
+        <h3>Logical connectives</h3>
+        <table class="ref-table">
+          <tr><th>Keyword</th><th>Symbol</th><th>Meaning</th></tr>
+          <tr><td>AND</td><td>&&</td><td>Both conditions must hold</td></tr>
+          <tr><td>OR</td><td>||</td><td>At least one must hold</td></tr>
+        </table>
+
+        <h3>Weight check</h3>
+        <p>You can guard on the current probability of an edge using <code>P(label)</code> or <code>F(label)</code>:</p>
+        <div class="code-block">
+          <div class="code-body"><pre><span class="cm">// Fire only if 'attack' has probability >= 0.6</span>
+<span class="st">idle</span> <span class="ar">---></span> <span class="st">alert</span> : <span class="ac">warn</span> <span class="kw">if</span> (<span class="op">P</span>(<span class="ac">attack</span>) <span class="op">>=</span> <span class="nu">0.6</span>)
+
+<span class="cm">// Fire only if the failure probability F(action) is low</span>
+<span class="st">idle</span> <span class="ar">---></span> <span class="st">safe</span>  : <span class="ac">proceed</span> <span class="kw">if</span> (<span class="op">F</span>(<span class="ac">fail</span>) <span class="op"><</span> <span class="nu">0.1</span>)</pre></div>
+        </div>
+
+        <h3>Examples</h3>
+        <div class="code-block">
+          <div class="code-body"><pre><span class="cm">// Simple guard</span>
+<span class="st">s0</span> <span class="ar">---></span> <span class="st">s1</span> : <span class="ac">step</span> <span class="kw">if</span> (<span class="va">counter</span> <span class="op"><</span> <span class="nu">5</span>)
+
+<span class="cm">// Compound guard</span>
+<span class="st">s0</span> <span class="ar">---></span> <span class="st">s2</span> : <span class="ac">jump</span>  <span class="kw">if</span> (<span class="va">flag</span> <span class="op">==</span> <span class="nu">true</span> <span class="op">AND</span> <span class="va">score</span> <span class="op">>=</span> <span class="nu">10</span>)
+
+<span class="cm">// Guard with then-block</span>
+<span class="st">s0</span> <span class="ar">---></span> <span class="st">s1</span> : <span class="ac">advance</span> <span class="kw">if</span> (<span class="va">n</span> <span class="op"><</span> <span class="nu">3</span>) <span class="kw">then</span> {
+    <span class="va">n</span>' := <span class="va">n</span> + <span class="nu">1</span>
+}</pre></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- 8. UPDATES -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="updates">
+        <div class="section-eyebrow">Section 08</div>
+        <h2>Updates (Side Effects)</h2>
+        <p>When a transition fires, it can update variables. Updates appear in a <code>then { ... }</code> block, or inline for a single assignment.</p>
+
+        <h3>Assignment</h3>
+        <div class="code-block">
+          <div class="code-body"><pre><span class="cm">// Inline (no then-block needed for a single statement)</span>
+<span class="st">s0</span> <span class="ar">---></span> <span class="st">s1</span> : <span class="ac">pay</span>  <span class="va">total</span>' := <span class="va">total</span> + <span class="nu">10</span>
+
+<span class="cm">// then-block for multiple statements</span>
+<span class="st">s0</span> <span class="ar">---></span> <span class="st">s1</span> : <span class="ac">buy</span>  <span class="kw">then</span> {
+    <span class="va">balance</span>' := <span class="va">balance</span> - <span class="nu">5</span>
+    <span class="va">items</span>'   := <span class="va">items</span>   + <span class="nu">1</span>
+}
+
+<span class="cm">// Nested if inside then</span>
+<span class="st">s0</span> <span class="ar">---></span> <span class="st">s1</span> : <span class="ac">check</span> <span class="kw">then</span> {
+    <span class="kw">if</span> (<span class="va">score</span> <span class="op">></span> <span class="nu">50</span>) <span class="kw">then</span> {
+        <span class="va">grade</span>' := <span class="nu">1</span>
+    }
+}</pre></div>
+        </div>
+
+        <h3>Math expressions</h3>
+        <table class="ref-table">
+          <tr><th>Operator</th><th>Meaning</th></tr>
+          <tr><td>+</td><td>Addition</td></tr>
+          <tr><td>-</td><td>Subtraction</td></tr>
+          <tr><td>*</td><td>Multiplication</td></tr>
+          <tr><td>/</td><td>Integer or float division</td></tr>
+        </table>
+
+        <h3>Print statement</h3>
+        <div class="code-block">
+          <div class="code-body"><pre><span class="kw">print</span>(<span class="va">counter</span>)        <span class="cm">// prints value to browser console</span>
+<span class="kw">print</span>(<span class="va">score</span> * <span class="nu">2</span>)      <span class="cm">// expression is evaluated first</span></pre></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- 9. FUNCTIONS -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="functions">
+        <div class="section-eyebrow">Section 09</div>
+        <h2>Functions</h2>
+        <p>You can define reusable functions and call them inside expressions or updates.</p>
+
+        <div class="code-block">
+          <div class="code-body"><pre><span class="cm">// Define a function</span>
+<span class="kw">def</span> <span class="ac">clamp</span>(<span class="va">x</span>, <span class="va">lo</span>, <span class="va">hi</span>) {
+    <span class="kw">if</span> (<span class="va">x</span> <span class="op"><</span> <span class="va">lo</span>) <span class="kw">then</span> { <span class="kw">return</span> <span class="va">lo</span> }
+    <span class="kw">if</span> (<span class="va">x</span> <span class="op">></span> <span class="va">hi</span>) <span class="kw">then</span> { <span class="kw">return</span> <span class="va">hi</span> }
+    <span class="kw">return</span> <span class="va">x</span>
+}
+
+<span class="cm">// Use in an update</span>
+<span class="st">s0</span> <span class="ar">---></span> <span class="st">s1</span> : <span class="ac">adjust</span> <span class="kw">then</span> {
+    <span class="va">volume</span>' := <span class="ac">clamp</span>(<span class="va">volume</span> + <span class="nu">10</span>, <span class="nu">0</span>, <span class="nu">100</span>)
+}
+
+<span class="cm">// foreach loop (works on arrays)</span>
+<span class="kw">def</span> <span class="ac">sumArr</span>(<span class="va">arr</span>) {
+    <span class="va">total</span>' := <span class="nu">0</span>
+    <span class="kw">foreach</span> (<span class="va">item</span> <span class="kw">in</span> <span class="va">arr</span>) {
+        <span class="va">total</span>' := <span class="va">total</span> + <span class="va">item</span>
+    }
+    <span class="kw">return</span> <span class="va">total</span>
+}</pre></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- 10. MODULES -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="modules">
+        <div class="section-eyebrow">Section 10</div>
+        <h2>Modules — <code>aut</code></h2>
+        <p>The <code>aut</code> keyword creates a named sub-automaton. State and label names inside are automatically prefixed, so there are no name collisions between modules.</p>
+
+        <div class="code-block">
+          <div class="code-body"><pre><span class="kw">aut</span> RobotA {
+    <span class="kw">init</span> <span class="st">idle</span>
+    <span class="st">idle</span>    <span class="ar">---></span> <span class="st">working</span> : <span class="ac">start</span> (<span class="nu">1.0</span>)
+    <span class="st">working</span> <span class="ar">---></span> <span class="st">idle</span>    : <span class="ac">stop</span>  (<span class="nu">1.0</span>)
+}
+
+<span class="kw">aut</span> RobotB {
+    <span class="kw">init</span> <span class="st">idle</span>
+    <span class="st">idle</span>    <span class="ar">---></span> <span class="st">busy</span>    : <span class="ac">start</span> (<span class="nu">1.0</span>)
+    <span class="st">busy</span>    <span class="ar">---></span> <span class="st">idle</span>    : <span class="ac">done</span>  (<span class="nu">1.0</span>)
+}
+
+<span class="cm">// Cross-module rule: RobotA's 'start' enables RobotB's 'start'</span>
+RobotA.start <span class="ar">->></span> RobotB.start : <span class="rl">sync</span> (<span class="nu">0.8</span>)</pre></div>
+        </div>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- 11. PDL -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="pdl">
+        <div class="section-eyebrow">Section 11</div>
+        <h2>PDL Verification</h2>
+        <p>The PDL (Probabilistic Dynamic Logic) verifier checks logical properties of your model starting from any state. Results include a boolean verdict or a quantitative probability.</p>
+
+        <h3>Propositional connectives</h3>
+        <div class="formula-box">
+          <span class="pdl">true</span>  &nbsp;|&nbsp;  <span class="pdl">false</span>  &nbsp;|&nbsp;  <span class="pdl">¬φ</span>  &nbsp;|&nbsp;  <span class="pdl">φ ∧ ψ</span>  &nbsp;|&nbsp;  <span class="pdl">φ ∨ ψ</span>  &nbsp;|&nbsp;  <span class="pdl">φ → ψ</span>  &nbsp;|&nbsp;  <span class="pdl">φ ↔ ψ</span>
+        </div>
+
+        <h3>State &amp; condition propositions</h3>
+        <div class="formula-box">
+          <span class="pdl">s0</span>               <span class="cm">// true if current state = s0</span><br>
+          <span class="pdl">counter == 3</span>     <span class="cm">// variable condition</span><br>
+          <span class="pdl">flag == true</span>
+        </div>
+
+        <h3>Modal operators</h3>
+        <table class="ref-table">
+          <tr><th>Formula</th><th>Meaning</th></tr>
+          <tr><td>&lt;&gt; φ</td><td>Diamond: <em>some</em> next state satisfies φ</td></tr>
+          <tr><td>[] φ</td><td>Box: <em>all</em> next states satisfy φ</td></tr>
+          <tr><td>&lt;α&gt; φ</td><td>After program α there exists a state satisfying φ</td></tr>
+          <tr><td>[α] φ</td><td>After program α all reachable states satisfy φ</td></tr>
+        </table>
+
+        <h3>PDL programs (α)</h3>
+        <table class="ref-table">
+          <tr><th>Syntax</th><th>Meaning</th></tr>
+          <tr><td>actionName</td><td>Fire this action once</td></tr>
+          <tr><td>a ; b</td><td>Sequence: fire a then b</td></tr>
+          <tr><td>a + b</td><td>Choice: fire a or b</td></tr>
+          <tr><td>a*</td><td>Kleene star: repeat a zero or more times</td></tr>
+        </table>
+
+        <h3>Probabilistic path operators</h3>
+        <table class="ref-table">
+          <tr><th>Formula</th><th>Meaning</th></tr>
+          <tr><td>{ P&gt;=0.9 [ F φ ] }</td><td>Probability of eventually reaching φ is ≥ 0.9</td></tr>
+          <tr><td>{ P=? [ F φ ] }</td><td>What is the exact probability of eventually reaching φ?</td></tr>
+          <tr><td>{ P=? [ G φ ] }</td><td>What is the probability of φ holding globally?</td></tr>
+          <tr><td>{ P=? [ X φ ] }</td><td>Probability of φ at the next step</td></tr>
+          <tr><td>{ P=? [ X X φ ] }</td><td>Probability of φ after exactly 2 steps</td></tr>
+          <tr><td>{ P=? [ φ U ψ ] }</td><td>Probability that φ holds until ψ is reached</td></tr>
+          <tr><td>{ P=? &lt;α&gt; φ }</td><td>Probability of reaching φ after program α</td></tr>
+        </table>
+
+        <div class="callout callout-info">
+          <strong>Where to type PDL</strong>
+          Use the <strong>PDL</strong> tab in the right panel. Select a starting state, then type your formula. Click the coloured buttons to insert state names, actions, and operators automatically.
+        </div>
+
+        <h3>PDL examples</h3>
+        <div class="tab-group">
+          <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab(this,'pdl1')">Reachability</button>
+            <button class="tab-btn" onclick="switchTab(this,'pdl2')">Probability</button>
+            <button class="tab-btn" onclick="switchTab(this,'pdl3')">Programs</button>
+            <button class="tab-btn" onclick="switchTab(this,'pdl4')">Variables</button>
+          </div>
+          <div id="pdl1" class="tab-pane active">
+            <div class="code-block">
+              <div class="code-body"><pre><span class="cm">// Can we reach state 'win'?</span>
+<span class="pdl">&lt;&gt; win</span>
+
+<span class="cm">// Is it true that every next step goes to 'safe'?</span>
+<span class="pdl">[] safe</span>
+
+<span class="cm">// After firing 'attack', can we reach 'dead'?</span>
+<span class="pdl">&lt;attack&gt; dead</span>
+
+<span class="cm">// No matter how we fire 'move', we stay in 'valid'?</span>
+<span class="pdl">[move*] valid</span></pre></div>
+            </div>
+          </div>
+          <div id="pdl2" class="tab-pane">
+            <div class="code-block">
+              <div class="code-body"><pre><span class="cm">// What is the probability of eventually reaching 'goal'?</span>
+<span class="pdl">P=? [ F goal ]</span>
+
+<span class="cm">// Is the probability of failing globally below 5%?</span>
+<span class="pdl">P&lt;0.05 [ G !fail ]</span>
+
+<span class="cm">// Probability of reaching 'win' within exactly 3 steps</span>
+<span class="pdl">P=? [ X X X win ]</span>
+
+<span class="cm">// Probability that 'idle' holds until 'working' is reached</span>
+<span class="pdl">P=? [ idle U working ]</span></pre></div>
+            </div>
+          </div>
+          <div id="pdl3" class="tab-pane">
+            <div class="code-block">
+              <div class="code-body"><pre><span class="cm">// After firing 'a' then 'b', is 'target' reachable?</span>
+<span class="pdl">&lt;a ; b&gt; target</span>
+
+<span class="cm">// After choosing between 'left' or 'right', reach 'exit'</span>
+<span class="pdl">&lt;left + right&gt; exit</span>
+
+<span class="cm">// After any number of 'loop' firings, is 'done' reachable?</span>
+<span class="pdl">&lt;loop*&gt; done</span>
+
+<span class="cm">// Probability of reaching 'end' via the sequence</span>
+<span class="pdl">P=? &lt;step ; step ; step&gt; end</span></pre></div>
+            </div>
+          </div>
+          <div id="pdl4" class="tab-pane">
+            <div class="code-block">
+              <div class="code-body"><pre><span class="cm">// Is the variable counter == 5 eventually reachable?</span>
+<span class="pdl">P=? [ F counter == 5 ]</span>
+
+<span class="cm">// Does every reachable state keep score >= 0?</span>
+<span class="pdl">[] score >= 0</span>
+
+<span class="cm">// Combination: in state 'end' with total > 100</span>
+<span class="pdl">end && total > 100</span>
+
+<span class="cm">// Is there a path where flag becomes true?</span>
+<span class="pdl">P=? [ F flag == true ]</span></pre></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- 12. PCTL -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="pctl">
+        <div class="section-eyebrow">Section 12</div>
+        <h2>PCTL / PRISM Export <span class="badge badge-adv">Advanced</span></h2>
+        <p>RePA can export your model to PRISM-compatible DTMC format and evaluate PCTL properties directly from the <strong>PCTL</strong> tab. The PRISM property language is a superset of what you type in the PDL panel.</p>
+
+        <h3>PCTL syntax reference</h3>
+        <table class="ref-table">
+          <tr><th>Syntax</th><th>Meaning</th></tr>
+          <tr><td>P=? [ F s=3 ]</td><td>Probability of reaching state ID 3</td></tr>
+          <tr><td>P&gt;=0.9 [ F goal ]</td><td>Is probability of reaching goal ≥ 0.9?</td></tr>
+          <tr><td>P=? [ G safe ]</td><td>Probability of always being in safe</td></tr>
+          <tr><td>P=? [ X s=2 ]</td><td>Probability of next state being 2</td></tr>
+          <tr><td>P=? [ a U b ]</td><td>Probability of a holding until b</td></tr>
+          <tr><td>action_act=1</td><td>Tests if action is currently enabled (in PRISM export)</td></tr>
+          <tr><td>action_act=0</td><td>Tests if action is currently disabled</td></tr>
+        </table>
+
+        <h3>PCTL property file example</h3>
+        <div class="code-block">
+          <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>properties.pctl</span></div>
+          <div class="code-body"><pre><span class="cm">// What is the probability of eventually reaching 'Delivered'?</span>
+P=? [ F Delivered ]
+
+<span class="cm">// Is it almost certain we avoid 'Crashed'?</span>
+P>=0.99 [ G !Crashed ]
+
+<span class="cm">// Is it always the case that 'go_work' can be activated?</span>
+P=? [ F go_work_act=1 ]
+
+<span class="cm">// Probability of reaching success in exactly 2 steps</span>
+P=? [ X X success ]</pre></div>
+        </div>
+
+        <div class="callout callout-tip">
+          <strong>Workflow</strong>
+          Use <em>File → Export PRISM</em> to download the <code>.pm</code> model, then paste your <code>.pctl</code> properties into PRISM for full model checking. Alternatively, the built-in PCTL tab runs properties directly without leaving the browser.
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- 13. PATH OPTIMIZER -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="path">
+        <div class="section-eyebrow">Section 13</div>
+        <h2>Path Optimizer</h2>
+        <p>The <strong>Path</strong> tab in the bottom panel uses a best-first search to find either the most probable or least probable path to a target.</p>
+
+        <table class="ref-table">
+          <tr><th>Option</th><th>Values</th></tr>
+          <tr><td>Search Type</td><td><code>Reach State</code> — pick a destination state. <code>Variable Value</code> — find when a variable equals a given integer.</td></tr>
+          <tr><td>Criterion</td><td><code>Max Probability</code> (most likely path) or <code>Min Probability</code> (rarest path).</td></tr>
+        </table>
+
+        <p>Results show the sequence of labels fired and the cumulative probability of that path.</p>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- 14. TRAINING -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="training">
+        <div class="section-eyebrow">Section 14</div>
+        <h2>Statistical Training</h2>
+        <p>Feed event-log data to the model and its weights will be updated automatically using empirical frequency or aggregation rules.</p>
+
+        <h3>Input format</h3>
+        <p>Each line is one session. Events within a session are comma-separated label names.</p>
+        <div class="code-block">
+          <div class="code-body"><pre><span class="cm">// File: sessions.txt</span>
+<span class="ac">buy</span>, <span class="ac">checkout</span>, <span class="ac">pay</span>
+<span class="ac">browse</span>, <span class="ac">buy</span>, <span class="ac">browse</span>, <span class="ac">exit</span>
+<span class="ac">login</span>, <span class="ac">buy</span>, <span class="ac">pay</span></pre></div>
+        </div>
+
+        <h3 id="calibration">Training modes</h3>
+        <table class="ref-table">
+          <tr><th>Mode</th><th>Behaviour</th></tr>
+          <tr><td>laplace</td><td>Bayesian frequency estimation. Each firing of an edge increments a counter; weight = hits / total, with a Laplace prior of 50 virtual samples to avoid cold-start extremes.</td></tr>
+          <tr><td>aggregation arith (λ)</td><td>Each firing applies the aggregation formula to update the weight. λ controls the learning rate.</td></tr>
+        </table>
+
+        <h3>Persistent vs reset mode</h3>
+        <p>By default each session in the file is replayed from the initial state (reset). If your model uses <em>persistent</em> mode, the state carries over between sessions.</p>
+
+        <h3>Sync weights to editor</h3>
+        <p>After training, click <strong>Sync Weights → Editor</strong> to write the learned weights back into your source code. You can then save and re-use the calibrated model.</p>
+      </section>
+
+      <hr class="divider">
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- 15. EXAMPLES -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="examples">
+        <div class="section-eyebrow">Section 15</div>
+        <h2>Complete Model Examples</h2>
+
+        <!-- Example 1 -->
+        <h3>1. Simple two-state loop</h3>
+        <p>A minimal model: one initial state, one transition out and one back, with a self-activating rule.</p>
+        <div class="code-block">
+          <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>simple.Re</span></div>
+          <div class="code-body"><pre><span class="kw">init</span> <span class="st">s0</span>
+
+<span class="st">s0</span> <span class="ar">---></span> <span class="st">s1</span> : <span class="ac">a</span>
+<span class="st">s1</span> <span class="ar">---></span> <span class="st">s0</span> : <span class="ac">b</span>
+
+<span class="cm">// Every time 'a' fires it deactivates itself</span>
+<span class="ac">a</span>  <span class="ar">--!</span>  <span class="ac">a</span> : <span class="rl">offA</span></pre></div>
+        </div>
+
+        <!-- Example 2 -->
+        <h3>2. Vending machine with dynamic stock</h3>
+        <div class="code-block">
+          <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>vending.Re</span></div>
+          <div class="code-body"><pre><span class="kw">int</span> <span class="va">stock</span> = <span class="nu">3</span>
+<span class="kw">init</span> <span class="st">Idle</span>
+
+<span class="st">Idle</span>       <span class="ar">---></span> <span class="st">Selecting</span> : <span class="ac">insertCoin</span>
+<span class="st">Selecting</span>  <span class="ar">---></span> <span class="st">Idle</span>      : <span class="ac">buyItem</span>   (<span class="nu">0.7</span>) <span class="kw">if</span> (<span class="va">stock</span> <span class="op">></span> <span class="nu">0</span>) <span class="kw">then</span> {
+    <span class="va">stock</span>' := <span class="va">stock</span> - <span class="nu">1</span>
+}
+<span class="st">Selecting</span>  <span class="ar">---></span> <span class="st">Idle</span>      : <span class="ac">cancel</span>    (<span class="nu">0.3</span>)
+
+<span class="cm">// When stock reaches 0, buyItem disables itself</span>
+<span class="ac">buyItem</span> <span class="ar">--!</span> <span class="ac">buyItem</span> : <span class="rl">outOfStock</span> (<span class="nu">0.1</span>) <span class="kw">if</span> (<span class="va">stock</span> <span class="op">==</span> <span class="nu">0</span>)</pre></div>
+        </div>
+
+        <!-- Example 3 -->
+        <h3>3. Recommendation algorithm</h3>
+        <div class="code-block">
+          <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>recommender.Re</span></div>
+          <div class="code-body"><pre><span class="kw">calibration</span> proportional
+<span class="kw">init</span> <span class="st">Feed</span>
+
+<span class="st">Feed</span>    <span class="ar">---></span> <span class="st">Watch</span>  : <span class="ac">watch</span>
+<span class="st">Watch</span>   <span class="ar">---></span> <span class="st">Watch</span>  : <span class="ac">like</span>
+<span class="st">Watch</span>   <span class="ar">---></span> <span class="st">Feed</span>   : <span class="ac">dontLike</span>
+<span class="st">Watch</span>   <span class="ar">---></span> <span class="st">Feed</span>   : <span class="ac">refresh</span>   <span class="kw">disabled</span>
+<span class="st">Feed</span>    <span class="ar">---></span> <span class="st">List</span>   : <span class="ac">watchLike</span> <span class="kw">disabled</span>
+<span class="st">List</span>    <span class="ar">---></span> <span class="st">Watch</span>  : <span class="ac">watch2</span>
+
+<span class="cm">// Rules</span>
+<span class="ac">watch</span>     <span class="ar">->></span>  <span class="ac">dontLike</span>  : <span class="rl">wd</span>
+<span class="ac">like</span>      <span class="ar">--!</span>  <span class="ac">dontLike</span>  : <span class="rl">ld</span>
+<span class="ac">like</span>      <span class="ar">->></span>  <span class="ac">refresh</span>   : <span class="rl">lr</span>
+<span class="ac">like</span>      <span class="ar">->></span>  <span class="ac">watchLike</span> : <span class="rl">lw</span>
+<span class="ac">dontLike</span>  <span class="ar">--!</span>  <span class="ac">watchLike</span> : <span class="rl">dw</span></pre></div>
+        </div>
+
+        <!-- Example 4 -->
+        <h3>4. Biased coin over time</h3>
+        <div class="code-block">
+          <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>coin.Re</span></div>
+          <div class="code-body"><pre><span class="kw">calibration</span> proportional
+<span class="kw">int</span>  <span class="va">flips</span> = <span class="nu">0</span>
+<span class="kw">int</span>  <span class="va">side</span>  = <span class="nu">0</span>
+<span class="kw">init</span> <span class="st">toss</span>
+
+<span class="st">toss</span> <span class="ar">---></span> <span class="st">toss</span> : <span class="ac">heads</span> (<span class="nu">0.5</span>) <span class="kw">if</span> (<span class="va">flips</span> <span class="op"><</span> <span class="nu">10</span>) <span class="kw">then</span> {
+    <span class="va">flips</span>' := <span class="va">flips</span> + <span class="nu">1</span>
+    <span class="va">side</span>'  := <span class="nu">0</span>
+}
+<span class="st">toss</span> <span class="ar">---></span> <span class="st">toss</span> : <span class="ac">tails</span> (<span class="nu">0.5</span>) <span class="kw">if</span> (<span class="va">flips</span> <span class="op"><</span> <span class="nu">10</span>) <span class="kw">then</span> {
+    <span class="va">flips</span>' := <span class="va">flips</span> + <span class="nu">1</span>
+    <span class="va">side</span>'  := <span class="nu">1</span>
+}
+
+<span class="cm">// Bias: each heads makes the next heads more likely</span>
+<span class="ac">heads</span> <span class="ar">->></span> <span class="ac">heads</span> : <span class="rl">bias</span> (<span class="nu">0.9</span>) <span class="op">max</span></pre></div>
+        </div>
+
+        <!-- Example 5 -->
+        <h3>5. Drone delivery with failure recovery</h3>
+        <div class="code-block">
+          <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>drone.Re</span></div>
+          <div class="code-body"><pre><span class="kw">init</span> <span class="st">Home</span>
+
+<span class="st">Home</span>       <span class="ar">---></span> <span class="st">Flying</span>    : <span class="ac">launch</span>   (<span class="nu">1.0</span>)
+<span class="st">Flying</span>     <span class="ar">---></span> <span class="st">Delivered</span> : <span class="ac">success</span>  (<span class="nu">0.8</span>)
+<span class="st">Flying</span>     <span class="ar">---></span> <span class="st">Crashed</span>   : <span class="ac">fail</span>     (<span class="nu">0.2</span>)
+<span class="st">Delivered</span>  <span class="ar">---></span> <span class="st">Home</span>      : <span class="ac">return</span>   (<span class="nu">1.0</span>)
+
+<span class="cm">// On failure, recovery re-enables the return path</span>
+<span class="ac">fail</span> <span class="ar">->></span> <span class="ac">return</span> (<span class="nu">1.0</span>)
+
+<span class="cm">// Useful PDL queries for this model:
+// What is the probability of eventual delivery?</span>
+{ <span class="pdl">P=? [ F Delivered ]</span> }
+<span class="cm">// Can we always recover from a crash?</span>
+<span class="pdl">[] !Crashed || &lt;&gt; Home</span></pre></div>
+        </div>
+
+        <!-- Example 6 -->
+        <h3>6. Multi-module robotic system</h3>
+        <div class="code-block">
+          <div class="code-header"><div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div><span>robots.Re</span></div>
+          <div class="code-body"><pre><span class="kw">aut</span> ArmA {
+    <span class="kw">init</span> <span class="st">rest</span>
+    <span class="st">rest</span>   <span class="ar">---></span> <span class="st">grip</span>  : <span class="ac">pickup</span> (<span class="nu">0.9</span>)
+    <span class="st">grip</span>   <span class="ar">---></span> <span class="st">rest</span>  : <span class="ac">drop</span>   (<span class="nu">1.0</span>)
+}
+
+<span class="kw">aut</span> ArmB {
+    <span class="kw">init</span> <span class="st">rest</span>
+    <span class="st">rest</span>   <span class="ar">---></span> <span class="st">place</span> : <span class="ac">insert</span>  (<span class="nu">1.0</span>) <span class="kw">disabled</span>
+    <span class="st">place</span>  <span class="ar">---></span> <span class="st">rest</span>  : <span class="ac">release</span> (<span class="nu">1.0</span>)
+}
+
+<span class="cm">// ArmA's drop enables ArmB's insert</span>
+ArmA.drop <span class="ar">->></span> ArmB.insert : <span class="rl">handoff</span> (<span class="nu">1.0</span>)
+<span class="cm">// ArmB's release disables insert again</span>
+ArmB.release <span class="ar">--!</span> ArmB.insert : <span class="rl">reset</span> (<span class="nu">1.0</span>)</pre></div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════ -->
+      <!-- QUICK REFERENCE CARD -->
+      <!-- ═══════════════════════════════════════════════ -->
+      <section class="doc-section" id="cheatsheet">
+        <div class="section-eyebrow">Appendix</div>
+        <h2>Quick Reference Card</h2>
+
+        <h3>Declaration keywords</h3>
+        <table class="ref-table">
+          <tr><th>Keyword</th><th>Example</th><th>Meaning</th></tr>
+          <tr><td>name</td><td>name MyModel</td><td>Model identifier (optional)</td></tr>
+          <tr><td>paradigm</td><td>paradigm fuzzy</td><td>probabilistic or fuzzy</td></tr>
+          <tr><td>calibration</td><td>calibration equal</td><td>normalize / equal / proportional</td></tr>
+          <tr><td>training</td><td>training laplace</td><td>Enable statistical learning</td></tr>
+          <tr><td>init</td><td>init s0</td><td>Set initial state</td></tr>
+          <tr><td>int</td><td>int x = 0</td><td>Integer variable</td></tr>
+          <tr><td>float</td><td>float r = 0.5</td><td>Float variable</td></tr>
+          <tr><td>bool</td><td>bool ok = true</td><td>Boolean variable</td></tr>
+          <tr><td>dyn int[]</td><td>dyn int[] q = []</td><td>Dynamic array</td></tr>
+          <tr><td>def</td><td>def f(x) { ... }</td><td>Function definition</td></tr>
+          <tr><td>aut</td><td>aut Worker { ... }</td><td>Module / sub-automaton</td></tr>
+        </table>
+
+        <h3>Edge arrows</h3>
+        <table class="ref-table">
+          <tr><th>Arrow</th><th>Type</th><th>Usage</th></tr>
+          <tr><td>---></td><td>Standard</td><td>Simple transition</td></tr>
+          <tr><td>-id-></td><td>Named</td><td>Transition with explicit transId</td></tr>
+          <tr><td>->></td><td>Rule ON</td><td>Hyper-edge: activate / buff target</td></tr>
+          <tr><td>--!</td><td>Rule OFF</td><td>Hyper-edge: deactivate / debuff target</td></tr>
+          <tr><td>--x</td><td>Rule OFF</td><td>Alias for --!</td></tr>
+        </table>
+
+        <h3>PDL formula cheatsheet</h3>
+        <table class="ref-table">
+          <tr><th>Formula</th><th>Reads as</th></tr>
+          <tr><td>&lt;&gt; φ</td><td>Some next state satisfies φ</td></tr>
+          <tr><td>[] φ</td><td>All next states satisfy φ</td></tr>
+          <tr><td>&lt;a&gt; φ</td><td>Fire a, then some state satisfies φ</td></tr>
+          <tr><td>[a] φ</td><td>Fire a, then all states satisfy φ</td></tr>
+          <tr><td>&lt;a*&gt; φ</td><td>Fire a zero or more times to reach φ</td></tr>
+          <tr><td>{ P=? [ F φ ] }</td><td>Probability of eventually reaching φ</td></tr>
+          <tr><td>{ P=? [ G φ ] }</td><td>Probability of φ holding always</td></tr>
+          <tr><td>{ P=? [ X φ ] }</td><td>Probability of φ at next step</td></tr>
+          <tr><td>{ P=? [ φ U ψ ] }</td><td>Probability of φ until ψ</td></tr>
+          <tr><td>{ P&gt;=0.9 [ F φ ] }</td><td>Is prob of reaching φ at least 90%?</td></tr>
+        </table>
+      </section>
+
+      <footer>
+        <p>RePA Tool — ReLang Reference &nbsp;·&nbsp; <a href="index.html">← Back to Tool</a></p>
+      </footer>
+
+    </div>
+  </main>
+</div>
+
+<script>
+// Tab switching
+function switchTab(btn, paneId) {
+  const group = btn.closest('.tab-group');
+  group.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  group.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(paneId).classList.add('active');
+}
+
+// Active sidebar link on scroll - Updated to target the 'main' scrolling container!
+const links = document.querySelectorAll('.side-link');
+const sections = document.querySelectorAll('.doc-section');
+const mainEl = document.querySelector('main');
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const target = document.querySelector(`.side-link[href="#${entry.target.id}"]`);
+      if (target) target.classList.add('active');
+    }
+  });
+}, { 
+  root: mainEl,
+  rootMargin: '-20% 0px -70% 0px' 
+});
+
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

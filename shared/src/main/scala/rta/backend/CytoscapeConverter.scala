@@ -1,19 +1,29 @@
 package rta.backend
 
 import rta.syntax.Program2.{Edge, RxGraph, QName}
-import rta.syntax.{Condition, UpdateExpr, Statement, UpdateStmt, IfThenStmt}
+import rta.syntax.{Condition, UpdateExpr, Statement, AssignStmt, ArrayAssignStmt, IfThenStmt, ForeachStmt, ReturnStmt,PrintStmt}
 
 object CytoscapeConverter {
 
   private def formatStatements(stmts: List[Statement], indent: String = ""): String = {
     stmts.map {
-      case UpdateStmt(upd) =>
-        s"${indent}${upd.variable.show}' := ${UpdateExpr.show(upd.expr)}"
+      case AssignStmt(variable, expr) =>
+        s"${indent}${variable.show}' := ${UpdateExpr.show(expr)}"
+      case ArrayAssignStmt(arrName, index, expr) =>
+        s"${indent}${arrName.show}[${UpdateExpr.show(index)}]' := ${UpdateExpr.show(expr)}"
       case IfThenStmt(condition, thenStmts) =>
         val conditionLine = s"${indent}if (${condition.toMermaidString}) then {"
         val thenBlock = formatStatements(thenStmts, indent + "  ")
         val closingBrace = s"${indent}}"
         Seq(conditionLine, thenBlock, closingBrace).filter(_.nonEmpty).mkString("\n")
+      case ForeachStmt(iter, arr, body) =>
+        val condLine = s"${indent}foreach (${iter.show} in ${arr.show}) {"
+        val bodyBlock = formatStatements(body, indent + "  ")
+        val closingBrace = s"${indent}}"
+        Seq(condLine, bodyBlock, closingBrace).filter(_.nonEmpty).mkString("\n")
+      case ReturnStmt(expr) =>
+        s"${indent}return ${UpdateExpr.show(expr)}"
+      case PrintStmt(expr)  => s"${indent}print(${UpdateExpr.show(expr)})"
     }.mkString("\n")
   }
 
@@ -31,7 +41,7 @@ object CytoscapeConverter {
       val outEdges = rx.edg.getOrElse(st, Set.empty)
       val validOut = outEdges.filter { t =>
         val edge = (st, t._1, t._2, t._3)
-        rx.act.contains(edge) && rx.edgeConditions.getOrElse(edge, None).forall(c => Condition.evaluate(c, rx.val_env))
+        rx.act.contains(edge) && rx.edgeConditions.getOrElse(edge, None).forall(c => RxSemantics.evalCondition(c, rx))
       }
       if (validOut.isEmpty) Some((st, st, QName(List("tau")), QName(List("deadlock")))) else None
     }.toSet
@@ -80,8 +90,6 @@ object CytoscapeConverter {
       val nodeTypeClass = if (isAction) "action-node" else "rule-node"
       val deadlockClass = if (deadlockEdges.contains(edge)) " deadlock-node" else ""
       
-      val hoverLabelField = s""", "hover_label": "${escapeJson(labelText + weightStr.replace("\\n", " "))}" """
-
       val classes = s"event-node $nodeTypeClass " + (if (isEnabled) "enabled" else "disabled") + deadlockClass
       s"""{ "data": { 
           "id": "$id", 
@@ -103,9 +111,7 @@ object CytoscapeConverter {
       val deadlockClass = if (deadlockEdges.contains(edge)) " deadlock-edge" else ""
       
       val labelThreshold = 30 
-      val fullConditionLabel = rx.edgeConditions.getOrElse(edge, None)
-        .map(cond => s"[${cond.toMermaidString}]")
-        .getOrElse("")
+      val fullConditionLabel = rx.edgeConditions.getOrElse(edge, None).map(cond => s"[${cond.toMermaidString}]").getOrElse("")
       
       var conditionDisplayLabel = fullConditionLabel
       var conditionExtraData = ""

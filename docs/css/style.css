@@ -835,3 +835,10 @@ hr { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
     background-color: var(--red);
     color: white;
 }
+
+
+.cm-lint-error-line { background: rgba(220, 38, 38, 0.08); }
+  .cm-lint-error-mark { border-bottom: 2px wavy #dc2626; }
+  #lint-status { font-size: 11px; padding: 2px 8px; }
+  #lint-status.ok { color: #16a34a; }
+  #lint-status.error { color: #dc2626; }

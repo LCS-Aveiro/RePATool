@@ -2,7 +2,7 @@ package rta.syntax
 
 import rta.backend.RxSemantics
 import rta.syntax.Program2.EdgeMap
-import rta.syntax.{Condition, CounterUpdate, UpdateExpr, Statement, UpdateStmt, IfThenStmt}
+import rta.syntax.{Condition, UpdateExpr, Statement, AssignStmt, ArrayAssignStmt, IfThenStmt, ForeachStmt, ReturnStmt, RuntimeValue, FunctionDef}
 import scala.annotation.tailrec
 import scala.language.implicitConversions
 
@@ -21,18 +21,10 @@ object Program2:
     def /(other:QName) = if (other.n.isEmpty) other else if (n.isEmpty) other else QName(n ::: other.n)
     def /(other:String) = QName(n:::List(other))
 
-    def /(e:EdgeMap):EdgeMap =
-      e.map((src, targets) => (this / src) -> targets.map((to, id, lbl) => (this / to, this / id, this / lbl)))
-
-    def /(es:Edges): Edges =
-      es.map((src, to, id, lbl) => (this / src, this / to, this / id, this / lbl))
-
-    def /-(lblsMap:Map[QName,Edges]): Map[QName,Edges] =
-      lblsMap.map((lbl, edges) => (this / lbl) -> (this / edges))
-
-    def /-(ns:Set[QName]): Set[QName] =
-      ns.map(n => this / n)
-    
+    def /(e:EdgeMap):EdgeMap = e.map((src, targets) => (this / src) -> targets.map((to, id, lbl) => (this / to, this / id, this / lbl)))
+    def /(es:Edges): Edges = es.map((src, to, id, lbl) => (this / src, this / to, this / id, this / lbl))
+    def /-(lblsMap:Map[QName,Edges]): Map[QName,Edges] = lblsMap.map((lbl, edges) => (this / lbl) -> (this / edges))
+    def /-(ns:Set[QName]): Set[QName] = ns.map(n => this / n)
     def scope: QName = if n.isEmpty then this else QName(n.init)
 
     def /(rx: RxGraph): RxGraph =
@@ -44,6 +36,9 @@ object Program2:
         inits = this /- rx.inits,
         act = this / rx.act,
         val_env = rx.val_env.map { case (k, v) => (this / k) -> v },
+        functions = rx.functions.map { case (k, f) => 
+          (this / k) -> FunctionDef(this / f.name, f.params, f.body.map(s => applyPrefixToStatement(this, s))) 
+        },
         edgeAggregations = rx.edgeAggregations.map { case (edge, agg) => 
           (this / edge._1, this / edge._2, this / edge._3, this / edge._4) -> agg 
         },
@@ -53,20 +48,23 @@ object Program2:
         edgeUpdates = rx.edgeUpdates.map { case (edge, stmtList) =>
           (this / edge._1, this / edge._2, this / edge._3, this / edge._4) -> stmtList.map(stmt => applyPrefixToStatement(this, stmt))
         },
-        weights = rx.weights.map { case (edge, w) => (this / edge._1, this / edge._2, this / edge._3, this / edge._4) -> w }
+        weights = rx.weights.map { case (edge, w) => (this / edge._1, this / edge._2, this / edge._3, this / edge._4) -> w },
+        weightExprs = rx.weightExprs.map { case (edge, expr) => (this / edge._1, this / edge._2, this / edge._3, this / edge._4) -> applyPrefixToExpr(this, expr) }
       )
   
+  def applyPrefixToExpr(prefix: QName, expr: UpdateExpr): UpdateExpr = expr match {
+    case UpdateExpr.LitInt(_) | UpdateExpr.LitFloat(_) | UpdateExpr.LitBool(_) => expr
+    case UpdateExpr.LitArray(elems) => UpdateExpr.LitArray(elems.map(applyPrefixToExpr(prefix, _)))
+    case UpdateExpr.Var(q) => UpdateExpr.Var(if(isGlobalControlVar(q)) q else prefix / q)
+    case UpdateExpr.ArrayAccess(arr, idx) => UpdateExpr.ArrayAccess(if(isGlobalControlVar(arr)) arr else prefix / arr, applyPrefixToExpr(prefix, idx))
+    case UpdateExpr.MathOp(l, op, r) => UpdateExpr.MathOp(applyPrefixToExpr(prefix, l), op, applyPrefixToExpr(prefix, r))
+    case UpdateExpr.FuncCall(f, args) => UpdateExpr.FuncCall(if(isGlobalControlVar(f)) f else prefix / f, args.map(applyPrefixToExpr(prefix, _)))
+  }
+
   def applyPrefixToCondition(prefix: QName, cond: Condition): Condition = {
     cond match {
-      case Condition.AtomicCond(left, op, right) =>
-        val newLeft = if (isGlobalControlVar(left)) left else prefix / left
-        val newRight = right match {
-          case Left(i) => Left(i)
-          case Right(q) => if (isGlobalControlVar(q)) Right(q) else Right(prefix / q)
-        }
-        Condition.AtomicCond(newLeft, op, newRight)
-      case Condition.WeightCheck(lbl, metric, op, value) =>
-        Condition.WeightCheck(if (isGlobalControlVar(lbl)) lbl else prefix / lbl, metric, op, value)
+      case Condition.AtomicCond(left, op, right) => Condition.AtomicCond(applyPrefixToExpr(prefix, left), op, applyPrefixToExpr(prefix, right))
+      case Condition.WeightCheck(lbl, metric, op, value) => Condition.WeightCheck(if (isGlobalControlVar(lbl)) lbl else prefix / lbl, metric, op, value)
       case Condition.And(l, r) => Condition.And(applyPrefixToCondition(prefix, l), applyPrefixToCondition(prefix, r))
       case Condition.Or(l, r) => Condition.Or(applyPrefixToCondition(prefix, l), applyPrefixToCondition(prefix, r))
     }
@@ -74,26 +72,20 @@ object Program2:
 
   def applyPrefixToStatement(prefix: QName, stmt: Statement): Statement = {
     stmt match {
-      case UpdateStmt(upd) =>
-        val newVar = if (isGlobalControlVar(upd.variable)) upd.variable else prefix / upd.variable
-        val newExpr = upd.expr match {
-            case UpdateExpr.Add(v, e) => UpdateExpr.Add(if(isGlobalControlVar(v)) v else prefix/v, e match {
-                case Right(q) if !isGlobalControlVar(q) => Right(prefix/q)
-                case other => other
-            })
-            case UpdateExpr.Sub(v, e) => UpdateExpr.Sub(if(isGlobalControlVar(v)) v else prefix/v, e match {
-                case Right(q) if !isGlobalControlVar(q) => Right(prefix/q)
-                case other => other
-            })
-            case UpdateExpr.Var(q) if !isGlobalControlVar(q) => UpdateExpr.Var(prefix/q)
-            case other => other
-        }
-        UpdateStmt(upd.copy(variable = newVar, expr = newExpr))
+      case AssignStmt(variable, expr) =>
+        val newVar = if (isGlobalControlVar(variable)) variable else prefix / variable
+        AssignStmt(newVar, applyPrefixToExpr(prefix, expr))
+      case ArrayAssignStmt(arrName, index, expr) =>
+        val newArr = if (isGlobalControlVar(arrName)) arrName else prefix / arrName
+        ArrayAssignStmt(newArr, applyPrefixToExpr(prefix, index), applyPrefixToExpr(prefix, expr))
       case IfThenStmt(cond, thenStmts) =>
-        IfThenStmt(
-          applyPrefixToCondition(prefix, cond),
-          thenStmts.map(s => applyPrefixToStatement(prefix, s))
-        )
+        IfThenStmt(applyPrefixToCondition(prefix, cond), thenStmts.map(s => applyPrefixToStatement(prefix, s)))
+      case ForeachStmt(iter, arr, body) =>
+        val newIter = if (isGlobalControlVar(iter)) iter else prefix / iter
+        val newArr = if (isGlobalControlVar(arr)) arr else prefix / arr
+        ForeachStmt(newIter, newArr, body.map(s => applyPrefixToStatement(prefix, s)))
+      case ReturnStmt(expr) => ReturnStmt(applyPrefixToExpr(prefix, expr))
+      case PrintStmt(expr) => PrintStmt(applyPrefixToExpr(prefix, expr))
     }
   }
 
@@ -103,27 +95,23 @@ object Program2:
 
   def showEdge(e: Edge): String = {
     val (from, to, transId, label) = e
-    if (transId == label) {
-      s"${from.show} ---> ${to.show} : ${label.show}"
-    } else {
-      s"${from.show} -${transId.show}-> ${to.show} : ${label.show}"
-    }
+    if (transId == label) s"${from.show} ---> ${to.show} : ${label.show}"
+    else s"${from.show} -${transId.show}-> ${to.show} : ${label.show}"
   }
   
-  def showEdges(abc:Edges): String =
-    abc.map(showEdge).mkString(", ")
+  def showEdges(abc:Edges): String = abc.map(showEdge).mkString(", ")
 
   private def showEdgeMap(abc:EdgeMap): String =
     val es = for (a, bcs) <- abc.toSet; (b, id, lbl) <- bcs yield (a, b, id, lbl)
     showEdges(es)
-
 
   case class RxGraph(edg:EdgeMap,
                      on:EdgeMap, off: EdgeMap,
                      lbls: Map[QName,Edges],
                      inits: Set[QName],
                      act: Edges,
-                     val_env: Map[QName, Int], 
+                     val_env: Map[QName, RuntimeValue],
+                     functions: Map[QName, FunctionDef],
                      edgeConditions: Map[Edge, Option[Condition]], 
                      edgeUpdates: Map[Edge, List[Statement]],
                      weights: Map[Edge, Double],
@@ -133,7 +121,8 @@ object Program2:
                      distributionMode: String = "normalize",
                      trainingMethod: String = "laplace",
                      trainingAgg: String = "arith",
-                     trainingLambda: Double = 1.0
+                     trainingLambda: Double = 1.0,
+                     weightExprs: Map[Edge, UpdateExpr] = Map()
                     ):
     def union(other: RxGraph, aggName: String): RxGraph = {
       val allEdgeKeys = this.lbls.keySet ++ other.lbls.keySet
@@ -141,7 +130,8 @@ object Program2:
 
       newRx = newRx.copy(
         inits = this.inits ++ other.inits,
-        val_env = this.val_env ++ other.val_env
+        val_env = this.val_env ++ other.val_env,
+        functions = this.functions ++ other.functions
       )
 
       for (label <- allEdgeKeys) {
@@ -155,37 +145,23 @@ object Program2:
 
           val wM = this.weights.getOrElse(e, 0.0)
           val wN = other.weights.getOrElse(e, 0.0)
-          val finalWeight = if (inM && inN) {
-            Aggregation.compute(aggName, wM, wN, (wM + wN) / 2) 
-          } else if (inM) wM else wN
+          val finalWeight = if (inM && inN) Aggregation.compute(aggName, wM, wN, (wM + wN) / 2) else if (inM) wM else wN
 
           val isActM = this.act.contains(e)
           val isActN = other.act.contains(e)
           val shouldBeActive = isActM || isActN
 
-          
-          val isStandard = this.edg.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) || 
-                          other.edg.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
-          
-          val isOnRule = this.on.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) || 
-                        other.on.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
-
-          val isOffRule = this.off.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) || 
-                          other.off.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
+          val isStandard = this.edg.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) || other.edg.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
+          val isOnRule = this.on.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) || other.on.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
+          val isOffRule = this.off.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) || other.off.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
 
           val cond = this.edgeConditions.get(e).flatten.orElse(other.edgeConditions.get(e).flatten)
           val upd = this.edgeUpdates.getOrElse(e, other.edgeUpdates.getOrElse(e, Nil))
+          val wExpr = this.weightExprs.get(e).orElse(other.weightExprs.get(e))
 
-          if (isStandard) {
-            newRx = newRx.addEdge(e._1, e._2, e._3, e._4, cond, upd, finalWeight)
-          } 
-          if (isOnRule) {
-            newRx = newRx.addOn(e._1, e._2, e._3, e._4, cond, upd, finalWeight)
-          }
-          if (isOffRule) {
-            newRx = newRx.addOff(e._1, e._2, e._3, e._4, cond, upd, finalWeight)
-          }
-          
+          if (isStandard) newRx = newRx.addEdge(e._1, e._2, e._3, e._4, cond, upd, finalWeight, "", wExpr)
+          if (isOnRule) newRx = newRx.addOn(e._1, e._2, e._3, e._4, cond, upd, finalWeight, "", wExpr)
+          if (isOffRule) newRx = newRx.addOff(e._1, e._2, e._3, e._4, cond, upd, finalWeight, "", wExpr)
           if (!shouldBeActive) newRx = newRx.deactivate(e._1, e._2, e._3, e._4)
         }
       }
@@ -193,25 +169,12 @@ object Program2:
     }
 
     def applyDeltaCut(delta: Double): RxGraph = {
-      val newEdg = edg.map { case (src, targets) =>
-        src -> targets.filter(t => weights.getOrElse((src, t._1, t._2, t._3), 1.0) >= delta)
-      }.filter(_._2.nonEmpty)
+      val newEdg = edg.map { case (src, targets) => src -> targets.filter(t => weights.getOrElse((src, t._1, t._2, t._3), 1.0) >= delta) }.filter(_._2.nonEmpty)
+      val newOn = on.map { case (src, targets) => src -> targets.filter(t => weights.getOrElse((src, t._1, t._2, t._3), 0.1) >= delta) }.filter(_._2.nonEmpty)
+      val newOff = off.map { case (src, targets) => src -> targets.filter(t => weights.getOrElse((src, t._1, t._2, t._3), 0.1) >= delta) }.filter(_._2.nonEmpty)
 
-      val newOn = on.map { case (src, targets) =>
-        src -> targets.filter(t => weights.getOrElse((src, t._1, t._2, t._3), 0.1) >= delta)
-      }.filter(_._2.nonEmpty)
-
-      val newOff = off.map { case (src, targets) =>
-        src -> targets.filter(t => weights.getOrElse((src, t._1, t._2, t._3), 0.1) >= delta)
-      }.filter(_._2.nonEmpty)
-
-      this.copy(
-        edg = newEdg.toMap.withDefaultValue(Set()), 
-        on = newOn.toMap.withDefaultValue(Set()), 
-        off = newOff.toMap.withDefaultValue(Set())
-      )
+      this.copy(edg = newEdg.toMap.withDefaultValue(Set()), on = newOn.toMap.withDefaultValue(Set()), off = newOff.toMap.withDefaultValue(Set()))
     }
-
 
     def intersection(other: RxGraph, aggName: String): RxGraph = {
       val commonLabels = this.lbls.keySet.intersect(other.lbls.keySet)
@@ -219,12 +182,12 @@ object Program2:
       
       var newRx = RxGraph().copy(
         inits = commonInits,
-        val_env = this.val_env.filter { case (k, v) => other.val_env.get(k).contains(v) }
+        val_env = this.val_env.filter { case (k, v) => other.val_env.get(k).contains(v) },
+        functions = this.functions ++ other.functions
       )
 
       for (label <- commonLabels) {
         val commonEdges = this.lbls(label).intersect(other.lbls(label))
-        
         for (e <- commonEdges) {
           val wM = this.weights.getOrElse(e, 0.0)
           val wN = other.weights.getOrElse(e, 0.0)
@@ -234,36 +197,22 @@ object Program2:
           val isActN = other.act.contains(e)
           val shouldBeActive = isActM && isActN
 
-          val isStandard = this.edg.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) &&
-                          other.edg.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
-          
-          val isOnRule = this.on.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) &&
-                        other.on.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
-
-          val isOffRule = this.off.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) &&
-                          other.off.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
+          val isStandard = this.edg.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) && other.edg.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
+          val isOnRule = this.on.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) && other.on.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
+          val isOffRule = this.off.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) && other.off.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
 
           val cond = this.edgeConditions.get(e).flatten 
           val upd = this.edgeUpdates.getOrElse(e, Nil)
+          val wExpr = this.weightExprs.get(e).orElse(other.weightExprs.get(e))
 
-          if (isStandard) {
-            newRx = newRx.addEdge(e._1, e._2, e._3, e._4, cond, upd, finalWeight)
-          }
-          if (isOnRule) {
-            newRx = newRx.addOn(e._1, e._2, e._3, e._4, cond, upd, finalWeight)
-          }
-          if (isOffRule) {
-            newRx = newRx.addOff(e._1, e._2, e._3, e._4, cond, upd, finalWeight)
-          }
-
-          if (!shouldBeActive) {
-            newRx = newRx.deactivate(e._1, e._2, e._3, e._4)
-          }
+          if (isStandard) newRx = newRx.addEdge(e._1, e._2, e._3, e._4, cond, upd, finalWeight, "", wExpr)
+          if (isOnRule) newRx = newRx.addOn(e._1, e._2, e._3, e._4, cond, upd, finalWeight, "", wExpr)
+          if (isOffRule) newRx = newRx.addOff(e._1, e._2, e._3, e._4, cond, upd, finalWeight, "", wExpr)
+          if (!shouldBeActive) newRx = newRx.deactivate(e._1, e._2, e._3, e._4)
         }
       }
       newRx
     }
-
 
     def toRta: String = {
       val sb = new StringBuilder
@@ -272,158 +221,111 @@ object Program2:
       sb.append("\n")
 
       val_env.foreach { case (k, v) => 
-        if (!k.show.startsWith("__")) sb.append(s"int ${k.show} = $v\n")
+        if (!k.show.startsWith("__")) {
+          v match {
+            case RuntimeValue.VInt(value, minOpt, maxOpt) => 
+              val bounds = if(minOpt.isDefined && maxOpt.isDefined) s" [${minOpt.get}..${maxOpt.get}]" else ""
+              sb.append(s"int ${k.show}$bounds = $value\n")
+            case RuntimeValue.VFloat(value, minOpt, maxOpt) =>
+              val bounds = if(minOpt.isDefined && maxOpt.isDefined) s" [${minOpt.get}..${maxOpt.get}]" else ""
+              sb.append(s"float ${k.show}$bounds = $value\n")
+            case RuntimeValue.VBool(value) => 
+              sb.append(s"bool ${k.show} = $value\n")
+            case RuntimeValue.VArray(values, isDyn, maxOpt) =>
+              val dynStr = if(isDyn) "dyn " else ""
+              val bound = maxOpt.map(m => s" [max=$m]").getOrElse("")
+              sb.append(s"${dynStr}int[] ${k.show}$bound = [...]\n")
+          }
+        }
       }
       if (val_env.nonEmpty) sb.append("\n")
 
-      val allSimple = for {
-        (src, targets) <- edg.toList
-        (trg, id, lbl) <- targets
-      } yield (src, trg, id, lbl)
-
+      val allSimple = for { (src, targets) <- edg.toList; (trg, id, lbl) <- targets } yield (src, trg, id, lbl)
       allSimple.sortBy(_._1.toString).foreach { case (s, t, id, l) =>
         val edge = (s, t, id, l)
         val w = weights.getOrElse(edge, 1.0)
         val wFormatted = f"$w%.3f"
         val isDisabled = !act.contains(edge)
-
         val agg = edgeAggregations.getOrElse(edge, "arith")
         val aggStr = if (agg != "arith") s" $agg" else ""
         
-        val line = if (id == l) s"${s.show} ---> ${t.show}: ${l.show}"
-                  else s"${s.show} -${id.show}-> ${t.show}: ${l.show}"
-        
+        val line = if (id == l) s"${s.show} ---> ${t.show}: ${l.show}" else s"${s.show} -${id.show}-> ${t.show}: ${l.show}"
         sb.append(s"$line ($wFormatted)$aggStr${if (isDisabled) " disabled" else ""}\n")
       }
 
-      val allOn = for {
-        (src, targets) <- on.toList
-        (trg, id, lbl) <- targets
-      } yield (src, trg, id, lbl)
-
+      val allOn = for { (src, targets) <- on.toList; (trg, id, lbl) <- targets } yield (src, trg, id, lbl)
       allOn.foreach { case (s, t, id, l) =>
         val edge = (s, t, id, l)
         val w = weights.getOrElse(edge, 0.1)
-        val wFormatted = f"$w%.3f"
-        sb.append(s"${s.show} ->> ${t.show}: ${l.show} ($wFormatted)\n")
+        sb.append(s"${s.show} ->> ${t.show}: ${l.show} (${f"$w%.3f"})\n")
       }
 
-      val allOff = for {
-        (src, targets) <- off.toList
-        (trg, id, lbl) <- targets
-      } yield (src, trg, id, lbl)
-
+      val allOff = for { (src, targets) <- off.toList; (trg, id, lbl) <- targets } yield (src, trg, id, lbl)
       allOff.foreach { case (s, t, id, l) =>
         val edge = (s, t, id, l)
         val w = weights.getOrElse(edge, 0.1)
-        val wFormatted = f"$w%.3f"
-        sb.append(s"${s.show} --x ${t.show}: ${l.show} ($wFormatted)\n")
+        sb.append(s"${s.show} --x ${t.show}: ${l.show} (${f"$w%.3f"})\n")
       }
 
       sb.toString()
     }
 
-    def showSimple: String =
-      s"[at] ${inits.mkString(",")}" +
-      s"${if val_env.nonEmpty then s" [vars] ${val_env.map(kv => s"${kv._1}=${kv._2}").mkString(", ")}" else ""}" +
-      s" [active] ${showEdges(act)}"
-
     override def toString: String =
       s"""[init]  ${inits.mkString(",")}
-         |[vars]  ${val_env.map(kv => s"${kv._1}=${kv._2}").mkString(", ")}
+         |[vars]  ${val_env.map(kv => s"${kv._1}=${kv._2.value}").mkString(", ")}
          |[act]   ${showEdges(act)}
          |[edges] ${showEdgeMap(edg)}
          |[on]    ${showEdgeMap(on)}
          |[off]   ${showEdgeMap(off)}
-         |[weights] ${weights.map(kv => s"${showEdge(kv._1)} -> ${f"${kv._2}%.3f"}").mkString(", ")}
-         |[conds] ${edgeConditions.filter(_._2.isDefined).map(kv => s"${showEdge(kv._1)} -> ${kv._2.get.toMermaidString}").mkString(", ")}
-         |[upd]   ${edgeUpdates.filter(_._2.nonEmpty).map(kv => s"${showEdge(kv._1)} -> ${kv._2.map(_.toString).mkString("; ")}").mkString(", ")}"""
+         |[weights] ${weights.map(kv => s"${showEdge(kv._1)} -> ${f"${kv._2}%.3f"}").mkString(", ")}"""
     
-    def states =
-      for (src, dests) <- edg.toSet; (d, _, _) <- dests; st <- Set(src, d) yield st
+    def states = for (src, dests) <- edg.toSet; (d, _, _) <- dests; st <- Set(src, d) yield st
 
-    def addEdge(s1:QName, s2:QName, transId:QName, label:QName, cond: Option[Condition] = None, upd: List[Statement] = Nil, w: Double = 1.0, agg: String = "") = {
+    def addEdge(s1:QName, s2:QName, transId:QName, label:QName, cond: Option[Condition] = None, upd: List[Statement] = Nil, w: Double = 1.0, agg: String = "", wExpr: Option[UpdateExpr] = None) = {
       val edge: Edge = (s1, s2, transId, label)
       val newAggs = if (agg.nonEmpty) edgeAggregations + (edge -> agg) else edgeAggregations
-      
-      this.copy(
-        edg = add(s1 -> (s2, transId, label), edg), 
-        lbls = add(label -> edge, lbls),           
-        act = act + edge,
-        edgeConditions = edgeConditions + (edge -> cond),
-        edgeUpdates = edgeUpdates + (edge -> upd),
-        weights = weights + (edge -> w),
-        edgeAggregations = newAggs
-      )
+      val newExprs = wExpr.map(e => weightExprs + (edge -> e)).getOrElse(weightExprs)
+      this.copy(edg = add(s1 -> (s2, transId, label), edg), lbls = add(label -> edge, lbls), act = act + edge, edgeConditions = edgeConditions + (edge -> cond), edgeUpdates = edgeUpdates + (edge -> upd), weights = weights + (edge -> w), edgeAggregations = newAggs, weightExprs = newExprs)
     }
 
-    def addOn(s1: QName, s2: QName, transId: QName, label: QName, cond: Option[Condition] = None, upd: List[Statement] = Nil, w: Double = 1.0, agg: String = "") = {
+    def addOn(s1: QName, s2: QName, transId: QName, label: QName, cond: Option[Condition] = None, upd: List[Statement] = Nil, w: Double = 1.0, agg: String = "", wExpr: Option[UpdateExpr] = None) = {
       val edge: Edge = (s1, s2, transId, label)
       val newAggs = if (agg.nonEmpty) edgeAggregations + (edge -> agg) else edgeAggregations
-      
-      this.copy(
-        on = add(s1 -> (s2, transId, label), on),
-        lbls = add(label -> edge, lbls),
-        act = act + edge,
-        edgeConditions = edgeConditions + (edge -> cond),
-        edgeUpdates = edgeUpdates + (edge -> upd),
-        weights = weights + (edge -> w),
-        edgeAggregations = newAggs)
+      val newExprs = wExpr.map(e => weightExprs + (edge -> e)).getOrElse(weightExprs)
+      this.copy(on = add(s1 -> (s2, transId, label), on), lbls = add(label -> edge, lbls), act = act + edge, edgeConditions = edgeConditions + (edge -> cond), edgeUpdates = edgeUpdates + (edge -> upd), weights = weights + (edge -> w), edgeAggregations = newAggs, weightExprs = newExprs)
     }
 
-    def addOff(s1: QName, s2: QName, transId: QName, label: QName, cond: Option[Condition] = None, upd: List[Statement] = Nil, w: Double = 1.0, agg: String = "") = {
+    def addOff(s1: QName, s2: QName, transId: QName, label: QName, cond: Option[Condition] = None, upd: List[Statement] = Nil, w: Double = 1.0, agg: String = "", wExpr: Option[UpdateExpr] = None) = {
       val edge: Edge = (s1, s2, transId, label)
       val newAggs = if (agg.nonEmpty) edgeAggregations + (edge -> agg) else edgeAggregations
-      
-      this.copy(
-        off = add(s1 -> (s2, transId, label), off),
-        lbls = add(label -> edge, lbls),
-        act = act + edge,
-        edgeConditions = edgeConditions + (edge -> cond),
-        edgeUpdates = edgeUpdates + (edge -> upd),
-        weights = weights + (edge -> w),
-        edgeAggregations = newAggs)
+      val newExprs = wExpr.map(e => weightExprs + (edge -> e)).getOrElse(weightExprs)
+      this.copy(off = add(s1 -> (s2, transId, label), off), lbls = add(label -> edge, lbls), act = act + edge, edgeConditions = edgeConditions + (edge -> cond), edgeUpdates = edgeUpdates + (edge -> upd), weights = weights + (edge -> w), edgeAggregations = newAggs, weightExprs = newExprs)
     }
 
-    def deactivate(s1:QName, s2:QName, tId:QName, l:QName) =
-      this.copy(act = act - ((s1, s2, tId, l)))
-
-    def addInit(s:QName) =
-      this.copy(inits = inits + s)
-
-    def addVariable(name: QName, value: Int) =
-      this.copy(val_env = val_env + (name -> value))
+    def deactivate(s1:QName, s2:QName, tId:QName, l:QName) = this.copy(act = act - ((s1, s2, tId, l)))
+    def addInit(s:QName) = this.copy(inits = inits + s)
+    def addVariable(name: QName, value: RuntimeValue) = this.copy(val_env = val_env + (name -> value))
 
     def ++(r:RxGraph) =
       RxGraph(
         join(edg,r.edg),join(on,r.on),join(off,r.off),
         join(lbls,r.lbls),inits++r.inits,act++r.act,
-        val_env ++ r.val_env, 
-        edgeConditions ++ r.edgeConditions, 
-        edgeUpdates ++ r.edgeUpdates,
-        weights ++ r.weights,
-        edgeAggregations ++ r.edgeAggregations,
-        trainingMode = this.trainingMode || r.trainingMode,
-        distributionMode = this.distributionMode
+        val_env ++ r.val_env, functions ++ r.functions,
+        edgeConditions ++ r.edgeConditions, edgeUpdates ++ r.edgeUpdates,
+        weights ++ r.weights, edgeAggregations ++ r.edgeAggregations,
+        trainingMode = this.trainingMode || r.trainingMode, distributionMode = this.distributionMode,
+        weightExprs = weightExprs ++ r.weightExprs
       )
-
 
   object RxGraph: 
     def apply(): RxGraph = RxGraph(
-      edg = Map().withDefaultValue(Set()),
-      on = Map().withDefaultValue(Set()),
-      off = Map().withDefaultValue(Set()),
-      lbls = Map().withDefaultValue(Set()),
-      inits = Set(),
-      act = Set(),
-      val_env = Map(), 
-      edgeConditions = Map().withDefaultValue(None), 
-      edgeUpdates = Map().withDefaultValue(Nil), 
-      weights = Map(),
-      edgeAggregations = Map(), 
-      trainingMode = false,
-      paradigm = "probabilistic",
-      distributionMode = "normalize"
+      edg = Map().withDefaultValue(Set()), on = Map().withDefaultValue(Set()), off = Map().withDefaultValue(Set()),
+      lbls = Map().withDefaultValue(Set()), inits = Set(), act = Set(),
+      val_env = Map(), functions = Map(),
+      edgeConditions = Map().withDefaultValue(None), edgeUpdates = Map().withDefaultValue(Nil), 
+      weights = Map(), edgeAggregations = Map(), 
+      trainingMode = false, paradigm = "probabilistic", distributionMode = "normalize",
+      weightExprs = Map()
     )
 
     def toMermaid(rx: RxGraph): String =
@@ -439,28 +341,12 @@ object Program2:
     def toMermaidPlain(rx: RxGraph): String =
       var i = -1
       def fresh(): Int = {i += 1; i}
-      s"flowchart LR\n${
-        drawEdges(rx.edg, rx, fresh, ">", "stroke:black, stroke-width:2px",(x,y) => Set(x.toString),simple=true, withConditions = false)}${
-        (for s<-rx.inits yield s"  style $s fill:#8f7,stroke:#363,stroke-width:4px\n").mkString 
-      }"
+      s"flowchart LR\n${drawEdges(rx.edg, rx, fresh, ">", "stroke:black, stroke-width:2px",(x,y) => Set(x.toString),simple=true, withConditions = false)}${(for s<-rx.inits yield s"  style $s fill:#8f7,stroke:#363,stroke-width:4px\n").mkString }"
 
-    private def cleanId(a: Any, b: Any, id: Any, lbl: Any): String =
-      s"$a$b$id$lbl".replaceAll("[^a-zA-Z0-9]", "")
+    private def cleanId(a: Any, b: Any, id: Any, lbl: Any): String = s"$a$b$id$lbl".replaceAll("[^a-zA-Z0-9]", "")
+    private def getLabel(n: QName, rx: RxGraph): Set[String] = for (edge <- rx.lbls.getOrElse(n, Set())) yield cleanId(edge._1, edge._2, edge._3, edge._4)
 
-    private def getLabel(n: QName, rx: RxGraph): Set[String] =
-      for (edge <- rx.lbls.getOrElse(n, Set())) 
-        yield cleanId(edge._1, edge._2, edge._3, edge._4)
-
-    private def drawEdges(
-      es: EdgeMap,
-      rx: RxGraph,
-      fresh: () => Int,
-      tip: String,
-      style: String,
-      getEnds: (QName, RxGraph) => Set[String],
-      simple: Boolean = false,
-      withConditions: Boolean = false
-    ): String =
+    private def drawEdges(es: EdgeMap, rx: RxGraph, fresh: () => Int, tip: String, style: String, getEnds: (QName, RxGraph) => Set[String], simple: Boolean = false, withConditions: Boolean = false): String =
       (for
         (a, bs) <- es.toList
         (b, transId, lbl) <- bs.toList
@@ -469,7 +355,7 @@ object Program2:
       yield
         val edge: Edge = (a, b, transId, lbl)
         val isGloballyActive = rx.act(edge)
-        val isConditionSatisfied = rx.edgeConditions.getOrElse(edge, None).forall(Condition.evaluate(_, rx))
+        val isConditionSatisfied = rx.edgeConditions.getOrElse(edge, None).forall(c => RxSemantics.evalCondition(c, rx))
         val line = if (isGloballyActive && isConditionSatisfied) then "---" else "-.-"
 
         val qNameLabel = if transId == lbl then lbl.show else s"${lbl.show}(${transId.show})"
@@ -481,28 +367,9 @@ object Program2:
         val combined   = List(condText, qNameLabel, weightText, updText).filter(_.nonEmpty).mkString(" ")
         val edgeLabel = if combined.nonEmpty then s"|\"${combined}\"|" else ""
 
-        if lbl.n.isEmpty && transId.n.isEmpty then
-          s"  $a2 $line$tip $edgeLabel $b2\n" +
-          s"  linkStyle ${fresh()} $style\n"
-        else if simple then
-          s"  $a2 $line$tip $edgeLabel $b2\n" +
-          s"  linkStyle ${fresh()} $style\n"
+        if lbl.n.isEmpty && transId.n.isEmpty then s"  $a2 $line$tip $edgeLabel $b2\n  linkStyle ${fresh()} $style\n"
+        else if simple then s"  $a2 $line$tip $edgeLabel $b2\n  linkStyle ${fresh()} $style\n"
         else
           val anchorId = cleanId(a, b, transId, lbl)
-          s"  $a2 $line $anchorId( ) $line$tip $edgeLabel $b2\n" +
-          s"  style $anchorId width: 0\n" +
-          s"  linkStyle ${fresh()} $style\n" +
-          s"  linkStyle ${fresh()} $style\n"
+          s"  $a2 $line $anchorId( ) $line$tip $edgeLabel $b2\n  style $anchorId width: 0\n  linkStyle ${fresh()} $style\n  linkStyle ${fresh()} $style\n"
       ).mkString
-
-  object Examples:
-    implicit def s2n(str:String): QName = QName(List(str))
-    val a = s2n("a")
-    val t1 = s2n("t1")
-    val s1 = s2n("s1")
-    val s2 = s2n("s2")
-
-    val g1 = RxGraph()
-      .addInit(s1)
-      .addEdge(s1, s2, t1, a)
-      .addOff(a, a, s2n("rule1"), s2n("off-a"))

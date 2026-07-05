@@ -2,6 +2,8 @@ package rta.backend
 
 import rta.syntax.Program2.{Edge, QName, RxGraph}
 import rta.syntax.{Condition, Statement, Aggregation}
+import rta.syntax.RuntimeValue
+
 import scala.collection.mutable
 
 object TrainingEngine {
@@ -31,7 +33,7 @@ object TrainingEngine {
     val hyperTable: Map[QName, List[HyperEffect]],
     val labelToEdges: Map[QName, List[Int]],
     val stateToEdges: Map[QName, List[Int]],
-    var varEnv: Map[QName, Int],
+    var varEnv: Map[QName, RuntimeValue],
     var currentStates: Set[QName],
     val isAggregation: Boolean
   )
@@ -75,7 +77,6 @@ object TrainingEngine {
     new Session(rx, edgeList, weights, hits, totals, activeArr, initActiveArr, builder.map(kv => kv._1 -> kv._2.toList).toMap, labelToEdges, stateToEdges, rx.val_env, rx.inits, isAgg)
   }
 
-  // AGORA RECEBEMOS UMA FUNÇÃO getOldW PARA NÃO DEPENDER CEGAMENTE DOS HITS
   private def distributeWeights(sess: Session, srcState: QName, modifiedIdxs: Set[Int], activeIdxs: List[Int], mode: String, getOldW: Int => Double): Unit = {
     if (sess.rx.paradigm == "fuzzy") return
     if (activeIdxs.isEmpty) return
@@ -139,7 +140,7 @@ object TrainingEngine {
     val firedIdxOpt = sess.currentStates.view.flatMap { st =>
       sess.stateToEdges.getOrElse(st, Nil).find { idx =>
         val e = sess.edgeArr(idx)
-        e._4 == labelQN && sess.activeArr(idx) && sess.rx.edgeConditions.get(e).flatten.forall(c => Condition.evaluate(c, sess.varEnv))
+        e._4 == labelQN && sess.activeArr(idx) && sess.rx.edgeConditions.get(e).flatten.forall(c => RxSemantics.evalCondition(c, sess.rx.copy(val_env = sess.varEnv)))
       }
     }.headOption
 
@@ -160,10 +161,10 @@ object TrainingEngine {
 
         if (effects.nonEmpty) {
           val wSource = sess.weights(firedIdx)
-          val preHyperWeights = sess.weights.clone() // Foto da realidade ANTES de aplicar as regras!
+          val preHyperWeights = sess.weights.clone() 
 
           for (fx <- effects) {
-            if (fx.conditionOpt.forall(c => Condition.evaluate(c, sess.varEnv))) {
+            if (fx.conditionOpt.forall(c => RxSemantics.evalCondition(c, sess.rx.copy(val_env = sess.varEnv)))) {
               val newW = Aggregation.compute(fx.aggType, wSource, fx.ruleWeight, sess.weights(fx.targetEdgeIdx))
               sess.weights(fx.targetEdgeIdx) = clamp(newW)
               dirtyStates += sess.edgeArr(fx.targetEdgeIdx)._1
@@ -174,10 +175,8 @@ object TrainingEngine {
           if (sess.rx.paradigm == "probabilistic") {
             for (st <- dirtyStates) {
               val stActiveIdxs = sess.stateToEdges.getOrElse(st, Nil).filter(sess.activeArr)
-              // Redistribui respeitando os pesos reais que existiam antes
               distributeWeights(sess, st, modifiedByHyper.toSet, stActiveIdxs, sess.rx.distributionMode, i => preHyperWeights(i))
               
-              // SINCRONIZAÇÃO: Força o Laplace a aceitar as mudanças das regras (HyperEdges)!
               for (idx <- stActiveIdxs) {
                 sess.hits(idx) = Math.round(sess.weights(idx) * sess.totals(st))
               }
@@ -185,18 +184,15 @@ object TrainingEngine {
           }
         }
 
-        // PEGA A LISTA DE ATIVADOS APÓS AS REGRAS (OVR entra na conta do Treino agora!)
         val activeAfterIdxs = sess.stateToEdges.getOrElse(srcState, Nil).filter(sess.activeArr)
-        val preTrainWeights = sess.weights.clone() // Foto da realidade ANTES do Treino agir
+        val preTrainWeights = sess.weights.clone()
 
         if (sess.isAggregation) {
           val oldW = sess.weights(firedIdx)
           sess.weights(firedIdx) = clamp(Aggregation.compute(sess.rx.trainingAgg, oldW, sess.rx.trainingLambda, oldW))
           if (sess.rx.paradigm == "probabilistic") {
-            // Como é aggregation, o "oldW" na redistribuição é o peso exato antes desse treino.
             distributeWeights(sess, srcState, Set(firedIdx), activeAfterIdxs, sess.rx.distributionMode, i => preTrainWeights(i))
             
-            // Sincroniza por segurança
             for (idx <- activeAfterIdxs) {
               sess.hits(idx) = Math.round(sess.weights(idx) * sess.totals(srcState))
             }
@@ -207,10 +203,8 @@ object TrainingEngine {
           sess.hits(firedIdx) += 1L
           sess.weights(firedIdx) = clamp(sess.hits(firedIdx).toDouble / newTotal.toDouble)
           
-          // Como é Laplace, usamos a proporção de decaimento natural baseada em hits como base antiga
           distributeWeights(sess, srcState, Set(firedIdx), activeAfterIdxs, sess.rx.distributionMode, i => sess.hits(i).toDouble / newTotal.toDouble)
           
-          // Atualiza qualquer variação de peso (devido ao clamp/equal) de volta para os hits.
           for (idx <- activeAfterIdxs) {
             sess.hits(idx) = Math.round(sess.weights(idx) * newTotal.toDouble)
           }

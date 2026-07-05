@@ -299,8 +299,9 @@ object RTAAPI {
     }.getOrElse("Modelo vazio")
   }
 
+  
   @JSExport
-  def runPdl(stateStr: String, formulaStr: String): String = {
+  def runPdl(stateStr: String, formulaStr: String, maxStates: Int, maxIter: Int, epsilon: Double): String = {
     currentGraph match {
       case Some(rx) =>
         try {
@@ -312,7 +313,7 @@ object RTAAPI {
                  s"""{"error": "State '${startState.show}' not found in the current model."}"""
               } else {
                  val formula = PdlParser.parsePdlFormula(formulaStr)
-                 val (resStr, vN, vE, tN, tE, viTrace) = PdlEvaluator.evaluateFormulaWithTrace(startState, formula, rx)
+                 val (resStr, vN, vE, tN, tE, viTrace,cxEdges) = PdlEvaluator.evaluateFormulaWithTrace(startState, formula, rx, maxStates, maxIter, epsilon)
                  
                  val viTraceJson = viTrace.map { stepMap =>
                    val entries = stepMap.map { case (k, v) => s""""$k": $v""" }.mkString(",")
@@ -325,7 +326,8 @@ object RTAAPI {
                    "visitedEdges": [${vE.map(s => s""""$s"""").mkString(",")}],
                    "targetNodes": [${tN.map(s => s""""$s"""").mkString(",")}],
                    "targetEdges": [${tE.map(s => s""""$s"""").mkString(",")}],
-                   "valueIterationTrace": $viTraceJson
+                   "valueIterationTrace": $viTraceJson,
+                   "counterexample": [${cxEdges.map(s => s""""$s"""").mkString(",")}]
                  }"""
               }
           }
@@ -337,7 +339,6 @@ object RTAAPI {
       case None => """{"error": "Model not loaded."}"""
     }
   }
-
 
   
 
@@ -940,7 +941,7 @@ object RTAAPI {
        s"""{"from":"$from", "to":"$to", "tId":"$id", "label":"$lbl", "p": ${f"$p%.3f".replace(",", ".")}, "isDelay": false}"""
      }.mkString(",")
 
-     val valEnvJson = graph.val_env.map { case (n, v) => s""""${n.show}": $v""" }.mkString(",")
+     val valEnvJson = graph.val_env.map { case (n, v) => s""""${n.show}": "${v.value}"""" }.mkString(",")
 
      val traversedJson = traversedEdge match {
     case Some((from, to, id, lbl)) => 

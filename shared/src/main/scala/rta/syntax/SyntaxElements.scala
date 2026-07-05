@@ -3,13 +3,41 @@ package rta.syntax
 import rta.syntax.Program2.{QName, RxGraph}
 
 sealed trait Statement
-case class UpdateStmt(update: CounterUpdate) extends Statement
+case class AssignStmt(variable: QName, expr: UpdateExpr) extends Statement {
+  override def toString: String = s"${variable.show}' := ${UpdateExpr.show(expr)}"
+}
+
+case class ArrayAssignStmt(arrName: QName, index: UpdateExpr, expr: UpdateExpr) extends Statement {
+  override def toString: String = s"${arrName.show}[${UpdateExpr.show(index)}]' := ${UpdateExpr.show(expr)}"
+}
+
 case class IfThenStmt(condition: Condition, thenStmts: List[Statement]) extends Statement
+
+case class ForeachStmt(iteratorVar: QName, arrayName: QName, body: List[Statement]) extends Statement
+
+case class ReturnStmt(expr: UpdateExpr) extends Statement
+case class PrintStmt(expr: UpdateExpr) extends Statement
+
+
+case class FunctionDef(name: QName, params: List[QName], body: List[Statement])
+
+sealed trait RuntimeValue {
+  def value: Any
+}
+
+object RuntimeValue {
+  case class VInt(value: Int, min: Option[Int] = None, max: Option[Int] = None) extends RuntimeValue
+  case class VFloat(value: Double, min: Option[Double] = None, max: Option[Double] = None) extends RuntimeValue
+  case class VBool(value: Boolean) extends RuntimeValue
+  case class VArray(value: List[RuntimeValue], isDynamic: Boolean, maxSize: Option[Int] = None) extends RuntimeValue {
+    override def toString: String = "[" + value.map(_.value).mkString(", ") + "]"
+  }
+}
+
 
 sealed trait Condition {
   def toMermaidString: String = this match {
-    case Condition.AtomicCond(left, op, Right(q)) => s"${left.show} $op ${q.show}"
-    case Condition.AtomicCond(left, op, Left(i))  => s"${left.show} $op $i"
+    case Condition.AtomicCond(left, op, right) => s"${UpdateExpr.show(left)} $op ${UpdateExpr.show(right)}"
     case Condition.WeightCheck(lbl, metric, op, v) => s"$metric(${lbl.show}) $op $v"
     case Condition.And(c1, c2) => s"(${c1.toMermaidString} AND ${c2.toMermaidString})"
     case Condition.Or(c1, c2)  => s"(${c1.toMermaidString} OR ${c2.toMermaidString})"
@@ -17,76 +45,74 @@ sealed trait Condition {
 }
 
 object Condition {
-  case class AtomicCond(left: QName, op: String, right: Either[Double, QName]) extends Condition
+  case class AtomicCond(left: UpdateExpr, op: String, right: UpdateExpr) extends Condition
+  
   case class WeightCheck(label: QName, metric: String, op: String, value: Double) extends Condition
   case class And(left: Condition, right: Condition) extends Condition
   case class Or(left: Condition, right: Condition) extends Condition
 
   private val epsilon = 1e-7
 
-  private def getValue(qname: QName, val_env: Map[QName, Int]): Double = {
-    val_env.get(qname).map(_.toDouble).getOrElse {
-      if (qname.n.size > 1) {
-        val globalName = QName(List(qname.n.last))
-        val_env.getOrElse(globalName, 0).toDouble
-      } else 0.0
+  def extractDouble(v: RuntimeValue): Double = v match {
+    case RuntimeValue.VInt(i, _, _) => i.toDouble
+    case RuntimeValue.VFloat(f, _, _) => f
+    case RuntimeValue.VBool(b) => if (b) 1.0 else 0.0
+    case _ => 0.0
+  }
+
+  def compareValues(leftVal: RuntimeValue, op: String, rightVal: RuntimeValue): Boolean = {
+    if (leftVal.isInstanceOf[RuntimeValue.VBool] && rightVal.isInstanceOf[RuntimeValue.VBool]) {
+      val b1 = leftVal.asInstanceOf[RuntimeValue.VBool].value
+      val b2 = rightVal.asInstanceOf[RuntimeValue.VBool].value
+      op match {
+        case "==" | "=" => b1 == b2
+        case "!=" => b1 != b2
+        case _ => false
+      }
+    } else {
+      val l = extractDouble(leftVal)
+      val r = extractDouble(rightVal)
+      op match {
+        case ">=" => l >= r - epsilon
+        case "<=" => l <= r + epsilon
+        case ">"  => l > r + epsilon
+        case "<"  => l < r - epsilon
+        case "==" | "=" => Math.abs(l - r) < epsilon
+        case "!=" => Math.abs(l - r) >= epsilon
+        case _    => false
+      }
     }
   }
 
-  def evaluate(condition: Condition, val_env: Map[QName, Int]): Boolean = condition match {
-    case AtomicCond(left, op, right) =>
-      val leftVal = getValue(left, val_env)
-      val rightVal = right match {
-        case Left(d) => d
-        case Right(qname) => getValue(qname, val_env)
-      }
-      compare(leftVal, op, rightVal)
-    case And(l, r) => evaluate(l, val_env) && evaluate(r, val_env)
-    case Or(l, r)  => evaluate(l, val_env) || evaluate(r, val_env)
-    case WeightCheck(_, _, _, _) => false 
-  }
 
-  def evaluate(condition: Condition, rx: RxGraph): Boolean = condition match {
-    case WeightCheck(label, metric, op, threshold) =>
-      val p = rx.act.find(_._4 == label).map(e => rx.weights.getOrElse(e, 1.0)).getOrElse(0.0)
-      val calculated = metric.toLowerCase match {
-        case "not_p" | "f" => 1.0 - p
-        case _             => p
-      }
-      compare(calculated, op, threshold)
-    case _ => evaluate(condition, rx.val_env) 
-  }
-
-  private def compare(leftVal: Double, op: String, rightVal: Double): Boolean = op match {
-    case ">=" => leftVal >= rightVal - epsilon
-    case "<=" => leftVal <= rightVal + epsilon
-    case ">"  => leftVal > rightVal + epsilon
-    case "<"  => leftVal < rightVal - epsilon
-    case "==" | "=" => Math.abs(leftVal - rightVal) < epsilon
-    case "!=" => Math.abs(leftVal - rightVal) >= epsilon
-    case _    => false
-  }
 }
 
 sealed trait UpdateExpr
+
 object UpdateExpr {
-  case class Lit(i: Int) extends UpdateExpr
+  case class LitInt(i: Int) extends UpdateExpr
+  case class LitFloat(f: Double) extends UpdateExpr
+  case class LitBool(b: Boolean) extends UpdateExpr
+  case class LitArray(elements: List[UpdateExpr]) extends UpdateExpr
+
   case class Var(q: QName) extends UpdateExpr
-  case class Add(v: QName, e: Either[Int, QName]) extends UpdateExpr
-  case class Sub(v: QName, e: Either[Int, QName]) extends UpdateExpr
+  case class ArrayAccess(arr: QName, index: UpdateExpr) extends UpdateExpr
+
+  case class MathOp(left: UpdateExpr, op: String, right: UpdateExpr) extends UpdateExpr
+  
+  case class FuncCall(funcName: QName, args: List[UpdateExpr]) extends UpdateExpr
 
   def show(expr: UpdateExpr): String = show(expr, _.show)
 
   def show(expr: UpdateExpr, s: QName => String): String = expr match {
-    case Lit(i) => i.toString
+    case LitInt(i) => i.toString
+    case LitFloat(f) => f.toString
+    case LitBool(b) => b.toString
+    case LitArray(elems) => elems.map(e => show(e, s)).mkString("[", ", ", "]")
     case Var(q) => s(q)
-    case Add(v, Left(i))  => s"${s(v)} + $i"
-    case Add(v, Right(q)) => s"${s(v)} + ${s(q)}"
-    case Sub(v, Left(i))  => s"${s(v)} - $i"
-    case Sub(v, Right(q)) => s"${s(v)} - ${s(q)}"
+    case ArrayAccess(arr, idx) => s"${s(arr)}[${show(idx, s)}]"
+    case MathOp(l, op, r) => s"${show(l, s)} $op ${show(r, s)}"
+    case FuncCall(f, args) => s"${s(f)}(${args.map(a => show(a, s)).mkString(", ")})"
   }
 }
 
-case class CounterUpdate(variable: QName, expr: UpdateExpr) {
-  override def toString: String = s"${variable.show}' := ${UpdateExpr.show(expr)}"
-}

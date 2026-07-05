@@ -1,7 +1,7 @@
 package rta.syntax
 
 import rta.syntax.Program2.{Edge, QName, RxGraph}
-import rta.syntax.{Condition, Statement, UpdateStmt, IfThenStmt, UpdateExpr}
+import rta.syntax.{Condition, Statement, AssignStmt, ArrayAssignStmt, IfThenStmt, ForeachStmt, ReturnStmt,PrintStmt, UpdateExpr}
 
 object RTATranslator {
 
@@ -200,9 +200,14 @@ object RTATranslator {
   private def conditionToString(cond: Condition): String = cond.toMermaidString
 
   private def statementToString(stmt: Statement): String = stmt match {
-    case UpdateStmt(upd) => s"${upd.variable.show}' := ${UpdateExpr.show(upd.expr)}"
+    case AssignStmt(variable, expr) => s"${variable.show}' := ${UpdateExpr.show(expr)}"
+    case ArrayAssignStmt(arrName, index, expr) => s"${arrName.show}[${UpdateExpr.show(index)}]' := ${UpdateExpr.show(expr)}"
     case IfThenStmt(c, ts) => 
       val thenContent = ts.map(statementToString).mkString("; ")
       s"if (${conditionToString(c)}) then { $thenContent }"
+    case ForeachStmt(iter, arr, body) => 
+      s"foreach (${iter.show} in ${arr.show}) { ${body.map(statementToString).mkString("; ")} }"
+    case ReturnStmt(expr) => s"return ${UpdateExpr.show(expr)}"
+    case PrintStmt(expr)  => s"$print(${UpdateExpr.show(expr)})"
   }
 }
