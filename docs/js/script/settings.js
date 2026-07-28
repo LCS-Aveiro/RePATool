@@ -1,6 +1,3 @@
-// ============================================================
-// settings.js — Engine preferences + panel resize logic
-// ============================================================
 
 window.appSettings = {
     maxStates: 1000,
@@ -34,7 +31,6 @@ function saveAppSettings() {
     console.log("Configurações salvas:", window.appSettings);
 }
 
-// ── Panel resize (left / right / bottom) ────────────────────
 document.addEventListener("DOMContentLoaded", function () {
     var leftPanel   = document.getElementById('left-panel');
     var rightPanel  = document.getElementById('right-panel');

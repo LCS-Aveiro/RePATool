@@ -928,6 +928,14 @@ object RTAAPI {
       case None => "Erro: Modelo não carregado."
     }
   }
+
+
+  private def runtimeValueToJson(v: rta.syntax.RuntimeValue): String = v match {
+    case rta.syntax.RuntimeValue.VInt(i, _, _) => i.toString
+    case rta.syntax.RuntimeValue.VFloat(f, _, _) => f.toString
+    case rta.syntax.RuntimeValue.VBool(b) => b.toString
+    case rta.syntax.RuntimeValue.VArray(elems, _, _) => "[" + elems.map(runtimeValueToJson).mkString(", ") + "]"
+  }
   
   private def generateSimulationJson(graph: RxGraph, traversedEdge: Option[Edge]): String = {
      val graphElementsJson = CytoscapeConverter(graph)
@@ -941,7 +949,9 @@ object RTAAPI {
        s"""{"from":"$from", "to":"$to", "tId":"$id", "label":"$lbl", "p": ${f"$p%.3f".replace(",", ".")}, "isDelay": false}"""
      }.mkString(",")
 
-     val valEnvJson = graph.val_env.map { case (n, v) => s""""${n.show}": "${v.value}"""" }.mkString(",")
+      val valEnvJson = graph.val_env.map { case (n, v) => 
+       s""""${n.show}": ${runtimeValueToJson(v)}""" 
+     }.mkString(",")
 
      val traversedJson = traversedEdge match {
     case Some((from, to, id, lbl)) => 

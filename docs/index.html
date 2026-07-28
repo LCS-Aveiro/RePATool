@@ -669,7 +669,7 @@ function doUndo() {
 mermaid.initialize({ startOnLoad: false });
 
 CodeMirror.defineMode("rta", function() {
-    var keywords = ["name","init","aut","int","training","if","then","else","disabled","calibration","proportional","normalize","equal","paradigm","fuzzy","probabilistic"];
+    var keywords = ["name","init","aut","int","training","if","then","else","disabled","calibration","proportional","normalize","equal","revise_equal","paradigm","fuzzy","probabilistic"];
     return {
         token: function(stream) {
             if (stream.eatSpace()) return null;

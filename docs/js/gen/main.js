@@ -8067,8 +8067,8 @@ $c_Lrta_backend_PrismConverter2$.prototype.apply__Lrta_syntax_Program2$RxGraph__
     return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$33, "", "/", "")
   }));
   var ord$1 = $m_s_math_Ordering$String$();
-  var this$139 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$34, f$1, ord$1)));
-  var f$26 = new $c_sjsr_AnonFunction1(((tLbl) => {
+  var this$149 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$34, f$1, ord$1)));
+  var f$28 = new $c_sjsr_AnonFunction1(((tLbl) => {
     var tLbl$1 = $as_Lrta_syntax_Program2$QName(tLbl);
     var n = $n(tLbl$1).show__T();
     var sT = $f_T__replaceAll__T__T__T($n(n), "[^a-zA-Z0-9_]", "_");
@@ -8420,8 +8420,8 @@ $c_Lrta_backend_PrismConverter2$.prototype.apply__Lrta_syntax_Program2$RxGraph__
         return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$96, "", "/", "")
       }));
       var ord$7 = $m_s_math_Ordering$String$();
-      var this$138 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$97, f$14, ord$7)));
-      var f$25 = new $c_sjsr_AnonFunction1(((st) => {
+      var this$148 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$97, f$14, ord$7)));
+      var f$27 = new $c_sjsr_AnonFunction1(((st) => {
         var st$1 = $as_Lrta_syntax_Program2$QName(st);
         var outEdges = $n($as_sc_IterableOnceOps($n($as_sc_IterableOps($n($n(rx).Lrta_syntax_Program2$RxGraph__f_edg).getOrElse__O__F0__O(st$1, new $c_sjsr_AnonFunction0((() => {
           var this$98 = $n($m_s_Predef$().s_Predef$__f_Set);
@@ -8466,106 +8466,16 @@ $c_Lrta_backend_PrismConverter2$.prototype.apply__Lrta_syntax_Program2$RxGraph__
           }))));
           var sumUnmodBase = $f_sc_IterableOnceOps__mkString__T__T__T__T(this$103, "", " + ", "")
         };
-        var x70 = $n(rx).Lrta_syntax_Program2$RxGraph__f_distributionMode;
-        switch (x70) {
-          case "normalize": {
-            var totalSumExp = (((("max(1, " + sumModExp) + " + ") + sumUnmodBase) + ")");
-            var this$106 = $n(outEdges);
-            var f$15 = new $c_sjsr_AnonFunction1(((_$28) => {
-              var _$28$1 = $as_T4(_$28);
-              var this$104 = $n($as_Lrta_syntax_Program2$QName($n(_$28$1).T4__f__4));
-              var this$105 = $n(this$104.Lrta_syntax_Program2$QName__f_n);
-              return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$105, "", "/", "")
-            }));
-            var ord$8 = $m_s_math_Ordering$String$();
-            var this$109 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$106, f$15, ord$8)));
-            var f$16 = new $c_sjsr_AnonFunction1(((e$5$1) => {
+        var x73 = $n(rx).Lrta_syntax_Program2$RxGraph__f_distributionMode;
+        switch (x73) {
+          case "revise_equal": {
+            var this$106 = $n($n(outEdges).map__F1__sci_List(new $c_sjsr_AnonFunction1(((e$5$1) => {
               var e$9 = $as_T4(e$5$1);
               var _2$5 = $n(e$9).T4__f__4;
-              if ((!$n(generatedUpdates).contains__O__Z(new $c_T2(tLbl$1, _2$5)))) {
-                var n$20 = $n($as_Lrta_syntax_Program2$QName($n(e$9).T4__f__4)).show__T();
-                var sE$1 = $f_T__replaceAll__T__T__T($n(n$20), "[^a-zA-Z0-9_]", "_");
-                var base = ($n(modifiedOut).contains__O__Z(e$9) ? ((("base_upd_" + sT) + "_") + sE$1) : ("w_int_" + sE$1));
-                var fName$1 = ((("final_upd_" + sT) + "_") + sE$1);
-                formulasSb.append__T__scm_StringBuilder((((((("formula " + fName$1) + " = min(10000, max(0, floor((") + base) + " * 10000) / ") + totalSumExp) + ")));\n"));
-                var $$x12 = $n(generatedUpdates);
-                var _2$6 = $n(e$9).T4__f__4;
-                $n($$x12).update__O__O__V(new $c_T2(tLbl$1, _2$6), fName$1)
-              }
-            }));
-            var these$4 = this$109;
-            while ((!$n(these$4).isEmpty__Z())) {
-              f$16.apply__O__O($n(these$4).head__O());
-              these$4 = $as_sci_List($n(these$4).tail__O())
-            };
-            break
-          }
-          case "proportional": {
-            var this$112 = $n(modifiedOut);
-            var f$17 = new $c_sjsr_AnonFunction1(((_$29) => {
-              var _$29$1 = $as_T4(_$29);
-              var this$110 = $n($as_Lrta_syntax_Program2$QName($n(_$29$1).T4__f__4));
-              var this$111 = $n(this$110.Lrta_syntax_Program2$QName__f_n);
-              return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$111, "", "/", "")
-            }));
-            var ord$9 = $m_s_math_Ordering$String$();
-            var this$115 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$112, f$17, ord$9)));
-            var f$18 = new $c_sjsr_AnonFunction1(((e$6$1) => {
-              var e$10 = $as_T4(e$6$1);
-              var _2$7 = $n(e$10).T4__f__4;
-              if ((!$n(generatedUpdates).contains__O__Z(new $c_T2(tLbl$1, _2$7)))) {
-                var n$21 = $n($as_Lrta_syntax_Program2$QName($n(e$10).T4__f__4)).show__T();
-                var sE$2 = $f_T__replaceAll__T__T__T($n(n$21), "[^a-zA-Z0-9_]", "_");
-                var fName$2 = ((("final_upd_" + sT) + "_") + sE$2);
-                formulasSb.append__T__scm_StringBuilder((((((("formula " + fName$2) + " = base_upd_") + sT) + "_") + sE$2) + ";\n"));
-                var $$x13 = $n(generatedUpdates);
-                var _2$8 = $n(e$10).T4__f__4;
-                $n($$x13).update__O__O__V(new $c_T2(tLbl$1, _2$8), fName$2)
-              }
-            }));
-            var these$5 = this$115;
-            while ((!$n(these$5).isEmpty__Z())) {
-              f$18.apply__O__O($n(these$5).head__O());
-              these$5 = $as_sci_List($n(these$5).tail__O())
-            };
-            var this$118 = $n(unmodifiedOut);
-            var f$19 = new $c_sjsr_AnonFunction1(((_$30) => {
-              var _$30$1 = $as_T4(_$30);
-              var this$116 = $n($as_Lrta_syntax_Program2$QName($n(_$30$1).T4__f__4));
-              var this$117 = $n(this$116.Lrta_syntax_Program2$QName__f_n);
-              return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$117, "", "/", "")
-            }));
-            var ord$10 = $m_s_math_Ordering$String$();
-            var this$121 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$118, f$19, ord$10)));
-            var f$20 = new $c_sjsr_AnonFunction1(((e$7$1) => {
-              var e$11 = $as_T4(e$7$1);
-              var _2$9 = $n(e$11).T4__f__4;
-              if ((!$n(generatedUpdates).contains__O__Z(new $c_T2(tLbl$1, _2$9)))) {
-                var n$22 = $n($as_Lrta_syntax_Program2$QName($n(e$11).T4__f__4)).show__T();
-                var sE$3 = $f_T__replaceAll__T__T__T($n(n$22), "[^a-zA-Z0-9_]", "_");
-                var newExpr = (((((("floor(w_int_" + sE$3) + " * (10000 - (") + sumModExp) + ")) / max(1, ") + sumUnmodBase) + "))");
-                var fName$3 = ((("final_upd_" + sT) + "_") + sE$3);
-                formulasSb.append__T__scm_StringBuilder((((("formula " + fName$3) + " = min(10000, max(0, ") + newExpr) + "));\n"));
-                var $$x14 = $n(generatedUpdates);
-                var _2$10 = $n(e$11).T4__f__4;
-                $n($$x14).update__O__O__V(new $c_T2(tLbl$1, _2$10), fName$3)
-              }
-            }));
-            var these$6 = this$121;
-            while ((!$n(these$6).isEmpty__Z())) {
-              f$20.apply__O__O($n(these$6).head__O());
-              these$6 = $as_sci_List($n(these$6).tail__O())
-            };
-            break
-          }
-          case "equal": {
-            var this$124 = $n($n(unmodifiedOut).map__F1__sci_List(new $c_sjsr_AnonFunction1(((e$8$1) => {
-              var e$12 = $as_T4(e$8$1);
-              var _2$11 = $n(e$12).T4__f__4;
-              var nextAct = $as_T($n(generatedNextActs).getOrElse__O__F0__O(new $c_T2(tLbl$1, _2$11), new $c_sjsr_AnonFunction0((() => $p_Lrta_backend_PrismConverter2$__actCheckExpr$1__Lrta_syntax_Program2$RxGraph__sci_Set__Lrta_syntax_Program2$QName__T(this, rx, toggledLabels, $as_Lrta_syntax_Program2$QName($n(e$12).T4__f__4))))));
-              var $$x15 = $n($n($n(rx).Lrta_syntax_Program2$RxGraph__f_edgeConditions).get__O__s_Option(e$12));
-              var this$123 = $m_s_$less$colon$less$();
-              var condOpt = $n($$x15).flatten__s_$less$colon$less__s_Option(this$123.s_$less$colon$less$__f_singleton);
+              var nextAct = $as_T($n(generatedNextActs).getOrElse__O__F0__O(new $c_T2(tLbl$1, _2$5), new $c_sjsr_AnonFunction0((() => $p_Lrta_backend_PrismConverter2$__actCheckExpr$1__Lrta_syntax_Program2$RxGraph__sci_Set__Lrta_syntax_Program2$QName__T(this, rx, toggledLabels, $as_Lrta_syntax_Program2$QName($n(e$9).T4__f__4))))));
+              var $$x12 = $n($n($n(rx).Lrta_syntax_Program2$RxGraph__f_edgeConditions).get__O__s_Option(e$9));
+              var this$105 = $m_s_$less$colon$less$();
+              var condOpt = $n($$x12).flatten__s_$less$colon$less__s_Option(this$105.s_$less$colon$less$__f_singleton);
               matchResult11$1: {
                 var combinedCond;
                 if ((condOpt instanceof $c_s_Some)) {
@@ -8583,18 +8493,109 @@ $c_Lrta_backend_PrismConverter2$.prototype.apply__Lrta_syntax_Program2$RxGraph__
               };
               return ((combinedCond === "false") ? "0" : ((combinedCond === "true") ? "1" : (("(" + combinedCond) + " ? 1 : 0)")))
             }))));
-            var p$6 = new $c_sjsr_AnonFunction1(((_$31) => {
-              var _$31$1 = $as_T(_$31);
-              return (_$31$1 !== "0")
+            var p$6 = new $c_sjsr_AnonFunction1(((_$28) => {
+              var _$28$1 = $as_T(_$28);
+              return (_$28$1 !== "0")
             }));
-            var nUnmodParts = $p_sci_List__filterCommon__F1__Z__sci_List(this$124, p$6, false);
-            if ($n(nUnmodParts).isEmpty__Z()) {
-              var nUnmodExpr = "0"
+            var nActiveParts = $p_sci_List__filterCommon__F1__Z__sci_List(this$106, p$6, false);
+            if ($n(nActiveParts).isEmpty__Z()) {
+              var nActiveExpr = "0"
             } else {
-              var this$125 = $n(nUnmodParts);
-              var nUnmodExpr = $f_sc_IterableOnceOps__mkString__T__T__T__T(this$125, "", " + ", "")
+              var this$107 = $n(nActiveParts);
+              var nActiveExpr = $f_sc_IterableOnceOps__mkString__T__T__T__T(this$107, "", " + ", "")
             };
-            var this$128 = $n(modifiedOut);
+            var this$110 = $n(outEdges);
+            var f$15 = new $c_sjsr_AnonFunction1(((_$29) => {
+              var _$29$1 = $as_T4(_$29);
+              var this$108 = $n($as_Lrta_syntax_Program2$QName($n(_$29$1).T4__f__4));
+              var this$109 = $n(this$108.Lrta_syntax_Program2$QName__f_n);
+              return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$109, "", "/", "")
+            }));
+            var ord$8 = $m_s_math_Ordering$String$();
+            var this$113 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$110, f$15, ord$8)));
+            var f$16 = new $c_sjsr_AnonFunction1(((e$6$1) => {
+              var e$10 = $as_T4(e$6$1);
+              var _2$6 = $n(e$10).T4__f__4;
+              if ((!$n(generatedUpdates).contains__O__Z(new $c_T2(tLbl$1, _2$6)))) {
+                var n$20 = $n($as_Lrta_syntax_Program2$QName($n(e$10).T4__f__4)).show__T();
+                var sE$1 = $f_T__replaceAll__T__T__T($n(n$20), "[^a-zA-Z0-9_]", "_");
+                var base = ($n(modifiedOut).contains__O__Z(e$10) ? ((("base_upd_" + sT) + "_") + sE$1) : ("w_int_" + sE$1));
+                var newExpr = (((((((("floor(" + base) + " + (10000 - (") + sumModExp) + ") - (") + sumUnmodBase) + ")) / max(1, ") + nActiveExpr) + "))");
+                var fName$1 = ((("final_upd_" + sT) + "_") + sE$1);
+                formulasSb.append__T__scm_StringBuilder((((("formula " + fName$1) + " = min(10000, max(0, ") + newExpr) + "));\n"));
+                var $$x13 = $n(generatedUpdates);
+                var _2$7 = $n(e$10).T4__f__4;
+                $n($$x13).update__O__O__V(new $c_T2(tLbl$1, _2$7), fName$1)
+              }
+            }));
+            var these$4 = this$113;
+            while ((!$n(these$4).isEmpty__Z())) {
+              f$16.apply__O__O($n(these$4).head__O());
+              these$4 = $as_sci_List($n(these$4).tail__O())
+            };
+            break
+          }
+          case "normalize": {
+            var totalSumExp = (((("max(1, " + sumModExp) + " + ") + sumUnmodBase) + ")");
+            var this$116 = $n(outEdges);
+            var f$17 = new $c_sjsr_AnonFunction1(((_$30) => {
+              var _$30$1 = $as_T4(_$30);
+              var this$114 = $n($as_Lrta_syntax_Program2$QName($n(_$30$1).T4__f__4));
+              var this$115 = $n(this$114.Lrta_syntax_Program2$QName__f_n);
+              return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$115, "", "/", "")
+            }));
+            var ord$9 = $m_s_math_Ordering$String$();
+            var this$119 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$116, f$17, ord$9)));
+            var f$18 = new $c_sjsr_AnonFunction1(((e$7$1) => {
+              var e$11 = $as_T4(e$7$1);
+              var _2$8 = $n(e$11).T4__f__4;
+              if ((!$n(generatedUpdates).contains__O__Z(new $c_T2(tLbl$1, _2$8)))) {
+                var n$21 = $n($as_Lrta_syntax_Program2$QName($n(e$11).T4__f__4)).show__T();
+                var sE$2 = $f_T__replaceAll__T__T__T($n(n$21), "[^a-zA-Z0-9_]", "_");
+                var base$1 = ($n(modifiedOut).contains__O__Z(e$11) ? ((("base_upd_" + sT) + "_") + sE$2) : ("w_int_" + sE$2));
+                var fName$2 = ((("final_upd_" + sT) + "_") + sE$2);
+                formulasSb.append__T__scm_StringBuilder((((((("formula " + fName$2) + " = min(10000, max(0, floor((") + base$1) + " * 10000) / ") + totalSumExp) + ")));\n"));
+                var $$x14 = $n(generatedUpdates);
+                var _2$9 = $n(e$11).T4__f__4;
+                $n($$x14).update__O__O__V(new $c_T2(tLbl$1, _2$9), fName$2)
+              }
+            }));
+            var these$5 = this$119;
+            while ((!$n(these$5).isEmpty__Z())) {
+              f$18.apply__O__O($n(these$5).head__O());
+              these$5 = $as_sci_List($n(these$5).tail__O())
+            };
+            break
+          }
+          case "proportional": {
+            var this$122 = $n(modifiedOut);
+            var f$19 = new $c_sjsr_AnonFunction1(((_$31) => {
+              var _$31$1 = $as_T4(_$31);
+              var this$120 = $n($as_Lrta_syntax_Program2$QName($n(_$31$1).T4__f__4));
+              var this$121 = $n(this$120.Lrta_syntax_Program2$QName__f_n);
+              return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$121, "", "/", "")
+            }));
+            var ord$10 = $m_s_math_Ordering$String$();
+            var this$125 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$122, f$19, ord$10)));
+            var f$20 = new $c_sjsr_AnonFunction1(((e$8$1) => {
+              var e$12 = $as_T4(e$8$1);
+              var _2$10 = $n(e$12).T4__f__4;
+              if ((!$n(generatedUpdates).contains__O__Z(new $c_T2(tLbl$1, _2$10)))) {
+                var n$22 = $n($as_Lrta_syntax_Program2$QName($n(e$12).T4__f__4)).show__T();
+                var sE$3 = $f_T__replaceAll__T__T__T($n(n$22), "[^a-zA-Z0-9_]", "_");
+                var fName$3 = ((("final_upd_" + sT) + "_") + sE$3);
+                formulasSb.append__T__scm_StringBuilder((((((("formula " + fName$3) + " = base_upd_") + sT) + "_") + sE$3) + ";\n"));
+                var $$x15 = $n(generatedUpdates);
+                var _2$11 = $n(e$12).T4__f__4;
+                $n($$x15).update__O__O__V(new $c_T2(tLbl$1, _2$11), fName$3)
+              }
+            }));
+            var these$6 = this$125;
+            while ((!$n(these$6).isEmpty__Z())) {
+              f$20.apply__O__O($n(these$6).head__O());
+              these$6 = $as_sci_List($n(these$6).tail__O())
+            };
+            var this$128 = $n(unmodifiedOut);
             var f$21 = new $c_sjsr_AnonFunction1(((_$32) => {
               var _$32$1 = $as_T4(_$32);
               var this$126 = $n($as_Lrta_syntax_Program2$QName($n(_$32$1).T4__f__4));
@@ -8609,8 +8610,9 @@ $c_Lrta_backend_PrismConverter2$.prototype.apply__Lrta_syntax_Program2$RxGraph__
               if ((!$n(generatedUpdates).contains__O__Z(new $c_T2(tLbl$1, _2$12)))) {
                 var n$23 = $n($as_Lrta_syntax_Program2$QName($n(e$13).T4__f__4)).show__T();
                 var sE$4 = $f_T__replaceAll__T__T__T($n(n$23), "[^a-zA-Z0-9_]", "_");
+                var newExpr$1 = (((((("floor(w_int_" + sE$4) + " * (10000 - (") + sumModExp) + ")) / max(1, ") + sumUnmodBase) + "))");
                 var fName$4 = ((("final_upd_" + sT) + "_") + sE$4);
-                formulasSb.append__T__scm_StringBuilder((((((("formula " + fName$4) + " = base_upd_") + sT) + "_") + sE$4) + ";\n"));
+                formulasSb.append__T__scm_StringBuilder((((("formula " + fName$4) + " = min(10000, max(0, ") + newExpr$1) + "));\n"));
                 var $$x16 = $n(generatedUpdates);
                 var _2$13 = $n(e$13).T4__f__4;
                 $n($$x16).update__O__O__V(new $c_T2(tLbl$1, _2$13), fName$4)
@@ -8621,212 +8623,245 @@ $c_Lrta_backend_PrismConverter2$.prototype.apply__Lrta_syntax_Program2$RxGraph__
               f$22.apply__O__O($n(these$7).head__O());
               these$7 = $as_sci_List($n(these$7).tail__O())
             };
-            var this$134 = $n(unmodifiedOut);
-            var f$23 = new $c_sjsr_AnonFunction1(((_$33) => {
-              var _$33$1 = $as_T4(_$33);
-              var this$132 = $n($as_Lrta_syntax_Program2$QName($n(_$33$1).T4__f__4));
-              var this$133 = $n(this$132.Lrta_syntax_Program2$QName__f_n);
-              return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$133, "", "/", "")
-            }));
-            var ord$12 = $m_s_math_Ordering$String$();
-            var this$137 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$134, f$23, ord$12)));
-            var f$24 = new $c_sjsr_AnonFunction1(((e$10$1) => {
+            break
+          }
+          case "equal": {
+            var this$134 = $n($n(unmodifiedOut).map__F1__sci_List(new $c_sjsr_AnonFunction1(((e$10$1) => {
               var e$14 = $as_T4(e$10$1);
               var _2$14 = $n(e$14).T4__f__4;
-              if ((!$n(generatedUpdates).contains__O__Z(new $c_T2(tLbl$1, _2$14)))) {
-                var n$24 = $n($as_Lrta_syntax_Program2$QName($n(e$14).T4__f__4)).show__T();
+              var nextAct$1 = $as_T($n(generatedNextActs).getOrElse__O__F0__O(new $c_T2(tLbl$1, _2$14), new $c_sjsr_AnonFunction0((() => $p_Lrta_backend_PrismConverter2$__actCheckExpr$1__Lrta_syntax_Program2$RxGraph__sci_Set__Lrta_syntax_Program2$QName__T(this, rx, toggledLabels, $as_Lrta_syntax_Program2$QName($n(e$14).T4__f__4))))));
+              var $$x17 = $n($n($n(rx).Lrta_syntax_Program2$RxGraph__f_edgeConditions).get__O__s_Option(e$14));
+              var this$133 = $m_s_$less$colon$less$();
+              var condOpt$1 = $n($$x17).flatten__s_$less$colon$less__s_Option(this$133.s_$less$colon$less$__f_singleton);
+              matchResult12$1: {
+                var combinedCond$1;
+                if ((condOpt$1 instanceof $c_s_Some)) {
+                  var c$3 = $as_Lrta_syntax_Condition($n($as_s_Some(condOpt$1)).s_Some__f_value);
+                  var cStr$1 = $p_Lrta_backend_PrismConverter2$__conditionToPrism__Lrta_syntax_Condition__T(this, c$3);
+                  var combinedCond$1 = ((nextAct$1 === "false") ? "false" : ((nextAct$1 === "true") ? cStr$1 : (((("(" + nextAct$1) + " & ") + cStr$1) + ")")));
+                  break matchResult12$1
+                };
+                var x$5 = $m_s_None$();
+                if ((x$5 === condOpt$1)) {
+                  var combinedCond$1 = nextAct$1;
+                  break matchResult12$1
+                };
+                throw new $c_s_MatchError(condOpt$1)
+              };
+              return ((combinedCond$1 === "false") ? "0" : ((combinedCond$1 === "true") ? "1" : (("(" + combinedCond$1) + " ? 1 : 0)")))
+            }))));
+            var p$7 = new $c_sjsr_AnonFunction1(((_$33) => {
+              var _$33$1 = $as_T(_$33);
+              return (_$33$1 !== "0")
+            }));
+            var nUnmodParts = $p_sci_List__filterCommon__F1__Z__sci_List(this$134, p$7, false);
+            if ($n(nUnmodParts).isEmpty__Z()) {
+              var nUnmodExpr = "0"
+            } else {
+              var this$135 = $n(nUnmodParts);
+              var nUnmodExpr = $f_sc_IterableOnceOps__mkString__T__T__T__T(this$135, "", " + ", "")
+            };
+            var this$138 = $n(modifiedOut);
+            var f$23 = new $c_sjsr_AnonFunction1(((_$34) => {
+              var _$34$1 = $as_T4(_$34);
+              var this$136 = $n($as_Lrta_syntax_Program2$QName($n(_$34$1).T4__f__4));
+              var this$137 = $n(this$136.Lrta_syntax_Program2$QName__f_n);
+              return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$137, "", "/", "")
+            }));
+            var ord$12 = $m_s_math_Ordering$String$();
+            var this$141 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$138, f$23, ord$12)));
+            var f$24 = new $c_sjsr_AnonFunction1(((e$11$1) => {
+              var e$15 = $as_T4(e$11$1);
+              var _2$15 = $n(e$15).T4__f__4;
+              if ((!$n(generatedUpdates).contains__O__Z(new $c_T2(tLbl$1, _2$15)))) {
+                var n$24 = $n($as_Lrta_syntax_Program2$QName($n(e$15).T4__f__4)).show__T();
                 var sE$5 = $f_T__replaceAll__T__T__T($n(n$24), "[^a-zA-Z0-9_]", "_");
-                var newExpr$1 = (((((((("floor(w_int_" + sE$5) + " + (10000 - (") + sumModExp) + ") - (") + sumUnmodBase) + ")) / max(1, ") + nUnmodExpr) + "))");
                 var fName$5 = ((("final_upd_" + sT) + "_") + sE$5);
-                formulasSb.append__T__scm_StringBuilder((((("formula " + fName$5) + " = min(10000, max(0, ") + newExpr$1) + "));\n"));
-                var $$x17 = $n(generatedUpdates);
-                var _2$15 = $n(e$14).T4__f__4;
-                $n($$x17).update__O__O__V(new $c_T2(tLbl$1, _2$15), fName$5)
+                formulasSb.append__T__scm_StringBuilder((((((("formula " + fName$5) + " = base_upd_") + sT) + "_") + sE$5) + ";\n"));
+                var $$x18 = $n(generatedUpdates);
+                var _2$16 = $n(e$15).T4__f__4;
+                $n($$x18).update__O__O__V(new $c_T2(tLbl$1, _2$16), fName$5)
               }
             }));
-            var these$8 = this$137;
+            var these$8 = this$141;
             while ((!$n(these$8).isEmpty__Z())) {
               f$24.apply__O__O($n(these$8).head__O());
               these$8 = $as_sci_List($n(these$8).tail__O())
             };
+            var this$144 = $n(unmodifiedOut);
+            var f$25 = new $c_sjsr_AnonFunction1(((_$35) => {
+              var _$35$1 = $as_T4(_$35);
+              var this$142 = $n($as_Lrta_syntax_Program2$QName($n(_$35$1).T4__f__4));
+              var this$143 = $n(this$142.Lrta_syntax_Program2$QName__f_n);
+              return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$143, "", "/", "")
+            }));
+            var ord$13 = $m_s_math_Ordering$String$();
+            var this$147 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$144, f$25, ord$13)));
+            var f$26 = new $c_sjsr_AnonFunction1(((e$12$1) => {
+              var e$16 = $as_T4(e$12$1);
+              var _2$17 = $n(e$16).T4__f__4;
+              if ((!$n(generatedUpdates).contains__O__Z(new $c_T2(tLbl$1, _2$17)))) {
+                var n$25 = $n($as_Lrta_syntax_Program2$QName($n(e$16).T4__f__4)).show__T();
+                var sE$6 = $f_T__replaceAll__T__T__T($n(n$25), "[^a-zA-Z0-9_]", "_");
+                var newExpr$2 = (((((((("floor(w_int_" + sE$6) + " + (10000 - (") + sumModExp) + ") - (") + sumUnmodBase) + ")) / max(1, ") + nUnmodExpr) + "))");
+                var fName$6 = ((("final_upd_" + sT) + "_") + sE$6);
+                formulasSb.append__T__scm_StringBuilder((((("formula " + fName$6) + " = min(10000, max(0, ") + newExpr$2) + "));\n"));
+                var $$x19 = $n(generatedUpdates);
+                var _2$18 = $n(e$16).T4__f__4;
+                $n($$x19).update__O__O__V(new $c_T2(tLbl$1, _2$18), fName$6)
+              }
+            }));
+            var these$9 = this$147;
+            while ((!$n(these$9).isEmpty__Z())) {
+              f$26.apply__O__O($n(these$9).head__O());
+              these$9 = $as_sci_List($n(these$9).tail__O())
+            };
             break
           }
           default: {
-            throw new $c_s_MatchError(x70)
+            throw new $c_s_MatchError(x73)
           }
         }
       }));
-      var these$9 = this$138;
-      while ((!$n(these$9).isEmpty__Z())) {
-        f$25.apply__O__O($n(these$9).head__O());
-        these$9 = $as_sci_List($n(these$9).tail__O())
+      var these$10 = this$148;
+      while ((!$n(these$10).isEmpty__Z())) {
+        f$27.apply__O__O($n(these$10).head__O());
+        these$10 = $as_sci_List($n(these$10).tail__O())
       }
     }
   }));
-  var these$10 = this$139;
-  while ((!$n(these$10).isEmpty__Z())) {
-    f$26.apply__O__O($n(these$10).head__O());
-    these$10 = $as_sci_List($n(these$10).tail__O())
+  var these$11 = this$149;
+  while ((!$n(these$11).isEmpty__Z())) {
+    f$28.apply__O__O($n(these$11).head__O());
+    these$11 = $as_sci_List($n(these$11).tail__O())
   };
   sb.append__T__scm_StringBuilder($n(formulasSb.scm_StringBuilder__f_underlying).jl_StringBuilder__f_java$lang$StringBuilder$$content);
-  var this$140 = $n($n($n(rx).Lrta_syntax_Program2$RxGraph__f_lbls).keySet__sci_Set());
-  var that$1 = $as_sc_IterableOnce($n(allRules).map__F1__O(new $c_sjsr_AnonFunction1(((_$34) => {
-    var _$34$1 = $as_T4(_$34);
-    return $as_Lrta_syntax_Program2$QName($n(_$34$1).T4__f__2)
+  var this$150 = $n($n($n(rx).Lrta_syntax_Program2$RxGraph__f_lbls).keySet__sci_Set());
+  var that$1 = $as_sc_IterableOnce($n(allRules).map__F1__O(new $c_sjsr_AnonFunction1(((_$36) => {
+    var _$36$1 = $as_T4(_$36);
+    return $as_Lrta_syntax_Program2$QName($n(_$36$1).T4__f__2)
   }))));
-  var this$141 = $n(this$140.concat__sc_IterableOnce__sc_SetOps(that$1));
-  var that$2 = $as_sc_IterableOnce($n(allRules).map__F1__O(new $c_sjsr_AnonFunction1(((_$35) => {
-    var _$35$1 = $as_T4(_$35);
-    return $as_Lrta_syntax_Program2$QName($n(_$35$1).T4__f__4)
+  var this$151 = $n(this$150.concat__sc_IterableOnce__sc_SetOps(that$1));
+  var that$2 = $as_sc_IterableOnce($n(allRules).map__F1__O(new $c_sjsr_AnonFunction1(((_$37) => {
+    var _$37$1 = $as_T4(_$37);
+    return $as_Lrta_syntax_Program2$QName($n(_$37$1).T4__f__4)
   }))));
-  var this$143 = $n($n($as_sc_IterableOnceOps($n(this$141.concat__sc_IterableOnce__sc_SetOps(that$2)).filter__F1__O(new $c_sjsr_AnonFunction1(((_$36) => {
-    var _$36$1 = $as_Lrta_syntax_Program2$QName(_$36);
-    var this$142 = $n($n(_$36$1).Lrta_syntax_Program2$QName__f_n);
-    return (!this$142.isEmpty__Z())
+  var this$153 = $n($n($as_sc_IterableOnceOps($n(this$151.concat__sc_IterableOnce__sc_SetOps(that$2)).filter__F1__O(new $c_sjsr_AnonFunction1(((_$38) => {
+    var _$38$1 = $as_Lrta_syntax_Program2$QName(_$38);
+    var this$152 = $n($n(_$38$1).Lrta_syntax_Program2$QName__f_n);
+    return (!this$152.isEmpty__Z())
   }))))).toList__sci_List());
-  var this$146 = $n($as_sc_SeqOps($f_sc_SeqOps__distinct__O(this$143)));
-  var f$27 = new $c_sjsr_AnonFunction1(((_$37) => {
-    var _$37$1 = $as_Lrta_syntax_Program2$QName(_$37);
-    var this$144 = $n(_$37$1);
-    var this$145 = $n(this$144.Lrta_syntax_Program2$QName__f_n);
-    return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$145, "", "/", "")
+  var this$156 = $n($as_sc_SeqOps($f_sc_SeqOps__distinct__O(this$153)));
+  var f$29 = new $c_sjsr_AnonFunction1(((_$39) => {
+    var _$39$1 = $as_Lrta_syntax_Program2$QName(_$39);
+    var this$154 = $n(_$39$1);
+    var this$155 = $n(this$154.Lrta_syntax_Program2$QName__f_n);
+    return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$155, "", "/", "")
   }));
-  var ord$13 = $m_s_math_Ordering$String$();
-  var allLabels = $as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$146, f$27, ord$13));
+  var ord$14 = $m_s_math_Ordering$String$();
+  var allLabels = $as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$156, f$29, ord$14));
   sb.append__T__scm_StringBuilder("\n// --- Static Weights (Constants) ---\n");
-  var this$147 = $n(allLabels);
-  var p$7 = new $c_sjsr_AnonFunction1(((lbl$2$1) => {
+  var this$157 = $n(allLabels);
+  var p$8 = new $c_sjsr_AnonFunction1(((lbl$2$1) => {
     var lbl$4 = $as_Lrta_syntax_Program2$QName(lbl$2$1);
     return (!$n(mutableLabels).contains__O__Z(lbl$4))
   }));
-  var this$152 = $ct_sc_IterableOps$WithFilter__sc_IterableOps__F1__(new $c_sc_IterableOps$WithFilter(), this$147, p$7);
-  var f$30 = new $c_sjsr_AnonFunction1(((lbl$3$1) => {
+  var this$162 = $ct_sc_IterableOps$WithFilter__sc_IterableOps__F1__(new $c_sc_IterableOps$WithFilter(), this$157, p$8);
+  var f$32 = new $c_sjsr_AnonFunction1(((lbl$3$1) => {
     var lbl$5 = $as_Lrta_syntax_Program2$QName(lbl$3$1);
-    var n$25 = $n(lbl$5).show__T();
-    var sId = $f_T__replaceAll__T__T__T($n(n$25), "[^a-zA-Z0-9_]", "_");
-    var this$149 = $n($n($n(rx).Lrta_syntax_Program2$RxGraph__f_lbls).get__O__s_Option(lbl$5));
-    var f$28 = new $c_sjsr_AnonFunction1(((_$38) => {
-      var _$38$1 = $as_sci_Set(_$38);
-      var this$148 = $n(_$38$1);
-      return $f_sc_IterableOps__headOption__s_Option(this$148)
+    var n$26 = $n(lbl$5).show__T();
+    var sId = $f_T__replaceAll__T__T__T($n(n$26), "[^a-zA-Z0-9_]", "_");
+    var this$159 = $n($n($n(rx).Lrta_syntax_Program2$RxGraph__f_lbls).get__O__s_Option(lbl$5));
+    var f$30 = new $c_sjsr_AnonFunction1(((_$40) => {
+      var _$40$1 = $as_sci_Set(_$40);
+      var this$158 = $n(_$40$1);
+      return $f_sc_IterableOps__headOption__s_Option(this$158)
     }));
-    var this$150 = $n((this$149.isEmpty__Z() ? $m_s_None$() : $as_s_Option(f$28.apply__O__O(this$149.get__O()))));
-    var f$29 = new $c_sjsr_AnonFunction1(((_$39) => {
-      var _$39$1 = $as_T4(_$39);
-      return $uD($n($n(rx).Lrta_syntax_Program2$RxGraph__f_weights).getOrElse__O__F0__O(_$39$1, new $c_sjsr_AnonFunction0((() => 1.0))))
+    var this$160 = $n((this$159.isEmpty__Z() ? $m_s_None$() : $as_s_Option(f$30.apply__O__O(this$159.get__O()))));
+    var f$31 = new $c_sjsr_AnonFunction1(((_$41) => {
+      var _$41$1 = $as_T4(_$41);
+      return $uD($n($n(rx).Lrta_syntax_Program2$RxGraph__f_weights).getOrElse__O__F0__O(_$41$1, new $c_sjsr_AnonFunction0((() => 1.0))))
     }));
-    var this$151 = $n((this$150.isEmpty__Z() ? $m_s_None$() : new $c_s_Some(f$29.apply__O__O(this$150.get__O()))));
+    var this$161 = $n((this$160.isEmpty__Z() ? $m_s_None$() : new $c_s_Some(f$31.apply__O__O(this$160.get__O()))));
     var default$3 = new $c_sjsr_AnonFunction0((() => 1.0));
-    var w = $uD((this$151.isEmpty__Z() ? default$3.apply__O() : this$151.get__O()));
+    var w = $uD((this$161.isEmpty__Z() ? default$3.apply__O() : this$161.get__O()));
     return sb.append__T__scm_StringBuilder((((("formula w_int_" + sId) + " = ") + $doubleToInt((w * this.Lrta_backend_PrismConverter2$__f_SCALE))) + ";\n"))
   }));
-  $n(this$152.filtered__sc_Iterable()).foreach__F1__V(f$30);
+  $n(this$162.filtered__sc_Iterable()).foreach__F1__V(f$32);
   sb.append__T__scm_StringBuilder("\n// --- State Transitions ---\n");
   $n($m_s_package$().s_package$__f_List);
   var commands = new $c_scm_ListBuffer();
-  var this$154 = $n(stateToId);
-  var p$8 = new $c_sjsr_AnonFunction1(((x$1$3$1) => {
+  var this$164 = $n(stateToId);
+  var p$9 = new $c_sjsr_AnonFunction1(((x$1$3$1) => {
     var x$1$7 = $as_T2(x$1$3$1);
     return ((x$1$7 !== null) && ($as_Lrta_syntax_Program2$QName($n(x$1$7)._1__O()), $uI($n(x$1$7)._2__O()), true))
   }));
-  var this$188 = new $c_sc_MapOps$WithFilter(this$154, p$8);
-  var f$38 = new $c_sjsr_AnonFunction1(((x$1$4$1) => {
+  var this$198 = new $c_sc_MapOps$WithFilter(this$164, p$9);
+  var f$40 = new $c_sjsr_AnonFunction1(((x$1$4$1) => {
     var x$1$8 = $as_T2(x$1$4$1);
     if ((x$1$8 !== null)) {
       var source$1 = $as_Lrta_syntax_Program2$QName($n(x$1$8)._1__O());
       var srcIdx$1 = $uI($n(x$1$8)._2__O());
       var outgoingEdges = $n($as_sc_IterableOnceOps($n($n(rx).Lrta_syntax_Program2$RxGraph__f_edg).getOrElse__O__F0__O(source$1, new $c_sjsr_AnonFunction0((() => {
-        var this$155 = $n($m_s_Predef$().s_Predef$__f_Set);
+        var this$165 = $n($m_s_Predef$().s_Predef$__f_Set);
         var elems$7 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T3.getArrayOf().constr)([]));
-        return this$155.from__sc_IterableOnce__sci_Set(elems$7)
+        return this$165.from__sc_IterableOnce__sci_Set(elems$7)
       }))))).toList__sci_List();
-      var this$156 = $n(outgoingEdges);
-      if ((!this$156.isEmpty__Z())) {
+      var this$166 = $n(outgoingEdges);
+      if ((!this$166.isEmpty__Z())) {
         var sumParts = $n(outgoingEdges).map__F1__sci_List(new $c_sjsr_AnonFunction1(((x$1$2$2) => {
           var x$1$9 = $as_T3(x$1$2$2);
           if ((x$1$9 !== null)) {
             var target = $as_Lrta_syntax_Program2$QName($n(x$1$9).T3__f__1);
             var id = $as_Lrta_syntax_Program2$QName($n(x$1$9).T3__f__2);
             var label = $as_Lrta_syntax_Program2$QName($n(x$1$9).T3__f__3);
-            var e$15 = new $c_T4(source$1, target, id, label);
-            var actCheck = $p_Lrta_backend_PrismConverter2$__fullActCheckExpr$1__Lrta_syntax_Program2$RxGraph__sci_Set__T4__T(this, rx, toggledLabels, e$15);
-            var n$26 = $n(label).show__T();
-            var wVar = ("w_int_" + $f_T__replaceAll__T__T__T($n(n$26), "[^a-zA-Z0-9_]", "_"));
+            var e$17 = new $c_T4(source$1, target, id, label);
+            var actCheck = $p_Lrta_backend_PrismConverter2$__fullActCheckExpr$1__Lrta_syntax_Program2$RxGraph__sci_Set__T4__T(this, rx, toggledLabels, e$17);
+            var n$27 = $n(label).show__T();
+            var wVar = ("w_int_" + $f_T__replaceAll__T__T__T($n(n$27), "[^a-zA-Z0-9_]", "_"));
             return ((actCheck === "true") ? wVar : ((actCheck === "false") ? "0" : (((("(" + actCheck) + " ? ") + wVar) + " : 0)")))
           };
           throw new $c_s_MatchError(x$1$9)
         })));
         var sumName = ("sum_s" + srcIdx$1);
-        var this$158 = $n(sumParts);
-        sb.append__T__scm_StringBuilder((((("formula " + sumName) + " = ") + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$158, "", " + ", "")) + ";\n"));
+        var this$168 = $n(sumParts);
+        sb.append__T__scm_StringBuilder((((("formula " + sumName) + " = ") + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$168, "", " + ", "")) + ";\n"));
         var branches = $n(outgoingEdges).map__F1__sci_List(new $c_sjsr_AnonFunction1(((x$1$3$2) => {
           var x$1$10 = $as_T3(x$1$3$2);
           if ((x$1$10 !== null)) {
             var target$1 = $as_Lrta_syntax_Program2$QName($n(x$1$10).T3__f__1);
             var id$1 = $as_Lrta_syntax_Program2$QName($n(x$1$10).T3__f__2);
             var label$1 = $as_Lrta_syntax_Program2$QName($n(x$1$10).T3__f__3);
-            var n$27 = $n(label$1).show__T();
-            var sLbl$1 = $f_T__replaceAll__T__T__T($n(n$27), "[^a-zA-Z0-9_]", "_");
+            var n$28 = $n(label$1).show__T();
+            var sLbl$1 = $f_T__replaceAll__T__T__T($n(n$28), "[^a-zA-Z0-9_]", "_");
             var edge = new $c_T4(source$1, target$1, id$1, label$1);
             var actCheck$1 = $p_Lrta_backend_PrismConverter2$__fullActCheckExpr$1__Lrta_syntax_Program2$RxGraph__sci_Set__T4__T(this, rx, toggledLabels, edge);
             var probFormula = ((actCheck$1 === "true") ? (((("(w_int_" + sLbl$1) + " / ") + sumName) + ")") : ((actCheck$1 === "false") ? "0" : (((((("(" + actCheck$1) + " ? (w_int_") + sLbl$1) + " / ") + sumName) + ") : 0)")));
             var elems$8 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T.getArrayOf().constr)([]));
             var effectParts = new $c_scm_ListBuffer().scala$collection$mutable$ListBuffer$$freshFrom__sc_IterableOnce__scm_ListBuffer(elems$8);
-            var this$161 = $n(effectParts);
+            var this$171 = $n(effectParts);
             var elem$1 = (("(s'=" + $n(stateToId).apply__O__O(target$1)) + ")");
-            this$161.addOne__O__scm_ListBuffer(elem$1);
-            var this$162 = $n(toggledLabels);
+            this$171.addOne__O__scm_ListBuffer(elem$1);
+            var this$172 = $n(toggledLabels);
             $m_sci_List$();
-            var this$166 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$162));
-            var f$31 = new $c_sjsr_AnonFunction1(((_$40) => {
-              var _$40$1 = $as_Lrta_syntax_Program2$QName(_$40);
-              var this$164 = $n(_$40$1);
-              var this$165 = $n(this$164.Lrta_syntax_Program2$QName__f_n);
-              return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$165, "", "/", "")
-            }));
-            var ord$14 = $m_s_math_Ordering$String$();
-            var this$169 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$166, f$31, ord$14)));
-            var f$32 = new $c_sjsr_AnonFunction1(((tgtLbl$4) => {
-              var tgtLbl$5 = $as_Lrta_syntax_Program2$QName(tgtLbl$4);
-              var x78 = $n(generatedNextActs).get__O__s_Option(new $c_T2(label$1, tgtLbl$5));
-              if ((x78 instanceof $c_s_Some)) {
-                var nextFormula = $as_T($n($as_s_Some(x78)).s_Some__f_value);
-                var this$168 = $n(effectParts);
-                var n$28 = $n(tgtLbl$5).show__T();
-                var elem$2 = (((("(" + $f_T__replaceAll__T__T__T($n(n$28), "[^a-zA-Z0-9_]", "_")) + "_act' = (") + nextFormula) + " ? 1 : 0))");
-                return this$168.addOne__O__scm_ListBuffer(elem$2)
-              };
-              var x$5 = $m_s_None$();
-              if ((x$5 === x78)) {
-                return (void 0)
-              };
-              throw new $c_s_MatchError(x78)
-            }));
-            var these$11 = this$169;
-            while ((!$n(these$11).isEmpty__Z())) {
-              f$32.apply__O__O($n(these$11).head__O());
-              these$11 = $as_sci_List($n(these$11).tail__O())
-            };
-            var this$170 = $n(mutableLabels);
-            $m_sci_List$();
-            var this$174 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$170));
-            var f$33 = new $c_sjsr_AnonFunction1(((_$41) => {
-              var _$41$1 = $as_Lrta_syntax_Program2$QName(_$41);
-              var this$172 = $n(_$41$1);
-              var this$173 = $n(this$172.Lrta_syntax_Program2$QName__f_n);
-              return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$173, "", "/", "")
+            var this$176 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$172));
+            var f$33 = new $c_sjsr_AnonFunction1(((_$42) => {
+              var _$42$1 = $as_Lrta_syntax_Program2$QName(_$42);
+              var this$174 = $n(_$42$1);
+              var this$175 = $n(this$174.Lrta_syntax_Program2$QName__f_n);
+              return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$175, "", "/", "")
             }));
             var ord$15 = $m_s_math_Ordering$String$();
-            var this$177 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$174, f$33, ord$15)));
-            var f$34 = new $c_sjsr_AnonFunction1(((tgtLbl$2$1) => {
-              var tgtLbl$6 = $as_Lrta_syntax_Program2$QName(tgtLbl$2$1);
-              var x81 = $n(generatedUpdates).get__O__s_Option(new $c_T2(label$1, tgtLbl$6));
+            var this$179 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$176, f$33, ord$15)));
+            var f$34 = new $c_sjsr_AnonFunction1(((tgtLbl$4) => {
+              var tgtLbl$5 = $as_Lrta_syntax_Program2$QName(tgtLbl$4);
+              var x81 = $n(generatedNextActs).get__O__s_Option(new $c_T2(label$1, tgtLbl$5));
               if ((x81 instanceof $c_s_Some)) {
-                var updFormula = $as_T($n($as_s_Some(x81)).s_Some__f_value);
-                var this$176 = $n(effectParts);
-                var n$29 = $n(tgtLbl$6).show__T();
-                var elem$3 = (((("(w_int_" + $f_T__replaceAll__T__T__T($n(n$29), "[^a-zA-Z0-9_]", "_")) + "' = ") + updFormula) + ")");
-                return this$176.addOne__O__scm_ListBuffer(elem$3)
+                var nextFormula = $as_T($n($as_s_Some(x81)).s_Some__f_value);
+                var this$178 = $n(effectParts);
+                var n$29 = $n(tgtLbl$5).show__T();
+                var elem$2 = (((("(" + $f_T__replaceAll__T__T__T($n(n$29), "[^a-zA-Z0-9_]", "_")) + "_act' = (") + nextFormula) + " ? 1 : 0))");
+                return this$178.addOne__O__scm_ListBuffer(elem$2)
               };
               var x$6 = $m_s_None$();
               if ((x$6 === x81)) {
@@ -8834,83 +8869,115 @@ $c_Lrta_backend_PrismConverter2$.prototype.apply__Lrta_syntax_Program2$RxGraph__
               };
               throw new $c_s_MatchError(x81)
             }));
-            var these$12 = this$177;
+            var these$12 = this$179;
             while ((!$n(these$12).isEmpty__Z())) {
               f$34.apply__O__O($n(these$12).head__O());
               these$12 = $as_sci_List($n(these$12).tail__O())
             };
-            var varUpdates = $p_Lrta_backend_PrismConverter2$__getVariableUpdates__sci_List__s_Option__sci_List(this, $as_sci_List($n($n(rx).Lrta_syntax_Program2$RxGraph__f_edgeUpdates).getOrElse__O__F0__O(edge, new $c_sjsr_AnonFunction0((() => $m_s_package$().s_package$__f_Nil)))), $m_s_None$());
-            var this$178 = $n(varUpdates);
-            var f$35 = new $c_sjsr_AnonFunction1(((_$42) => {
-              var _$42$1 = $as_T3(_$42);
-              return $as_Lrta_syntax_Program2$QName($n(_$42$1).T3__f__1)
+            var this$180 = $n(mutableLabels);
+            $m_sci_List$();
+            var this$184 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$180));
+            var f$35 = new $c_sjsr_AnonFunction1(((_$43) => {
+              var _$43$1 = $as_Lrta_syntax_Program2$QName(_$43);
+              var this$182 = $n(_$43$1);
+              var this$183 = $n(this$182.Lrta_syntax_Program2$QName__f_n);
+              return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$183, "", "/", "")
             }));
-            var grouped = $f_sc_IterableOps__groupBy__F1__sci_Map(this$178, f$35);
-            var this$179 = $n(grouped);
-            var p$9 = new $c_sjsr_AnonFunction1(((x$1$2$3) => {
+            var ord$16 = $m_s_math_Ordering$String$();
+            var this$187 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$184, f$35, ord$16)));
+            var f$36 = new $c_sjsr_AnonFunction1(((tgtLbl$2$1) => {
+              var tgtLbl$6 = $as_Lrta_syntax_Program2$QName(tgtLbl$2$1);
+              var x84 = $n(generatedUpdates).get__O__s_Option(new $c_T2(label$1, tgtLbl$6));
+              if ((x84 instanceof $c_s_Some)) {
+                var updFormula = $as_T($n($as_s_Some(x84)).s_Some__f_value);
+                var this$186 = $n(effectParts);
+                var n$30 = $n(tgtLbl$6).show__T();
+                var elem$3 = (((("(w_int_" + $f_T__replaceAll__T__T__T($n(n$30), "[^a-zA-Z0-9_]", "_")) + "' = ") + updFormula) + ")");
+                return this$186.addOne__O__scm_ListBuffer(elem$3)
+              };
+              var x$7 = $m_s_None$();
+              if ((x$7 === x84)) {
+                return (void 0)
+              };
+              throw new $c_s_MatchError(x84)
+            }));
+            var these$13 = this$187;
+            while ((!$n(these$13).isEmpty__Z())) {
+              f$36.apply__O__O($n(these$13).head__O());
+              these$13 = $as_sci_List($n(these$13).tail__O())
+            };
+            var varUpdates = $p_Lrta_backend_PrismConverter2$__getVariableUpdates__sci_List__s_Option__sci_List(this, $as_sci_List($n($n(rx).Lrta_syntax_Program2$RxGraph__f_edgeUpdates).getOrElse__O__F0__O(edge, new $c_sjsr_AnonFunction0((() => $m_s_package$().s_package$__f_Nil)))), $m_s_None$());
+            var this$188 = $n(varUpdates);
+            var f$37 = new $c_sjsr_AnonFunction1(((_$44) => {
+              var _$44$1 = $as_T3(_$44);
+              return $as_Lrta_syntax_Program2$QName($n(_$44$1).T3__f__1)
+            }));
+            var grouped = $f_sc_IterableOps__groupBy__F1__sci_Map(this$188, f$37);
+            var this$189 = $n(grouped);
+            var p$10 = new $c_sjsr_AnonFunction1(((x$1$2$3) => {
               var x$1$11 = $as_T2(x$1$2$3);
               return ((x$1$11 !== null) && ($as_Lrta_syntax_Program2$QName($n(x$1$11)._1__O()), $as_sci_List($n(x$1$11)._2__O()), true))
             }));
-            var this$184 = new $c_sc_MapOps$WithFilter(this$179, p$9);
-            var f$37 = new $c_sjsr_AnonFunction1(((x$1$3$3) => {
+            var this$194 = new $c_sc_MapOps$WithFilter(this$189, p$10);
+            var f$39 = new $c_sjsr_AnonFunction1(((x$1$3$3) => {
               var x$1$12 = $as_T2(x$1$3$3);
               if ((x$1$12 !== null)) {
                 var v$1 = $as_Lrta_syntax_Program2$QName($n(x$1$12)._1__O());
                 var upds$1 = $as_sci_List($n(x$1$12)._2__O());
-                var n$30 = $n(v$1).show__T();
-                var vName = $f_T__replaceAll__T__T__T($n(n$30), "[^a-zA-Z0-9_]", "_");
+                var n$31 = $n(v$1).show__T();
+                var vName = $f_T__replaceAll__T__T__T($n(n$31), "[^a-zA-Z0-9_]", "_");
                 var currentExpr = new $c_sr_ObjectRef(vName);
-                var this$181 = $n(upds$1);
-                var p$10 = new $c_sjsr_AnonFunction1(((x$1$2$4) => {
+                var this$191 = $n(upds$1);
+                var p$11 = new $c_sjsr_AnonFunction1(((x$1$2$4) => {
                   var x$1$13 = $as_T3(x$1$2$4);
                   return ((x$1$13 !== null) && ($as_T($n(x$1$13).T3__f__2), $as_s_Option($n(x$1$13).T3__f__3), true))
                 }));
-                var this$182 = $ct_sc_IterableOps$WithFilter__sc_IterableOps__F1__(new $c_sc_IterableOps$WithFilter(), this$181, p$10);
-                var f$36 = new $c_sjsr_AnonFunction1(((x$1$3$4) => {
+                var this$192 = $ct_sc_IterableOps$WithFilter__sc_IterableOps__F1__(new $c_sc_IterableOps$WithFilter(), this$191, p$11);
+                var f$38 = new $c_sjsr_AnonFunction1(((x$1$3$4) => {
                   var x$1$14 = $as_T3(x$1$3$4);
-                  matchResult20: {
+                  matchResult21: {
                     if ((x$1$14 !== null)) {
                       var expr$1 = $as_T($n(x$1$14).T3__f__2);
-                      var condOpt$2 = $as_s_Option($n(x$1$14).T3__f__3);
-                      matchResult19: {
-                        if ((condOpt$2 instanceof $c_s_Some)) {
-                          var c$3 = $as_Lrta_syntax_Condition($n($as_s_Some(condOpt$2)).s_Some__f_value);
-                          var ev$4 = (((((("(" + $p_Lrta_backend_PrismConverter2$__conditionToPrism__Lrta_syntax_Condition__T(this, c$3)) + " ? ") + expr$1) + " : ") + $as_T(currentExpr.sr_ObjectRef__f_elem)) + ")");
+                      var condOpt$3 = $as_s_Option($n(x$1$14).T3__f__3);
+                      matchResult20: {
+                        if ((condOpt$3 instanceof $c_s_Some)) {
+                          var c$4 = $as_Lrta_syntax_Condition($n($as_s_Some(condOpt$3)).s_Some__f_value);
+                          var ev$4 = (((((("(" + $p_Lrta_backend_PrismConverter2$__conditionToPrism__Lrta_syntax_Condition__T(this, c$4)) + " ? ") + expr$1) + " : ") + $as_T(currentExpr.sr_ObjectRef__f_elem)) + ")");
                           currentExpr.sr_ObjectRef__f_elem = ev$4;
                           ev$4 = null;
-                          break matchResult19
+                          break matchResult20
                         };
-                        var x$7 = $m_s_None$();
-                        if ((x$7 === condOpt$2)) {
+                        var x$8 = $m_s_None$();
+                        if ((x$8 === condOpt$3)) {
                           var ev$5 = expr$1;
                           currentExpr.sr_ObjectRef__f_elem = ev$5;
                           ev$5 = null;
-                          break matchResult19
+                          break matchResult20
                         };
-                        throw new $c_s_MatchError(condOpt$2)
+                        throw new $c_s_MatchError(condOpt$3)
                       };
-                      break matchResult20
+                      break matchResult21
                     };
                     throw new $c_s_MatchError(x$1$14)
                   }
                 }));
-                $n(this$182.filtered__sc_Iterable()).foreach__F1__V(f$36);
-                var this$183 = $n(effectParts);
+                $n(this$192.filtered__sc_Iterable()).foreach__F1__V(f$38);
+                var this$193 = $n(effectParts);
                 var elem$4 = (((("(" + vName) + "'=") + $as_T(currentExpr.sr_ObjectRef__f_elem)) + ")");
-                return this$183.addOne__O__scm_ListBuffer(elem$4)
+                return this$193.addOne__O__scm_ListBuffer(elem$4)
               };
               throw new $c_s_MatchError(x$1$12)
             }));
-            $n(this$184.filtered__sc_Iterable()).foreach__F1__V(f$37);
-            var this$185 = $n(effectParts);
-            var this$186 = $n($as_sc_IterableOnceOps($f_sc_SeqOps__distinct__O(this$185)));
-            return ((probFormula + " : ") + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$186, "", " & ", ""))
+            $n(this$194.filtered__sc_Iterable()).foreach__F1__V(f$39);
+            var this$195 = $n(effectParts);
+            var this$196 = $n($as_sc_IterableOnceOps($f_sc_SeqOps__distinct__O(this$195)));
+            return ((probFormula + " : ") + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$196, "", " & ", ""))
           };
           throw new $c_s_MatchError(x$1$10)
         })));
-        var $$x18 = $n(source$1).show__T();
-        var this$187 = $n(branches);
-        var elem$5 = (((((((((("  // State: " + $$x18) + "\n  [") + source$1) + "] s=") + srcIdx$1) + " & ") + sumName) + " > 0 -> \n    ") + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$187, "", "\n    + ", "")) + ";");
+        var $$x20 = $n(source$1).show__T();
+        var this$197 = $n(branches);
+        var elem$5 = (((((((((("  // State: " + $$x20) + "\n  [") + source$1) + "] s=") + srcIdx$1) + " & ") + sumName) + " > 0 -> \n    ") + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$197, "", "\n    + ", "")) + ";");
         commands.addOne__O__scm_ListBuffer(elem$5);
         var elem$6 = (((((("  [] s=" + srcIdx$1) + " & ") + sumName) + " = 0 -> 1.0 : (s'=") + srcIdx$1) + ");");
         return commands.addOne__O__scm_ListBuffer(elem$6)
@@ -8921,118 +8988,118 @@ $c_Lrta_backend_PrismConverter2$.prototype.apply__Lrta_syntax_Program2$RxGraph__
     };
     throw new $c_s_MatchError(x$1$8)
   }));
-  $n(this$188.filtered__sc_Iterable()).foreach__F1__V(f$38);
+  $n(this$198.filtered__sc_Iterable()).foreach__F1__V(f$40);
   sb.append__T__scm_StringBuilder("\nmodule RTA_Model\n\n");
-  var this$189 = $n($n(rx).Lrta_syntax_Program2$RxGraph__f_inits);
-  var this$190 = $n($f_sc_IterableOps__headOption__s_Option(this$189));
-  var f$39 = new $c_sjsr_AnonFunction1(((_$43) => {
-    var _$43$1 = $as_Lrta_syntax_Program2$QName(_$43);
-    return $uI($n(stateToId).getOrElse__O__F0__O(_$43$1, new $c_sjsr_AnonFunction0((() => 0))))
+  var this$199 = $n($n(rx).Lrta_syntax_Program2$RxGraph__f_inits);
+  var this$200 = $n($f_sc_IterableOps__headOption__s_Option(this$199));
+  var f$41 = new $c_sjsr_AnonFunction1(((_$45) => {
+    var _$45$1 = $as_Lrta_syntax_Program2$QName(_$45);
+    return $uI($n(stateToId).getOrElse__O__F0__O(_$45$1, new $c_sjsr_AnonFunction0((() => 0))))
   }));
-  var this$191 = $n((this$190.isEmpty__Z() ? $m_s_None$() : new $c_s_Some(f$39.apply__O__O(this$190.get__O()))));
+  var this$201 = $n((this$200.isEmpty__Z() ? $m_s_None$() : new $c_s_Some(f$41.apply__O__O(this$200.get__O()))));
   var default$4 = new $c_sjsr_AnonFunction0((() => 0));
-  var initId = $uI((this$191.isEmpty__Z() ? default$4.apply__O() : this$191.get__O()));
+  var initId = $uI((this$201.isEmpty__Z() ? default$4.apply__O() : this$201.get__O()));
   sb.append__T__scm_StringBuilder((((("  s : [0.." + maxState) + "] init ") + initId) + ";\n\n"));
-  var this$192 = $n($n(rx).Lrta_syntax_Program2$RxGraph__f_val_env);
+  var this$202 = $n($n(rx).Lrta_syntax_Program2$RxGraph__f_val_env);
   $m_sci_List$();
-  var this$196 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$192));
-  var f$40 = new $c_sjsr_AnonFunction1(((_$44) => {
-    var _$44$1 = $as_T2(_$44);
-    var this$194 = $n($as_Lrta_syntax_Program2$QName($n(_$44$1)._1__O()));
-    var this$195 = $n(this$194.Lrta_syntax_Program2$QName__f_n);
-    return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$195, "", "/", "")
+  var this$206 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$202));
+  var f$42 = new $c_sjsr_AnonFunction1(((_$46) => {
+    var _$46$1 = $as_T2(_$46);
+    var this$204 = $n($as_Lrta_syntax_Program2$QName($n(_$46$1)._1__O()));
+    var this$205 = $n(this$204.Lrta_syntax_Program2$QName__f_n);
+    return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$205, "", "/", "")
   }));
-  var ord$16 = $m_s_math_Ordering$String$();
-  var this$197 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$196, f$40, ord$16)));
-  var f$41 = new $c_sjsr_AnonFunction1(((x$1$5$1) => {
+  var ord$17 = $m_s_math_Ordering$String$();
+  var this$207 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$206, f$42, ord$17)));
+  var f$43 = new $c_sjsr_AnonFunction1(((x$1$5$1) => {
     var x$1$15 = $as_T2(x$1$5$1);
     if ((x$1$15 !== null)) {
-      var n$31 = $as_Lrta_syntax_Program2$QName($n(x$1$15)._1__O());
+      var n$32 = $as_Lrta_syntax_Program2$QName($n(x$1$15)._1__O());
       var v$2 = $as_Lrta_syntax_RuntimeValue($n(x$1$15)._2__O());
-      var n$32 = $n(n$31).show__T();
-      return sb.append__T__scm_StringBuilder((((("  " + $f_T__replaceAll__T__T__T($n(n$32), "[^a-zA-Z0-9_]", "_")) + " : [0..100] init ") + v$2) + ";\n"))
+      var n$33 = $n(n$32).show__T();
+      return sb.append__T__scm_StringBuilder((((("  " + $f_T__replaceAll__T__T__T($n(n$33), "[^a-zA-Z0-9_]", "_")) + " : [0..100] init ") + v$2) + ";\n"))
     };
     throw new $c_s_MatchError(x$1$15)
   }));
-  var these$13 = this$197;
-  while ((!$n(these$13).isEmpty__Z())) {
-    f$41.apply__O__O($n(these$13).head__O());
-    these$13 = $as_sci_List($n(these$13).tail__O())
-  };
-  sb.append__T__scm_StringBuilder("\n  // --- Mutable Weights (State Variables) ---\n");
-  var this$198 = $n(mutableLabels);
-  $m_sci_List$();
-  var this$202 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$198));
-  var f$42 = new $c_sjsr_AnonFunction1(((_$45) => {
-    var _$45$1 = $as_Lrta_syntax_Program2$QName(_$45);
-    var this$200 = $n(_$45$1);
-    var this$201 = $n(this$200.Lrta_syntax_Program2$QName__f_n);
-    return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$201, "", "/", "")
-  }));
-  var ord$17 = $m_s_math_Ordering$String$();
-  var this$207 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$202, f$42, ord$17)));
-  var f$45 = new $c_sjsr_AnonFunction1(((lbl$4$1) => {
-    var lbl$6 = $as_Lrta_syntax_Program2$QName(lbl$4$1);
-    var n$33 = $n(lbl$6).show__T();
-    var sId$1 = $f_T__replaceAll__T__T__T($n(n$33), "[^a-zA-Z0-9_]", "_");
-    var this$204 = $n($n($n(rx).Lrta_syntax_Program2$RxGraph__f_lbls).get__O__s_Option(lbl$6));
-    var f$43 = new $c_sjsr_AnonFunction1(((_$46) => {
-      var _$46$1 = $as_sci_Set(_$46);
-      var this$203 = $n(_$46$1);
-      return $f_sc_IterableOps__headOption__s_Option(this$203)
-    }));
-    var this$205 = $n((this$204.isEmpty__Z() ? $m_s_None$() : $as_s_Option(f$43.apply__O__O(this$204.get__O()))));
-    var f$44 = new $c_sjsr_AnonFunction1(((_$47) => {
-      var _$47$1 = $as_T4(_$47);
-      return $uD($n($n(rx).Lrta_syntax_Program2$RxGraph__f_weights).getOrElse__O__F0__O(_$47$1, new $c_sjsr_AnonFunction0((() => 1.0))))
-    }));
-    var this$206 = $n((this$205.isEmpty__Z() ? $m_s_None$() : new $c_s_Some(f$44.apply__O__O(this$205.get__O()))));
-    var default$5 = new $c_sjsr_AnonFunction0((() => 1.0));
-    var w$1 = $uD((this$206.isEmpty__Z() ? default$5.apply__O() : this$206.get__O()));
-    return sb.append__T__scm_StringBuilder((((("  w_int_" + sId$1) + " : [0..10000] init ") + $doubleToInt((w$1 * this.Lrta_backend_PrismConverter2$__f_SCALE))) + ";\n"))
-  }));
   var these$14 = this$207;
   while ((!$n(these$14).isEmpty__Z())) {
-    f$45.apply__O__O($n(these$14).head__O());
+    f$43.apply__O__O($n(these$14).head__O());
     these$14 = $as_sci_List($n(these$14).tail__O())
   };
-  sb.append__T__scm_StringBuilder("\n  // --- Toggle Switches (Active/Inactive) ---\n");
-  var this$208 = $n(toggledLabels);
+  sb.append__T__scm_StringBuilder("\n  // --- Mutable Weights (State Variables) ---\n");
+  var this$208 = $n(mutableLabels);
   $m_sci_List$();
   var this$212 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$208));
-  var f$46 = new $c_sjsr_AnonFunction1(((_$48) => {
-    var _$48$1 = $as_Lrta_syntax_Program2$QName(_$48);
-    var this$210 = $n(_$48$1);
+  var f$44 = new $c_sjsr_AnonFunction1(((_$47) => {
+    var _$47$1 = $as_Lrta_syntax_Program2$QName(_$47);
+    var this$210 = $n(_$47$1);
     var this$211 = $n(this$210.Lrta_syntax_Program2$QName__f_n);
     return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$211, "", "/", "")
   }));
   var ord$18 = $m_s_math_Ordering$String$();
-  var this$213 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$212, f$46, ord$18)));
-  var f$47 = new $c_sjsr_AnonFunction1(((lbl$5$1) => {
-    var lbl$7 = $as_Lrta_syntax_Program2$QName(lbl$5$1);
-    var n$34 = $n(lbl$7).show__T();
-    var sId$2 = $f_T__replaceAll__T__T__T($n(n$34), "[^a-zA-Z0-9_]", "_");
-    var initiallyActive = $n($as_sc_SetOps($n($n(rx).Lrta_syntax_Program2$RxGraph__f_act).map__F1__O(new $c_sjsr_AnonFunction1(((_$49) => {
+  var this$217 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$212, f$44, ord$18)));
+  var f$47 = new $c_sjsr_AnonFunction1(((lbl$4$1) => {
+    var lbl$6 = $as_Lrta_syntax_Program2$QName(lbl$4$1);
+    var n$34 = $n(lbl$6).show__T();
+    var sId$1 = $f_T__replaceAll__T__T__T($n(n$34), "[^a-zA-Z0-9_]", "_");
+    var this$214 = $n($n($n(rx).Lrta_syntax_Program2$RxGraph__f_lbls).get__O__s_Option(lbl$6));
+    var f$45 = new $c_sjsr_AnonFunction1(((_$48) => {
+      var _$48$1 = $as_sci_Set(_$48);
+      var this$213 = $n(_$48$1);
+      return $f_sc_IterableOps__headOption__s_Option(this$213)
+    }));
+    var this$215 = $n((this$214.isEmpty__Z() ? $m_s_None$() : $as_s_Option(f$45.apply__O__O(this$214.get__O()))));
+    var f$46 = new $c_sjsr_AnonFunction1(((_$49) => {
       var _$49$1 = $as_T4(_$49);
-      return $as_Lrta_syntax_Program2$QName($n(_$49$1).T4__f__4)
-    }))))).contains__O__Z(lbl$7);
-    return sb.append__T__scm_StringBuilder((((("  " + sId$2) + "_act : [0..1] init ") + (initiallyActive ? 1 : 0)) + ";\n"))
+      return $uD($n($n(rx).Lrta_syntax_Program2$RxGraph__f_weights).getOrElse__O__F0__O(_$49$1, new $c_sjsr_AnonFunction0((() => 1.0))))
+    }));
+    var this$216 = $n((this$215.isEmpty__Z() ? $m_s_None$() : new $c_s_Some(f$46.apply__O__O(this$215.get__O()))));
+    var default$5 = new $c_sjsr_AnonFunction0((() => 1.0));
+    var w$1 = $uD((this$216.isEmpty__Z() ? default$5.apply__O() : this$216.get__O()));
+    return sb.append__T__scm_StringBuilder((((("  w_int_" + sId$1) + " : [0..10000] init ") + $doubleToInt((w$1 * this.Lrta_backend_PrismConverter2$__f_SCALE))) + ";\n"))
   }));
-  var these$15 = this$213;
+  var these$15 = this$217;
   while ((!$n(these$15).isEmpty__Z())) {
     f$47.apply__O__O($n(these$15).head__O());
     these$15 = $as_sci_List($n(these$15).tail__O())
   };
-  sb.append__T__scm_StringBuilder("\n");
-  var this$214 = $n(commands.toList__sci_List());
-  var f$48 = new $c_sjsr_AnonFunction1(((c$4) => {
-    var c$5 = $as_T(c$4);
-    return sb.append__T__scm_StringBuilder((c$5 + "\n\n"))
+  sb.append__T__scm_StringBuilder("\n  // --- Toggle Switches (Active/Inactive) ---\n");
+  var this$218 = $n(toggledLabels);
+  $m_sci_List$();
+  var this$222 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$218));
+  var f$48 = new $c_sjsr_AnonFunction1(((_$50) => {
+    var _$50$1 = $as_Lrta_syntax_Program2$QName(_$50);
+    var this$220 = $n(_$50$1);
+    var this$221 = $n(this$220.Lrta_syntax_Program2$QName__f_n);
+    return $f_sc_IterableOnceOps__mkString__T__T__T__T(this$221, "", "/", "")
   }));
-  var these$16 = this$214;
+  var ord$19 = $m_s_math_Ordering$String$();
+  var this$223 = $n($as_sci_List($f_sc_SeqOps__sortBy__F1__s_math_Ordering__O(this$222, f$48, ord$19)));
+  var f$49 = new $c_sjsr_AnonFunction1(((lbl$5$1) => {
+    var lbl$7 = $as_Lrta_syntax_Program2$QName(lbl$5$1);
+    var n$35 = $n(lbl$7).show__T();
+    var sId$2 = $f_T__replaceAll__T__T__T($n(n$35), "[^a-zA-Z0-9_]", "_");
+    var initiallyActive = $n($as_sc_SetOps($n($n(rx).Lrta_syntax_Program2$RxGraph__f_act).map__F1__O(new $c_sjsr_AnonFunction1(((_$51) => {
+      var _$51$1 = $as_T4(_$51);
+      return $as_Lrta_syntax_Program2$QName($n(_$51$1).T4__f__4)
+    }))))).contains__O__Z(lbl$7);
+    return sb.append__T__scm_StringBuilder((((("  " + sId$2) + "_act : [0..1] init ") + (initiallyActive ? 1 : 0)) + ";\n"))
+  }));
+  var these$16 = this$223;
   while ((!$n(these$16).isEmpty__Z())) {
-    f$48.apply__O__O($n(these$16).head__O());
+    f$49.apply__O__O($n(these$16).head__O());
     these$16 = $as_sci_List($n(these$16).tail__O())
+  };
+  sb.append__T__scm_StringBuilder("\n");
+  var this$224 = $n(commands.toList__sci_List());
+  var f$50 = new $c_sjsr_AnonFunction1(((c$5) => {
+    var c$6 = $as_T(c$5);
+    return sb.append__T__scm_StringBuilder((c$6 + "\n\n"))
+  }));
+  var these$17 = this$224;
+  while ((!$n(these$17).isEmpty__Z())) {
+    f$50.apply__O__O($n(these$17).head__O());
+    these$17 = $as_sci_List($n(these$17).tail__O())
   };
   sb.append__T__scm_StringBuilder("endmodule\n");
   return $n(sb.scm_StringBuilder__f_underlying).jl_StringBuilder__f_java$lang$StringBuilder$$content
@@ -9093,6 +9160,81 @@ function $p_Lrta_backend_RxSemantics$__distributeWeights__Lrta_syntax_Program2$Q
   var this$5 = $n(outgoingActive);
   var unmodified = $as_sci_Set(this$5.removedAll__sc_IterableOnce__sci_SetOps(activeModified));
   matchResult16: {
+    if ((mode === "revise_equal")) {
+      var remainingTarget = new $c_sr_DoubleRef(1.0);
+      var remainingEdges = outgoingActive;
+      var $$x1 = $n($as_sc_IterableOnceOps($n(outgoingActive).map__F1__O(new $c_sjsr_AnonFunction1(((e$2) => {
+        var e$3 = $as_T4(e$2);
+        var y = ($n(activeModified).contains__O__Z(e$3) ? $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem)).getOrElse__O__F0__O(e$3, new $c_sjsr_AnonFunction0((() => 0.0))) : $n(oldWeights).getOrElse__O__F0__O(e$3, new $c_sjsr_AnonFunction0((() => 0.0))));
+        return new $c_T2(e$3, y)
+      })))));
+      var this$9 = $m_s_$less$colon$less$();
+      var currentW = $n($$x1).toMap__s_$less$colon$less__sci_Map(this$9.s_$less$colon$less$__f_singleton);
+      var done = false;
+      while (true) {
+        if ((!done)) {
+          var this$10 = $n(remainingEdges);
+          var $$x2 = (!this$10.isEmpty__Z())
+        } else {
+          var $$x2 = false
+        };
+        if ($$x2) {
+          var this$11 = $n(remainingEdges);
+          $m_sci_List$();
+          var this$13 = $n($n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$11)).map__F1__sci_List(currentW));
+          var num = $m_s_math_Numeric$DoubleIsFractional$();
+          var currentSum = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$13, num));
+          var diff = (remainingTarget.sr_DoubleRef__f_elem - currentSum);
+          var share = (diff / $n(remainingEdges).size__I());
+          var clampedAny = new $c_sr_BooleanRef(false);
+          $n($m_s_Predef$().s_Predef$__f_Set);
+          var elem$2 = $m_sci_Set$EmptySet$();
+          var nextRemaining = new $c_sr_ObjectRef(elem$2);
+          $n(remainingEdges).foreach__F1__V(new $c_sjsr_AnonFunction1(((updatedWeights, remainingTarget, currentW, share, clampedAny, nextRemaining) => ((e$3$1) => {
+            var e$4 = $as_T4(e$3$1);
+            var proposed = ($uD($n(currentW).apply__O__O(e$4)) + share);
+            if ((proposed < 0.0)) {
+              var this$19 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
+              var ev$38 = $as_sci_Map(this$19.updated__O__O__sci_MapOps(e$4, 0.0));
+              updatedWeights.sr_ObjectRef__f_elem = ev$38;
+              ev$38 = null;
+              var ev$39 = true;
+              clampedAny.sr_BooleanRef__f_elem = ev$39
+            } else if ((proposed > 1.0)) {
+              var this$22 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
+              var ev$40 = $as_sci_Map(this$22.updated__O__O__sci_MapOps(e$4, 1.0));
+              updatedWeights.sr_ObjectRef__f_elem = ev$40;
+              ev$40 = null;
+              var ev$41 = (remainingTarget.sr_DoubleRef__f_elem - 1.0);
+              remainingTarget.sr_DoubleRef__f_elem = ev$41;
+              var ev$42 = true;
+              clampedAny.sr_BooleanRef__f_elem = ev$42
+            } else {
+              var this$23 = $n($as_sci_Set(nextRemaining.sr_ObjectRef__f_elem));
+              var ev$43 = $as_sci_Set(this$23.incl__O__sci_SetOps(e$4));
+              nextRemaining.sr_ObjectRef__f_elem = ev$43;
+              ev$43 = null
+            }
+          }))(updatedWeights, remainingTarget, currentW, share, clampedAny, nextRemaining)));
+          if ((!clampedAny.sr_BooleanRef__f_elem)) {
+            $n($as_sci_Set(nextRemaining.sr_ObjectRef__f_elem)).foreach__F1__V(new $c_sjsr_AnonFunction1(((updatedWeights, currentW, share) => ((e$4$1) => {
+              var e$5 = $as_T4(e$4$1);
+              var this$26 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
+              var y$1 = $p_Lrta_backend_RxSemantics$__clamp__D__D($thiz, ($uD($n(currentW).apply__O__O(e$5)) + share));
+              var ev$44 = $as_sci_Map(this$26.updated__O__O__sci_MapOps(e$5, y$1));
+              updatedWeights.sr_ObjectRef__f_elem = ev$44;
+              ev$44 = null
+            }))(updatedWeights, currentW, share)));
+            done = true
+          } else {
+            remainingEdges = $as_sci_Set(nextRemaining.sr_ObjectRef__f_elem)
+          }
+        } else {
+          break
+        }
+      };
+      break matchResult16
+    };
     matchAlts5: {
       matchAlts6: {
         if ((mode === "equal")) {
@@ -9103,22 +9245,22 @@ function $p_Lrta_backend_RxSemantics$__distributeWeights__Lrta_syntax_Program2$Q
         };
         break matchAlts5
       };
-      var this$6 = $n(unmodified);
-      if ((!this$6.isEmpty__Z())) {
-        var this$7 = $n(activeModified);
+      var this$27 = $n(unmodified);
+      if ((!this$27.isEmpty__Z())) {
+        var this$28 = $n(activeModified);
         $m_sci_List$();
-        var this$9 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$7));
-        var f = ((e$2) => {
-          var e$3 = $as_T4(e$2);
-          return $uD($n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem)).getOrElse__O__F0__O(e$3, new $c_sjsr_AnonFunction0((() => 0.0))))
+        var this$30 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$28));
+        var f = ((e$5$1) => {
+          var e$6 = $as_T4(e$5$1);
+          return $uD($n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem)).getOrElse__O__F0__O(e$6, new $c_sjsr_AnonFunction0((() => 0.0))))
         });
-        if ((this$9 === $m_sci_Nil$())) {
-          var $$x1 = $m_sci_Nil$()
+        if ((this$30 === $m_sci_Nil$())) {
+          var $$x3 = $m_sci_Nil$()
         } else {
-          var arg1 = this$9.head__O();
+          var arg1 = this$30.head__O();
           var h = new $c_sci_$colon$colon(f(arg1), $m_sci_Nil$());
           var t$2 = h;
-          var rest = $as_sci_List(this$9.tail__O());
+          var rest = $as_sci_List(this$30.tail__O());
           while ((rest !== $m_sci_Nil$())) {
             var arg1$1 = $n(rest).head__O();
             var nx = new $c_sci_$colon$colon(f(arg1$1), $m_sci_Nil$());
@@ -9126,46 +9268,46 @@ function $p_Lrta_backend_RxSemantics$__distributeWeights__Lrta_syntax_Program2$Q
             t$2 = nx;
             rest = $as_sci_List($n(rest).tail__O())
           };
-          var $$x1 = h
+          var $$x3 = h
         };
-        var this$10 = $n($$x1);
-        var num = $m_s_math_Numeric$DoubleIsFractional$();
-        var sMod = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$10, num));
+        var this$31 = $n($$x3);
+        var num$1 = $m_s_math_Numeric$DoubleIsFractional$();
+        var sMod = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$31, num$1));
         if ((sMod >= (1.0 - $thiz.Lrta_backend_RxSemantics$__f_EPSILON))) {
-          $n(unmodified).foreach__F1__V(new $c_sjsr_AnonFunction1(((e$3$1) => {
-            var e$4 = $as_T4(e$3$1);
-            var this$13 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
-            var ev$34 = $as_sci_Map(this$13.updated__O__O__sci_MapOps(e$4, 0.0));
-            updatedWeights.sr_ObjectRef__f_elem = ev$34;
-            ev$34 = null
+          $n(unmodified).foreach__F1__V(new $c_sjsr_AnonFunction1(((e$6$1) => {
+            var e$7 = $as_T4(e$6$1);
+            var this$34 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
+            var ev$45 = $as_sci_Map(this$34.updated__O__O__sci_MapOps(e$7, 0.0));
+            updatedWeights.sr_ObjectRef__f_elem = ev$45;
+            ev$45 = null
           })));
           if ((sMod > $thiz.Lrta_backend_RxSemantics$__f_EPSILON)) {
-            $n(activeModified).foreach__F1__V(new $c_sjsr_AnonFunction1(((e$4$1) => {
-              var e$5 = $as_T4(e$4$1);
-              var this$16 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
-              var y = $p_Lrta_backend_RxSemantics$__clamp__D__D($thiz, ($uD($n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem)).getOrElse__O__F0__O(e$5, new $c_sjsr_AnonFunction0((() => 0.0)))) / sMod));
-              var ev$35 = $as_sci_Map(this$16.updated__O__O__sci_MapOps(e$5, y));
-              updatedWeights.sr_ObjectRef__f_elem = ev$35;
-              ev$35 = null
+            $n(activeModified).foreach__F1__V(new $c_sjsr_AnonFunction1(((e$7$1) => {
+              var e$8 = $as_T4(e$7$1);
+              var this$37 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
+              var y$2 = $p_Lrta_backend_RxSemantics$__clamp__D__D($thiz, ($uD($n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem)).getOrElse__O__F0__O(e$8, new $c_sjsr_AnonFunction0((() => 0.0)))) / sMod));
+              var ev$46 = $as_sci_Map(this$37.updated__O__O__sci_MapOps(e$8, y$2));
+              updatedWeights.sr_ObjectRef__f_elem = ev$46;
+              ev$46 = null
             })))
           }
         } else {
           var targetUnmod = (1.0 - sMod);
           if ((mode === "proportional")) {
-            var this$17 = $n(unmodified);
+            var this$38 = $n(unmodified);
             $m_sci_List$();
-            var this$19 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$17));
-            var f$1 = ((e$5$1) => {
-              var e$6 = $as_T4(e$5$1);
-              return $uD($n(oldWeights).getOrElse__O__F0__O(e$6, new $c_sjsr_AnonFunction0((() => 0.0))))
+            var this$40 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$38));
+            var f$1 = ((e$8$1) => {
+              var e$9 = $as_T4(e$8$1);
+              return $uD($n(oldWeights).getOrElse__O__F0__O(e$9, new $c_sjsr_AnonFunction0((() => 0.0))))
             });
-            if ((this$19 === $m_sci_Nil$())) {
-              var $$x2 = $m_sci_Nil$()
+            if ((this$40 === $m_sci_Nil$())) {
+              var $$x4 = $m_sci_Nil$()
             } else {
-              var arg1$2 = this$19.head__O();
+              var arg1$2 = this$40.head__O();
               var h$1 = new $c_sci_$colon$colon(f$1(arg1$2), $m_sci_Nil$());
               var t$3 = h$1;
-              var rest$1 = $as_sci_List(this$19.tail__O());
+              var rest$1 = $as_sci_List(this$40.tail__O());
               while ((rest$1 !== $m_sci_Nil$())) {
                 var arg1$3 = $n(rest$1).head__O();
                 var nx$1 = new $c_sci_$colon$colon(f$1(arg1$3), $m_sci_Nil$());
@@ -9173,58 +9315,58 @@ function $p_Lrta_backend_RxSemantics$__distributeWeights__Lrta_syntax_Program2$Q
                 t$3 = nx$1;
                 rest$1 = $as_sci_List($n(rest$1).tail__O())
               };
-              var $$x2 = h$1
+              var $$x4 = h$1
             };
-            var this$20 = $n($$x2);
-            var num$1 = $m_s_math_Numeric$DoubleIsFractional$();
-            var sUnmod = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$20, num$1));
+            var this$41 = $n($$x4);
+            var num$2 = $m_s_math_Numeric$DoubleIsFractional$();
+            var sUnmod = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$41, num$2));
             if ((sUnmod > $thiz.Lrta_backend_RxSemantics$__f_EPSILON)) {
               var scale = (targetUnmod / sUnmod);
-              $n(unmodified).foreach__F1__V(new $c_sjsr_AnonFunction1(((e$6$1) => {
-                var e$7 = $as_T4(e$6$1);
-                var this$23 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
-                var y$1 = $p_Lrta_backend_RxSemantics$__clamp__D__D($thiz, ($uD($n(oldWeights).getOrElse__O__F0__O(e$7, new $c_sjsr_AnonFunction0((() => 0.0)))) * scale));
-                var ev$36 = $as_sci_Map(this$23.updated__O__O__sci_MapOps(e$7, y$1));
-                updatedWeights.sr_ObjectRef__f_elem = ev$36;
-                ev$36 = null
+              $n(unmodified).foreach__F1__V(new $c_sjsr_AnonFunction1(((e$9$1) => {
+                var e$10 = $as_T4(e$9$1);
+                var this$44 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
+                var y$3 = $p_Lrta_backend_RxSemantics$__clamp__D__D($thiz, ($uD($n(oldWeights).getOrElse__O__F0__O(e$10, new $c_sjsr_AnonFunction0((() => 0.0)))) * scale));
+                var ev$47 = $as_sci_Map(this$44.updated__O__O__sci_MapOps(e$10, y$3));
+                updatedWeights.sr_ObjectRef__f_elem = ev$47;
+                ev$47 = null
               })))
             } else {
-              var share = (targetUnmod / $n(unmodified).size__I());
-              $n(unmodified).foreach__F1__V(new $c_sjsr_AnonFunction1(((e$7$1) => {
-                var e$8 = $as_T4(e$7$1);
-                var this$26 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
-                var y$2 = $p_Lrta_backend_RxSemantics$__clamp__D__D($thiz, share);
-                var ev$37 = $as_sci_Map(this$26.updated__O__O__sci_MapOps(e$8, y$2));
-                updatedWeights.sr_ObjectRef__f_elem = ev$37;
-                ev$37 = null
+              var share$4 = (targetUnmod / $n(unmodified).size__I());
+              $n(unmodified).foreach__F1__V(new $c_sjsr_AnonFunction1(((e$10$1) => {
+                var e$11 = $as_T4(e$10$1);
+                var this$47 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
+                var y$4 = $p_Lrta_backend_RxSemantics$__clamp__D__D($thiz, share$4);
+                var ev$48 = $as_sci_Map(this$47.updated__O__O__sci_MapOps(e$11, y$4));
+                updatedWeights.sr_ObjectRef__f_elem = ev$48;
+                ev$48 = null
               })))
             }
           } else {
             var remainingUnmod = unmodified;
-            var remainingTarget = new $c_sr_DoubleRef(targetUnmod);
-            var done = false;
+            var remainingTarget$3 = new $c_sr_DoubleRef(targetUnmod);
+            var done$2 = false;
             while (true) {
-              if ((!done)) {
-                var this$28 = $n(remainingUnmod);
-                var $$x4 = (!this$28.isEmpty__Z())
+              if ((!done$2)) {
+                var this$49 = $n(remainingUnmod);
+                var $$x6 = (!this$49.isEmpty__Z())
               } else {
-                var $$x4 = false
+                var $$x6 = false
               };
-              if ($$x4) {
-                var this$29 = $n(remainingUnmod);
+              if ($$x6) {
+                var this$50 = $n(remainingUnmod);
                 $m_sci_List$();
-                var this$31 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$29));
-                var f$2 = ((oldWeights) => ((e$8$1) => {
-                  var e$9 = $as_T4(e$8$1);
-                  return $uD($n(oldWeights).getOrElse__O__F0__O(e$9, new $c_sjsr_AnonFunction0((() => 0.0))))
+                var this$52 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$50));
+                var f$2 = ((oldWeights) => ((e$11$1) => {
+                  var e$12 = $as_T4(e$11$1);
+                  return $uD($n(oldWeights).getOrElse__O__F0__O(e$12, new $c_sjsr_AnonFunction0((() => 0.0))))
                 }))(oldWeights);
-                if ((this$31 === $m_sci_Nil$())) {
-                  var $$x3 = $m_sci_Nil$()
+                if ((this$52 === $m_sci_Nil$())) {
+                  var $$x5 = $m_sci_Nil$()
                 } else {
-                  var arg1$4 = this$31.head__O();
+                  var arg1$4 = this$52.head__O();
                   var h$2 = new $c_sci_$colon$colon(f$2(arg1$4), $m_sci_Nil$());
                   var t$4 = h$2;
-                  var rest$2 = $as_sci_List(this$31.tail__O());
+                  var rest$2 = $as_sci_List(this$52.tail__O());
                   while ((rest$2 !== $m_sci_Nil$())) {
                     var arg1$5 = $n(rest$2).head__O();
                     var nx$2 = new $c_sci_$colon$colon(f$2(arg1$5), $m_sci_Nil$());
@@ -9232,53 +9374,53 @@ function $p_Lrta_backend_RxSemantics$__distributeWeights__Lrta_syntax_Program2$Q
                     t$4 = nx$2;
                     rest$2 = $as_sci_List($n(rest$2).tail__O())
                   };
-                  var $$x3 = h$2
+                  var $$x5 = h$2
                 };
-                var this$32 = $n($$x3);
-                var num$2 = $m_s_math_Numeric$DoubleIsFractional$();
-                var sUnmod$2 = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$32, num$2));
-                var diff = (remainingTarget.sr_DoubleRef__f_elem - sUnmod$2);
-                var share$3 = (diff / $n(remainingUnmod).size__I());
-                var clampedAny = new $c_sr_BooleanRef(false);
+                var this$53 = $n($$x5);
+                var num$3 = $m_s_math_Numeric$DoubleIsFractional$();
+                var sUnmod$2 = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$53, num$3));
+                var diff$2 = (remainingTarget$3.sr_DoubleRef__f_elem - sUnmod$2);
+                var share$6 = (diff$2 / $n(remainingUnmod).size__I());
+                var clampedAny$3 = new $c_sr_BooleanRef(false);
                 $n($m_s_Predef$().s_Predef$__f_Set);
-                var elem$2 = $m_sci_Set$EmptySet$();
-                var nextUnmod = new $c_sr_ObjectRef(elem$2);
-                $n(remainingUnmod).foreach__F1__V(new $c_sjsr_AnonFunction1(((oldWeights, updatedWeights, remainingTarget, share$3, clampedAny, nextUnmod) => ((e$9$1) => {
-                  var e$10 = $as_T4(e$9$1);
-                  var proposedW = ($uD($n(oldWeights).getOrElse__O__F0__O(e$10, new $c_sjsr_AnonFunction0((() => 0.0)))) + share$3);
+                var elem$3 = $m_sci_Set$EmptySet$();
+                var nextUnmod = new $c_sr_ObjectRef(elem$3);
+                $n(remainingUnmod).foreach__F1__V(new $c_sjsr_AnonFunction1(((oldWeights, updatedWeights, remainingTarget$3, share$6, clampedAny$3, nextUnmod) => ((e$12$1) => {
+                  var e$13 = $as_T4(e$12$1);
+                  var proposedW = ($uD($n(oldWeights).getOrElse__O__F0__O(e$13, new $c_sjsr_AnonFunction0((() => 0.0)))) + share$6);
                   if ((proposedW < 0.0)) {
-                    var this$38 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
-                    var ev$38 = $as_sci_Map(this$38.updated__O__O__sci_MapOps(e$10, 0.0));
-                    updatedWeights.sr_ObjectRef__f_elem = ev$38;
-                    ev$38 = null;
-                    var ev$39 = true;
-                    clampedAny.sr_BooleanRef__f_elem = ev$39
+                    var this$59 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
+                    var ev$49 = $as_sci_Map(this$59.updated__O__O__sci_MapOps(e$13, 0.0));
+                    updatedWeights.sr_ObjectRef__f_elem = ev$49;
+                    ev$49 = null;
+                    var ev$50 = true;
+                    clampedAny$3.sr_BooleanRef__f_elem = ev$50
                   } else if ((proposedW > 1.0)) {
-                    var this$41 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
-                    var ev$40 = $as_sci_Map(this$41.updated__O__O__sci_MapOps(e$10, 1.0));
-                    updatedWeights.sr_ObjectRef__f_elem = ev$40;
-                    ev$40 = null;
-                    var ev$41 = (remainingTarget.sr_DoubleRef__f_elem - 1.0);
-                    remainingTarget.sr_DoubleRef__f_elem = ev$41;
-                    var ev$42 = true;
-                    clampedAny.sr_BooleanRef__f_elem = ev$42
+                    var this$62 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
+                    var ev$51 = $as_sci_Map(this$62.updated__O__O__sci_MapOps(e$13, 1.0));
+                    updatedWeights.sr_ObjectRef__f_elem = ev$51;
+                    ev$51 = null;
+                    var ev$52 = (remainingTarget$3.sr_DoubleRef__f_elem - 1.0);
+                    remainingTarget$3.sr_DoubleRef__f_elem = ev$52;
+                    var ev$53 = true;
+                    clampedAny$3.sr_BooleanRef__f_elem = ev$53
                   } else {
-                    var this$42 = $n($as_sci_Set(nextUnmod.sr_ObjectRef__f_elem));
-                    var ev$43 = $as_sci_Set(this$42.incl__O__sci_SetOps(e$10));
-                    nextUnmod.sr_ObjectRef__f_elem = ev$43;
-                    ev$43 = null
+                    var this$63 = $n($as_sci_Set(nextUnmod.sr_ObjectRef__f_elem));
+                    var ev$54 = $as_sci_Set(this$63.incl__O__sci_SetOps(e$13));
+                    nextUnmod.sr_ObjectRef__f_elem = ev$54;
+                    ev$54 = null
                   }
-                }))(oldWeights, updatedWeights, remainingTarget, share$3, clampedAny, nextUnmod)));
-                if ((!clampedAny.sr_BooleanRef__f_elem)) {
-                  $n($as_sci_Set(nextUnmod.sr_ObjectRef__f_elem)).foreach__F1__V(new $c_sjsr_AnonFunction1(((oldWeights, updatedWeights, share$3) => ((e$10$1) => {
-                    var e$11 = $as_T4(e$10$1);
-                    var this$45 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
-                    var y$3 = $p_Lrta_backend_RxSemantics$__clamp__D__D($thiz, ($uD($n(oldWeights).getOrElse__O__F0__O(e$11, new $c_sjsr_AnonFunction0((() => 0.0)))) + share$3));
-                    var ev$44 = $as_sci_Map(this$45.updated__O__O__sci_MapOps(e$11, y$3));
-                    updatedWeights.sr_ObjectRef__f_elem = ev$44;
-                    ev$44 = null
-                  }))(oldWeights, updatedWeights, share$3)));
-                  done = true
+                }))(oldWeights, updatedWeights, remainingTarget$3, share$6, clampedAny$3, nextUnmod)));
+                if ((!clampedAny$3.sr_BooleanRef__f_elem)) {
+                  $n($as_sci_Set(nextUnmod.sr_ObjectRef__f_elem)).foreach__F1__V(new $c_sjsr_AnonFunction1(((oldWeights, updatedWeights, share$6) => ((e$13$1) => {
+                    var e$14 = $as_T4(e$13$1);
+                    var this$66 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
+                    var y$5 = $p_Lrta_backend_RxSemantics$__clamp__D__D($thiz, ($uD($n(oldWeights).getOrElse__O__F0__O(e$14, new $c_sjsr_AnonFunction0((() => 0.0)))) + share$6));
+                    var ev$55 = $as_sci_Map(this$66.updated__O__O__sci_MapOps(e$14, y$5));
+                    updatedWeights.sr_ObjectRef__f_elem = ev$55;
+                    ev$55 = null
+                  }))(oldWeights, updatedWeights, share$6)));
+                  done$2 = true
                 } else {
                   remainingUnmod = $as_sci_Set(nextUnmod.sr_ObjectRef__f_elem)
                 }
@@ -9291,20 +9433,20 @@ function $p_Lrta_backend_RxSemantics$__distributeWeights__Lrta_syntax_Program2$Q
         break matchResult16
       }
     };
-    var this$46 = $n(outgoingActive);
+    var this$67 = $n(outgoingActive);
     $m_sci_List$();
-    var this$48 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$46));
-    var f$3 = ((e$11$1) => {
-      var e$12 = $as_T4(e$11$1);
-      return $uD($n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem)).getOrElse__O__F0__O(e$12, new $c_sjsr_AnonFunction0((() => 0.0))))
+    var this$69 = $n($m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(this$67));
+    var f$3 = ((e$14$1) => {
+      var e$15 = $as_T4(e$14$1);
+      return $uD($n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem)).getOrElse__O__F0__O(e$15, new $c_sjsr_AnonFunction0((() => 0.0))))
     });
-    if ((this$48 === $m_sci_Nil$())) {
-      var $$x5 = $m_sci_Nil$()
+    if ((this$69 === $m_sci_Nil$())) {
+      var $$x7 = $m_sci_Nil$()
     } else {
-      var arg1$6 = this$48.head__O();
+      var arg1$6 = this$69.head__O();
       var h$3 = new $c_sci_$colon$colon(f$3(arg1$6), $m_sci_Nil$());
       var t$5 = h$3;
-      var rest$3 = $as_sci_List(this$48.tail__O());
+      var rest$3 = $as_sci_List(this$69.tail__O());
       while ((rest$3 !== $m_sci_Nil$())) {
         var arg1$7 = $n(rest$3).head__O();
         var nx$3 = new $c_sci_$colon$colon(f$3(arg1$7), $m_sci_Nil$());
@@ -9312,29 +9454,29 @@ function $p_Lrta_backend_RxSemantics$__distributeWeights__Lrta_syntax_Program2$Q
         t$5 = nx$3;
         rest$3 = $as_sci_List($n(rest$3).tail__O())
       };
-      var $$x5 = h$3
+      var $$x7 = h$3
     };
-    var this$49 = $n($$x5);
-    var num$3 = $m_s_math_Numeric$DoubleIsFractional$();
-    var totalSum = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$49, num$3));
+    var this$70 = $n($$x7);
+    var num$4 = $m_s_math_Numeric$DoubleIsFractional$();
+    var totalSum = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$70, num$4));
     if ((totalSum < $thiz.Lrta_backend_RxSemantics$__f_EPSILON)) {
       var uniform = (1.0 / $n(outgoingActive).size__I());
-      $n(outgoingActive).foreach__F1__V(new $c_sjsr_AnonFunction1(((e$12$1) => {
-        var e$13 = $as_T4(e$12$1);
-        var this$52 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
-        var y$4 = $p_Lrta_backend_RxSemantics$__clamp__D__D($thiz, uniform);
-        var ev$45 = $as_sci_Map(this$52.updated__O__O__sci_MapOps(e$13, y$4));
-        updatedWeights.sr_ObjectRef__f_elem = ev$45;
-        ev$45 = null
+      $n(outgoingActive).foreach__F1__V(new $c_sjsr_AnonFunction1(((e$15$1) => {
+        var e$16 = $as_T4(e$15$1);
+        var this$73 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
+        var y$6 = $p_Lrta_backend_RxSemantics$__clamp__D__D($thiz, uniform);
+        var ev$56 = $as_sci_Map(this$73.updated__O__O__sci_MapOps(e$16, y$6));
+        updatedWeights.sr_ObjectRef__f_elem = ev$56;
+        ev$56 = null
       })))
     } else {
-      $n(outgoingActive).foreach__F1__V(new $c_sjsr_AnonFunction1(((e$13$1) => {
-        var e$14 = $as_T4(e$13$1);
-        var this$55 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
-        var y$5 = $p_Lrta_backend_RxSemantics$__clamp__D__D($thiz, ($uD($n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem)).getOrElse__O__F0__O(e$14, new $c_sjsr_AnonFunction0((() => 0.0)))) / totalSum));
-        var ev$46 = $as_sci_Map(this$55.updated__O__O__sci_MapOps(e$14, y$5));
-        updatedWeights.sr_ObjectRef__f_elem = ev$46;
-        ev$46 = null
+      $n(outgoingActive).foreach__F1__V(new $c_sjsr_AnonFunction1(((e$16$1) => {
+        var e$17 = $as_T4(e$16$1);
+        var this$76 = $n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem));
+        var y$7 = $p_Lrta_backend_RxSemantics$__clamp__D__D($thiz, ($uD($n($as_sci_Map(updatedWeights.sr_ObjectRef__f_elem)).getOrElse__O__F0__O(e$17, new $c_sjsr_AnonFunction0((() => 0.0)))) / totalSum));
+        var ev$57 = $as_sci_Map(this$76.updated__O__O__sci_MapOps(e$17, y$7));
+        updatedWeights.sr_ObjectRef__f_elem = ev$57;
+        ev$57 = null
       })))
     }
   };
@@ -9396,9 +9538,9 @@ function $p_Lrta_backend_RxSemantics$__getHyperEdgeEffects__T4__Lrta_syntax_Prog
       };
       if (conditionHolds) {
         var prefix$1 = $as_sci_List(updatesToApply.sr_ObjectRef__f_elem);
-        var ev$47 = $n($as_sci_List($n($n(rx).Lrta_syntax_Program2$RxGraph__f_edgeUpdates).getOrElse__O__F0__O(hyperEdge$1, new $c_sjsr_AnonFunction0((() => $m_s_package$().s_package$__f_Nil))))).$colon$colon$colon__sci_List__sci_List(prefix$1);
-        updatesToApply.sr_ObjectRef__f_elem = ev$47;
-        ev$47 = null;
+        var ev$58 = $n($as_sci_List($n($n(rx).Lrta_syntax_Program2$RxGraph__f_edgeUpdates).getOrElse__O__F0__O(hyperEdge$1, new $c_sjsr_AnonFunction0((() => $m_s_package$().s_package$__f_Nil))))).$colon$colon$colon__sci_List__sci_List(prefix$1);
+        updatesToApply.sr_ObjectRef__f_elem = ev$58;
+        ev$58 = null;
         var wRule = $uD($n($n(rx).Lrta_syntax_Program2$RxGraph__f_weights).getOrElse__O__F0__O(hyperEdge$1, new $c_sjsr_AnonFunction0((() => 0.1))));
         var affectedEdges = $as_sci_Set($n($n(rx).Lrta_syntax_Program2$RxGraph__f_lbls).getOrElse__O__F0__O(targetLabel$2, new $c_sjsr_AnonFunction0((() => {
           $n($m_s_Predef$().s_Predef$__f_Set);
@@ -9410,49 +9552,49 @@ function $p_Lrta_backend_RxSemantics$__getHyperEdgeEffects__T4__Lrta_syntax_Prog
           var newW = $m_Lrta_syntax_Aggregation$().compute__T__D__D__D__D(aggType, wSource, wRule, wTarget);
           var this$18 = $n($as_sci_Map(currentWeights.sr_ObjectRef__f_elem));
           var y = $p_Lrta_backend_RxSemantics$__clamp__D__D($thiz, newW);
-          var ev$48 = $as_sci_Map(this$18.updated__O__O__sci_MapOps(te$1, y));
-          currentWeights.sr_ObjectRef__f_elem = ev$48;
-          ev$48 = null;
+          var ev$59 = $as_sci_Map(this$18.updated__O__O__sci_MapOps(te$1, y));
+          currentWeights.sr_ObjectRef__f_elem = ev$59;
+          ev$59 = null;
           var this$19 = $n($as_sci_Set(dirtyStates.sr_ObjectRef__f_elem));
           var elem$6 = $n(te$1).T4__f__1;
-          var ev$49 = $as_sci_Set(this$19.incl__O__sci_SetOps(elem$6));
-          dirtyStates.sr_ObjectRef__f_elem = ev$49;
-          ev$49 = null;
+          var ev$60 = $as_sci_Set(this$19.incl__O__sci_SetOps(elem$6));
+          dirtyStates.sr_ObjectRef__f_elem = ev$60;
+          ev$60 = null;
           var this$20 = $n($as_sci_Set(modifiedEdges.sr_ObjectRef__f_elem));
-          var ev$50 = $as_sci_Set(this$20.incl__O__sci_SetOps(te$1));
-          modifiedEdges.sr_ObjectRef__f_elem = ev$50;
-          ev$50 = null;
+          var ev$61 = $as_sci_Set(this$20.incl__O__sci_SetOps(te$1));
+          modifiedEdges.sr_ObjectRef__f_elem = ev$61;
+          ev$61 = null;
           if ($n($as_sc_SetOps($n($n(rx).Lrta_syntax_Program2$RxGraph__f_on).getOrElse__O__F0__O(triggerLabel$2, new $c_sjsr_AnonFunction0((() => {
             $n($m_s_Predef$().s_Predef$__f_Set);
             return $m_sci_Set$EmptySet$()
           }))))).contains__O__Z(new $c_T3(targetLabel$2, ruleId$2, ruleLabel$2))) {
             var this$23 = $n($as_sci_Set(toActivate.sr_ObjectRef__f_elem));
-            var ev$51 = $as_sci_Set(this$23.incl__O__sci_SetOps(te$1));
-            toActivate.sr_ObjectRef__f_elem = ev$51;
-            ev$51 = null;
+            var ev$62 = $as_sci_Set(this$23.incl__O__sci_SetOps(te$1));
+            toActivate.sr_ObjectRef__f_elem = ev$62;
+            ev$62 = null;
             var this$24 = $n($as_sci_Set(dirtyStates.sr_ObjectRef__f_elem));
             var elem$7 = $n(te$1).T4__f__1;
-            var ev$52 = $as_sci_Set(this$24.incl__O__sci_SetOps(elem$7));
-            dirtyStates.sr_ObjectRef__f_elem = ev$52;
-            ev$52 = null;
+            var ev$63 = $as_sci_Set(this$24.incl__O__sci_SetOps(elem$7));
+            dirtyStates.sr_ObjectRef__f_elem = ev$63;
+            ev$63 = null;
             var this$25 = $n($as_sci_Set(modifiedEdges.sr_ObjectRef__f_elem));
-            var ev$53 = $as_sci_Set(this$25.incl__O__sci_SetOps(te$1));
-            modifiedEdges.sr_ObjectRef__f_elem = ev$53;
-            ev$53 = null
+            var ev$64 = $as_sci_Set(this$25.incl__O__sci_SetOps(te$1));
+            modifiedEdges.sr_ObjectRef__f_elem = ev$64;
+            ev$64 = null
           };
           if ($n($as_sc_SetOps($n($n(rx).Lrta_syntax_Program2$RxGraph__f_off).getOrElse__O__F0__O(triggerLabel$2, new $c_sjsr_AnonFunction0((() => {
             $n($m_s_Predef$().s_Predef$__f_Set);
             return $m_sci_Set$EmptySet$()
           }))))).contains__O__Z(new $c_T3(targetLabel$2, ruleId$2, ruleLabel$2))) {
             var this$28 = $n($as_sci_Set(toDeactivate.sr_ObjectRef__f_elem));
-            var ev$54 = $as_sci_Set(this$28.incl__O__sci_SetOps(te$1));
-            toDeactivate.sr_ObjectRef__f_elem = ev$54;
-            ev$54 = null;
+            var ev$65 = $as_sci_Set(this$28.incl__O__sci_SetOps(te$1));
+            toDeactivate.sr_ObjectRef__f_elem = ev$65;
+            ev$65 = null;
             var this$29 = $n($as_sci_Set(dirtyStates.sr_ObjectRef__f_elem));
             var elem$8 = $n(te$1).T4__f__1;
-            var ev$55 = $as_sci_Set(this$29.incl__O__sci_SetOps(elem$8));
-            dirtyStates.sr_ObjectRef__f_elem = ev$55;
-            ev$55 = null
+            var ev$66 = $as_sci_Set(this$29.incl__O__sci_SetOps(elem$8));
+            dirtyStates.sr_ObjectRef__f_elem = ev$66;
+            ev$66 = null
           }
         })))
       }
@@ -9465,9 +9607,9 @@ function $p_Lrta_backend_RxSemantics$__getHyperEdgeEffects__T4__Lrta_syntax_Prog
   var nextActiveSet = $as_sci_Set(this$31.removedAll__sc_IterableOnce__sci_SetOps(that$1));
   $n($as_sci_Set(dirtyStates.sr_ObjectRef__f_elem)).foreach__F1__V(new $c_sjsr_AnonFunction1(((state) => {
     var state$1 = $as_Lrta_syntax_Program2$QName(state);
-    var ev$56 = $p_Lrta_backend_RxSemantics$__distributeWeights__Lrta_syntax_Program2$QName__sci_Map__sci_Map__sci_Set__sci_Set__T__Lrta_syntax_Program2$RxGraph__sci_Map($thiz, state$1, $n(rx).Lrta_syntax_Program2$RxGraph__f_weights, $as_sci_Map(currentWeights.sr_ObjectRef__f_elem), $as_sci_Set(modifiedEdges.sr_ObjectRef__f_elem), nextActiveSet, $n(rx).Lrta_syntax_Program2$RxGraph__f_distributionMode, rx);
-    currentWeights.sr_ObjectRef__f_elem = ev$56;
-    ev$56 = null
+    var ev$67 = $p_Lrta_backend_RxSemantics$__distributeWeights__Lrta_syntax_Program2$QName__sci_Map__sci_Map__sci_Set__sci_Set__T__Lrta_syntax_Program2$RxGraph__sci_Map($thiz, state$1, $n(rx).Lrta_syntax_Program2$RxGraph__f_weights, $as_sci_Map(currentWeights.sr_ObjectRef__f_elem), $as_sci_Set(modifiedEdges.sr_ObjectRef__f_elem), nextActiveSet, $n(rx).Lrta_syntax_Program2$RxGraph__f_distributionMode, rx);
+    currentWeights.sr_ObjectRef__f_elem = ev$67;
+    ev$67 = null
   })));
   var _1 = $as_sci_Set(toActivate.sr_ObjectRef__f_elem);
   var _2 = $as_sci_Set(toDeactivate.sr_ObjectRef__f_elem);
@@ -9578,9 +9720,9 @@ function $p_Lrta_backend_RxSemantics$__assignWithBounds$1__sr_ObjectRef__Lrta_sy
         var finalVal = $uI((this$18.isEmpty__Z() ? cappedMin : this$18.get__O()));
         var this$22 = $n($as_sci_Map($n(currentEnv$1).sr_ObjectRef__f_elem));
         var y = new $c_Lrta_syntax_RuntimeValue$VInt(finalVal, x106, x107);
-        var ev$26 = $as_sci_Map(this$22.updated__O__O__sci_MapOps(q, y));
-        $n(currentEnv$1).sr_ObjectRef__f_elem = ev$26;
-        ev$26 = null;
+        var ev$30 = $as_sci_Map(this$22.updated__O__O__sci_MapOps(q, y));
+        $n(currentEnv$1).sr_ObjectRef__f_elem = ev$30;
+        ev$30 = null;
         break matchResult12
       };
       if ((x102 instanceof $c_Lrta_syntax_RuntimeValue$VFloat)) {
@@ -9629,16 +9771,16 @@ function $p_Lrta_backend_RxSemantics$__assignWithBounds$1__sr_ObjectRef__Lrta_sy
         var finalVal$2 = $uD((this$40.isEmpty__Z() ? cappedMin$4 : this$40.get__O()));
         var this$44 = $n($as_sci_Map($n(currentEnv$1).sr_ObjectRef__f_elem));
         var y$1 = new $c_Lrta_syntax_RuntimeValue$VFloat(finalVal$2, x99, x100);
-        var ev$27 = $as_sci_Map(this$44.updated__O__O__sci_MapOps(q, y$1));
-        $n(currentEnv$1).sr_ObjectRef__f_elem = ev$27;
-        ev$27 = null;
+        var ev$31 = $as_sci_Map(this$44.updated__O__O__sci_MapOps(q, y$1));
+        $n(currentEnv$1).sr_ObjectRef__f_elem = ev$31;
+        ev$31 = null;
         break matchResult12
       }
     };
     var this$47 = $n($as_sci_Map($n(currentEnv$1).sr_ObjectRef__f_elem));
-    var ev$28 = $as_sci_Map(this$47.updated__O__O__sci_MapOps(q, newVal));
-    $n(currentEnv$1).sr_ObjectRef__f_elem = ev$28;
-    ev$28 = null
+    var ev$32 = $as_sci_Map(this$47.updated__O__O__sci_MapOps(q, newVal));
+    $n(currentEnv$1).sr_ObjectRef__f_elem = ev$32;
+    ev$32 = null
   }
 }
 function $p_Lrta_backend_RxSemantics$__process$1__Lrta_syntax_Program2$RxGraph__sr_ObjectRef__Lrta_syntax_Program2$QName__sci_List__V($thiz, rx$5, currentEnv$2, returnKey$1, ss) {
@@ -9681,9 +9823,9 @@ function $p_Lrta_backend_RxSemantics$__process$1__Lrta_syntax_Program2$RxGraph__
               var this$15 = $n($as_sci_Map($n(currentEnv$2).sr_ObjectRef__f_elem));
               var value$1 = $n(x113).updated__I__O__sci_List(idx, value);
               var y = new $c_Lrta_syntax_RuntimeValue$VArray(value$1, x114, x115);
-              var ev$29 = $as_sci_Map(this$15.updated__O__O__sci_MapOps(x142, y));
-              $n(currentEnv$2).sr_ObjectRef__f_elem = ev$29;
-              ev$29 = null
+              var ev$33 = $as_sci_Map(this$15.updated__O__O__sci_MapOps(x142, y));
+              $n(currentEnv$2).sr_ObjectRef__f_elem = ev$33;
+              ev$33 = null
             } else if ((x114 && (idx === $n(x113).length__I()))) {
               var this$16 = $n(x113);
               var newElems = $as_sci_List($f_sc_StrictOptimizedSeqOps__appended__O__O(this$16, value));
@@ -9699,9 +9841,9 @@ function $p_Lrta_backend_RxSemantics$__process$1__Lrta_syntax_Program2$RxGraph__
               var this$19 = $n($$x1);
               var value$2 = $as_sci_List((this$19.isEmpty__Z() ? newElems : this$19.get__O()));
               var y$1 = new $c_Lrta_syntax_RuntimeValue$VArray(value$2, x114, x115);
-              var ev$30 = $as_sci_Map(this$22.updated__O__O__sci_MapOps(x142, y$1));
-              $n(currentEnv$2).sr_ObjectRef__f_elem = ev$30;
-              ev$30 = null
+              var ev$34 = $as_sci_Map(this$22.updated__O__O__sci_MapOps(x142, y$1));
+              $n(currentEnv$2).sr_ObjectRef__f_elem = ev$34;
+              ev$34 = null
             };
             break matchResult13
           }
@@ -9780,15 +9922,15 @@ function $p_Lrta_backend_RxSemantics$__process$1__Lrta_syntax_Program2$RxGraph__
             while (($n(eIt).hasNext__Z() && (!$n($as_sci_Map($n(currentEnv$2).sr_ObjectRef__f_elem)).contains__O__Z(returnKey$1)))) {
               var this$55 = $n($as_sci_Map($n(currentEnv$2).sr_ObjectRef__f_elem));
               var y$2 = $n(eIt).next__O();
-              var ev$31 = $as_sci_Map(this$55.updated__O__O__sci_MapOps(x133, y$2));
-              $n(currentEnv$2).sr_ObjectRef__f_elem = ev$31;
-              ev$31 = null;
+              var ev$35 = $as_sci_Map(this$55.updated__O__O__sci_MapOps(x133, y$2));
+              $n(currentEnv$2).sr_ObjectRef__f_elem = ev$35;
+              ev$35 = null;
               $p_Lrta_backend_RxSemantics$__process$1__Lrta_syntax_Program2$RxGraph__sr_ObjectRef__Lrta_syntax_Program2$QName__sci_List__V($thiz, rx$5, currentEnv$2, returnKey$1, x135)
             };
             var this$56 = $n($as_sci_Map($n(currentEnv$2).sr_ObjectRef__f_elem));
-            var ev$32 = $as_sci_Map(this$56.removed__O__sci_MapOps(x133));
-            $n(currentEnv$2).sr_ObjectRef__f_elem = ev$32;
-            ev$32 = null;
+            var ev$36 = $as_sci_Map(this$56.removed__O__sci_MapOps(x133));
+            $n(currentEnv$2).sr_ObjectRef__f_elem = ev$36;
+            ev$36 = null;
             break matchResult14
           }
         }
@@ -9801,9 +9943,9 @@ function $p_Lrta_backend_RxSemantics$__process$1__Lrta_syntax_Program2$RxGraph__
       var x130 = this$58.Lrta_syntax_ReturnStmt__f_expr;
       var this$61 = $n($as_sci_Map($n(currentEnv$2).sr_ObjectRef__f_elem));
       var y$3 = $thiz.evalExpr__Lrta_syntax_UpdateExpr__sci_Map__Lrta_syntax_Program2$RxGraph__Lrta_syntax_RuntimeValue(x130, $as_sci_Map($n(currentEnv$2).sr_ObjectRef__f_elem), rx$5);
-      var ev$33 = $as_sci_Map(this$61.updated__O__O__sci_MapOps(returnKey$1, y$3));
-      $n(currentEnv$2).sr_ObjectRef__f_elem = ev$33;
-      ev$33 = null;
+      var ev$37 = $as_sci_Map(this$61.updated__O__O__sci_MapOps(returnKey$1, y$3));
+      $n(currentEnv$2).sr_ObjectRef__f_elem = ev$37;
+      ev$37 = null;
       continue
     };
     if ((x124 instanceof $c_Lrta_syntax_PrintStmt)) {
@@ -10116,9 +10258,9 @@ $c_Lrta_backend_RxSemantics$.prototype.evalExpr__Lrta_syntax_UpdateExpr__sci_Map
               var param = $as_Lrta_syntax_Program2$QName($n(x$1$10)._1__O());
               var v = $as_Lrta_syntax_RuntimeValue($n(x$1$10)._2__O());
               var this$94 = $n($as_sci_Map(elem));
-              var ev$25 = $as_sci_Map(this$94.updated__O__O__sci_MapOps(param, v));
-              elem = ev$25;
-              ev$25 = null;
+              var ev$29 = $as_sci_Map(this$94.updated__O__O__sci_MapOps(param, v));
+              elem = ev$29;
+              ev$29 = null;
               break matchResult5
             };
             throw new $c_s_MatchError(x$1$10)
@@ -10475,18 +10617,18 @@ $c_Lrta_backend_RxSemantics$.prototype.nextEdge__Lrta_syntax_Program2$RxGraph__s
                 if (($uD(Math.abs(a)) > this.Lrta_backend_RxSemantics$__f_EPSILON)) {
                   var this$39 = $n($as_sci_Map(finalWeights.sr_ObjectRef__f_elem));
                   var y = $p_Lrta_backend_RxSemantics$__clamp__D__D(this, newVal);
-                  var ev$57 = $as_sci_Map(this$39.updated__O__O__sci_MapOps(e$1, y));
-                  finalWeights.sr_ObjectRef__f_elem = ev$57;
-                  ev$57 = null;
+                  var ev$68 = $as_sci_Map(this$39.updated__O__O__sci_MapOps(e$1, y));
+                  finalWeights.sr_ObjectRef__f_elem = ev$68;
+                  ev$68 = null;
                   var this$40 = $n($as_sci_Set(dirtyStatesForVars.sr_ObjectRef__f_elem));
                   var elem$3 = $n(e$1).T4__f__1;
-                  var ev$58 = $as_sci_Set(this$40.incl__O__sci_SetOps(elem$3));
-                  dirtyStatesForVars.sr_ObjectRef__f_elem = ev$58;
-                  ev$58 = null;
+                  var ev$69 = $as_sci_Set(this$40.incl__O__sci_SetOps(elem$3));
+                  dirtyStatesForVars.sr_ObjectRef__f_elem = ev$69;
+                  ev$69 = null;
                   var this$41 = $n($as_sci_Set(modifiedEdgesForVars.sr_ObjectRef__f_elem));
-                  var ev$59 = $as_sci_Set(this$41.incl__O__sci_SetOps(e$1));
-                  modifiedEdgesForVars.sr_ObjectRef__f_elem = ev$59;
-                  ev$59 = null
+                  var ev$70 = $as_sci_Set(this$41.incl__O__sci_SetOps(e$1));
+                  modifiedEdgesForVars.sr_ObjectRef__f_elem = ev$70;
+                  ev$70 = null
                 };
                 break matchResult25
               };
@@ -10496,9 +10638,9 @@ $c_Lrta_backend_RxSemantics$.prototype.nextEdge__Lrta_syntax_Program2$RxGraph__s
           $n(this$42.filtered__sc_Iterable()).foreach__F1__V(f);
           $n($as_sci_Set(dirtyStatesForVars.sr_ObjectRef__f_elem)).foreach__F1__V(new $c_sjsr_AnonFunction1(((state) => {
             var state$1 = $as_Lrta_syntax_Program2$QName(state);
-            var ev$60 = $p_Lrta_backend_RxSemantics$__distributeWeights__Lrta_syntax_Program2$QName__sci_Map__sci_Map__sci_Set__sci_Set__T__Lrta_syntax_Program2$RxGraph__sci_Map(this, state$1, weightsAfterRules$2, $as_sci_Map(finalWeights.sr_ObjectRef__f_elem), $as_sci_Set(modifiedEdgesForVars.sr_ObjectRef__f_elem), currentAct, $n(rx).Lrta_syntax_Program2$RxGraph__f_distributionMode, rx);
-            finalWeights.sr_ObjectRef__f_elem = ev$60;
-            ev$60 = null
+            var ev$71 = $p_Lrta_backend_RxSemantics$__distributeWeights__Lrta_syntax_Program2$QName__sci_Map__sci_Map__sci_Set__sci_Set__T__Lrta_syntax_Program2$RxGraph__sci_Map(this, state$1, weightsAfterRules$2, $as_sci_Map(finalWeights.sr_ObjectRef__f_elem), $as_sci_Set(modifiedEdgesForVars.sr_ObjectRef__f_elem), currentAct, $n(rx).Lrta_syntax_Program2$RxGraph__f_distributionMode, rx);
+            finalWeights.sr_ObjectRef__f_elem = ev$71;
+            ev$71 = null
           })));
           if ($n(rx).Lrta_syntax_Program2$RxGraph__f_trainingMode) {
             var sourceState = $as_Lrta_syntax_Program2$QName($n(edge$3).T4__f__1);
@@ -10507,15 +10649,15 @@ $c_Lrta_backend_RxSemantics$.prototype.nextEdge__Lrta_syntax_Program2$RxGraph__s
             if (($n(rx).Lrta_syntax_Program2$RxGraph__f_trainingMethod === "aggregation")) {
               var updatedW = $p_Lrta_backend_RxSemantics$__clamp__D__D(this, $m_Lrta_syntax_Aggregation$().compute__T__D__D__D__D($n(rx).Lrta_syntax_Program2$RxGraph__f_trainingAgg, preTrainW, $n(rx).Lrta_syntax_Program2$RxGraph__f_trainingLambda, preTrainW));
               var this$45 = $n($as_sci_Map(finalWeights.sr_ObjectRef__f_elem));
-              var ev$61 = $as_sci_Map(this$45.updated__O__O__sci_MapOps(edge$3, updatedW));
-              finalWeights.sr_ObjectRef__f_elem = ev$61;
-              ev$61 = null;
+              var ev$72 = $as_sci_Map(this$45.updated__O__O__sci_MapOps(edge$3, updatedW));
+              finalWeights.sr_ObjectRef__f_elem = ev$72;
+              ev$72 = null;
               var $$x3 = $as_sci_Map(finalWeights.sr_ObjectRef__f_elem);
               var this$46 = $n($m_s_Predef$().s_Predef$__f_Set);
               var elems = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T4.getArrayOf().constr)([edge$3]));
-              var ev$62 = $p_Lrta_backend_RxSemantics$__distributeWeights__Lrta_syntax_Program2$QName__sci_Map__sci_Map__sci_Set__sci_Set__T__Lrta_syntax_Program2$RxGraph__sci_Map(this, sourceState, weightsAfterRules$2, $$x3, this$46.from__sc_IterableOnce__sci_Set(elems), currentAct, $n(rx).Lrta_syntax_Program2$RxGraph__f_distributionMode, rx);
-              finalWeights.sr_ObjectRef__f_elem = ev$62;
-              ev$62 = null
+              var ev$73 = $p_Lrta_backend_RxSemantics$__distributeWeights__Lrta_syntax_Program2$QName__sci_Map__sci_Map__sci_Set__sci_Set__T__Lrta_syntax_Program2$RxGraph__sci_Map(this, sourceState, weightsAfterRules$2, $$x3, this$46.from__sc_IterableOnce__sci_Set(elems), currentAct, $n(rx).Lrta_syntax_Program2$RxGraph__f_distributionMode, rx);
+              finalWeights.sr_ObjectRef__f_elem = ev$73;
+              ev$73 = null
             } else {
               $n($m_s_package$().s_package$__f_List);
               var elems$1 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T.getArrayOf().constr)([("__total_" + sourceName)]));
@@ -10540,9 +10682,9 @@ $c_Lrta_backend_RxSemantics$.prototype.nextEdge__Lrta_syntax_Program2$RxGraph__s
               var min = $m_s_None$();
               var max = $m_s_None$();
               var y$1 = new $c_Lrta_syntax_RuntimeValue$VInt(lo$1, min, max);
-              var ev$63 = $as_sci_Map(this$58.updated__O__O__sci_MapOps(totalVisitsVar, y$1));
-              nextEnv.sr_ObjectRef__f_elem = ev$63;
-              ev$63 = null;
+              var ev$74 = $as_sci_Map(this$58.updated__O__O__sci_MapOps(totalVisitsVar, y$1));
+              nextEnv.sr_ObjectRef__f_elem = ev$74;
+              ev$74 = null;
               var a$1 = (preTrainW * $m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toDouble__I__I__D(lo, hi));
               var this$60 = $m_RTLong$();
               var value$1 = $uD(Math.round(a$1));
@@ -10550,9 +10692,9 @@ $c_Lrta_backend_RxSemantics$.prototype.nextEdge__Lrta_syntax_Program2$RxGraph__s
               var updatedHits = ((1 + lo$2) | 0);
               var forcedProb = $p_Lrta_backend_RxSemantics$__clamp__D__D(this, (updatedHits / $m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toDouble__I__I__D(lo$1, hi$1)));
               var this$63 = $n($as_sci_Map(finalWeights.sr_ObjectRef__f_elem));
-              var ev$64 = $as_sci_Map(this$63.updated__O__O__sci_MapOps(edge$3, forcedProb));
-              finalWeights.sr_ObjectRef__f_elem = ev$64;
-              ev$64 = null;
+              var ev$75 = $as_sci_Map(this$63.updated__O__O__sci_MapOps(edge$3, forcedProb));
+              finalWeights.sr_ObjectRef__f_elem = ev$75;
+              ev$75 = null;
               var $$x5 = $n($as_sc_IterableOnceOps($n(currentAct).map__F1__O(new $c_sjsr_AnonFunction1(((currentTotal$2, newActualTotal$2) => ((e$2) => {
                 var e$3 = $as_T4(e$2);
                 var wAfter = $uD($n(weightsAfterRules$2).getOrElse__O__F0__O(e$3, new $c_sjsr_AnonFunction0((() => 0.0))));
@@ -10568,9 +10710,9 @@ $c_Lrta_backend_RxSemantics$.prototype.nextEdge__Lrta_syntax_Program2$RxGraph__s
               var $$x6 = $as_sci_Map(finalWeights.sr_ObjectRef__f_elem);
               var this$69 = $n($m_s_Predef$().s_Predef$__f_Set);
               var elems$2 = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T4.getArrayOf().constr)([edge$3]));
-              var ev$65 = $p_Lrta_backend_RxSemantics$__distributeWeights__Lrta_syntax_Program2$QName__sci_Map__sci_Map__sci_Set__sci_Set__T__Lrta_syntax_Program2$RxGraph__sci_Map(this, sourceState, hitRatios, $$x6, this$69.from__sc_IterableOnce__sci_Set(elems$2), currentAct, $n(rx).Lrta_syntax_Program2$RxGraph__f_distributionMode, rx);
-              finalWeights.sr_ObjectRef__f_elem = ev$65;
-              ev$65 = null;
+              var ev$76 = $p_Lrta_backend_RxSemantics$__distributeWeights__Lrta_syntax_Program2$QName__sci_Map__sci_Map__sci_Set__sci_Set__T__Lrta_syntax_Program2$RxGraph__sci_Map(this, sourceState, hitRatios, $$x6, this$69.from__sc_IterableOnce__sci_Set(elems$2), currentAct, $n(rx).Lrta_syntax_Program2$RxGraph__f_distributionMode, rx);
+              finalWeights.sr_ObjectRef__f_elem = ev$76;
+              ev$76 = null;
               var outgoingEdges = $as_sci_Set($n($as_sc_IterableOps($n($n(rx).Lrta_syntax_Program2$RxGraph__f_edg).getOrElse__O__F0__O(sourceState, new $c_sjsr_AnonFunction0((() => {
                 $n($m_s_Predef$().s_Predef$__f_Set);
                 return $m_sci_Set$EmptySet$()
@@ -10597,9 +10739,9 @@ $c_Lrta_backend_RxSemantics$.prototype.nextEdge__Lrta_syntax_Program2$RxGraph__s
                 var min$1 = $m_s_None$();
                 var max$1 = $m_s_None$();
                 var y$3 = new $c_Lrta_syntax_RuntimeValue$VInt(lo$4, min$1, max$1);
-                var ev$66 = $as_sci_Map(this$81.updated__O__O__sci_MapOps(hitsVar, y$3));
-                nextEnv.sr_ObjectRef__f_elem = ev$66;
-                ev$66 = null
+                var ev$77 = $as_sci_Map(this$81.updated__O__O__sci_MapOps(hitsVar, y$3));
+                nextEnv.sr_ObjectRef__f_elem = ev$77;
+                ev$77 = null
               }))(new $c_RTLong(lo$1, hi$1))))
             }
           };
@@ -11271,6 +11413,333 @@ function $p_Lrta_backend_TrainingEngine$__compile__Lrta_syntax_Program2$RxGraph_
   var this$70 = $m_s_$less$colon$less$();
   return new $c_Lrta_backend_TrainingEngine$Session(rx, edgeList, ys, hits, totals, ys$1, ys$2, $n($$x51).toMap__s_$less$colon$less__sci_Map(this$70.s_$less$colon$less$__f_singleton), labelToEdges, stateToEdges, $n(rx).Lrta_syntax_Program2$RxGraph__f_val_env, $n(rx).Lrta_syntax_Program2$RxGraph__f_inits, isAgg)
 }
+function $p_Lrta_backend_TrainingEngine$__distributeWeights__Lrta_backend_TrainingEngine$Session__Lrta_syntax_Program2$QName__sci_Set__sci_List__T__F1__V($thiz, sess, srcState, modifiedIdxs, activeIdxs, mode, getOldW) {
+  if (($n($n(sess).Lrta_backend_TrainingEngine$Session__f_rx).Lrta_syntax_Program2$RxGraph__f_paradigm === "fuzzy")) {
+    return (void 0)
+  };
+  if ($n(activeIdxs).isEmpty__Z()) {
+    return (void 0)
+  };
+  var activeModified = $as_sci_Set($n(modifiedIdxs).filter__F1__O(new $c_sjsr_AnonFunction1(((elem) => {
+    var elem$1 = $uI(elem);
+    return $n(activeIdxs).contains__O__Z(elem$1)
+  }))));
+  var this$3 = $n(activeIdxs);
+  var f = ((elem$2) => {
+    var elem$3 = $uI(elem$2);
+    return $n(activeModified).contains__O__Z(elem$3)
+  });
+  var l = this$3;
+  block: {
+    var result;
+    while (true) {
+      if ($n(l).isEmpty__Z()) {
+        var result = $m_sci_Nil$();
+        break
+      } else {
+        var h = $n(l).head__O();
+        var t = $as_sci_List($n(l).tail__O());
+        if (($uZ(f(h)) === true)) {
+          l = t;
+          continue
+        };
+        var start = l;
+        var remaining = t;
+        while (true) {
+          if ($n(remaining).isEmpty__Z()) {
+            var result = start;
+            break block
+          } else {
+            var x = $n(remaining).head__O();
+            if (($uZ(f(x)) !== true)) {
+              remaining = $as_sci_List($n(remaining).tail__O());
+              continue
+            };
+            var firstMiss = remaining;
+            var newHead = new $c_sci_$colon$colon($n(start).head__O(), $m_sci_Nil$());
+            var toProcess = $as_sci_List($n(start).tail__O());
+            var currentLast = newHead;
+            while ((toProcess !== firstMiss)) {
+              var newElem = new $c_sci_$colon$colon($n(toProcess).head__O(), $m_sci_Nil$());
+              $n(currentLast).sci_$colon$colon__f_next = newElem;
+              currentLast = newElem;
+              toProcess = $as_sci_List($n(toProcess).tail__O())
+            };
+            var next = $as_sci_List($n(firstMiss).tail__O());
+            var nextToCopy = next;
+            while ((!$n(next).isEmpty__Z())) {
+              var head = $n(next).head__O();
+              if (($uZ(f(head)) !== true)) {
+                next = $as_sci_List($n(next).tail__O())
+              } else {
+                while ((nextToCopy !== next)) {
+                  var newElem$2 = new $c_sci_$colon$colon($n(nextToCopy).head__O(), $m_sci_Nil$());
+                  $n(currentLast).sci_$colon$colon__f_next = newElem$2;
+                  currentLast = newElem$2;
+                  nextToCopy = $as_sci_List($n(nextToCopy).tail__O())
+                };
+                nextToCopy = $as_sci_List($n(next).tail__O());
+                next = $as_sci_List($n(next).tail__O())
+              }
+            };
+            if ((!$n(nextToCopy).isEmpty__Z())) {
+              $n(currentLast).sci_$colon$colon__f_next = nextToCopy
+            };
+            var result = newHead;
+            break block
+          }
+        }
+      }
+    }
+  };
+  matchResult8: {
+    if ((mode === "revise_equal")) {
+      var elem$4 = 0.0;
+      elem$4 = 1.0;
+      var remaining$1 = activeIdxs;
+      var this$7 = $n(activeIdxs);
+      var f$1 = ((i) => {
+        var i$1 = $uI(i);
+        var y = ($n(activeModified).contains__O__Z(i$1) ? $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(i$1) : $n(getOldW).apply__O__O(i$1));
+        return new $c_T2(i$1, y)
+      });
+      if ((this$7 === $m_sci_Nil$())) {
+        var $$x1 = $m_sci_Nil$()
+      } else {
+        var arg1 = this$7.head__O();
+        var h$1 = new $c_sci_$colon$colon(f$1(arg1), $m_sci_Nil$());
+        var t$1 = h$1;
+        var rest = $as_sci_List(this$7.tail__O());
+        while ((rest !== $m_sci_Nil$())) {
+          var arg1$1 = $n(rest).head__O();
+          var nx = new $c_sci_$colon$colon(f$1(arg1$1), $m_sci_Nil$());
+          $n(t$1).sci_$colon$colon__f_next = nx;
+          t$1 = nx;
+          rest = $as_sci_List($n(rest).tail__O())
+        };
+        var $$x1 = h$1
+      };
+      var this$9 = $n($$x1);
+      var this$8 = $m_s_$less$colon$less$();
+      var currentW = $m_sci_Map$().from__sc_IterableOnce__sci_Map(this$9);
+      var done = false;
+      while (true) {
+        if ((!done)) {
+          var this$10 = $n(remaining$1);
+          var $$x2 = (!this$10.isEmpty__Z())
+        } else {
+          var $$x2 = false
+        };
+        if ($$x2) {
+          var this$11 = $n($n(remaining$1).map__F1__sci_List(currentW));
+          var num = $m_s_math_Numeric$DoubleIsFractional$();
+          var currentSum = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$11, num));
+          var diff = (elem$4 - currentSum);
+          var this$12 = $n(remaining$1);
+          var share = (diff / this$12.length__I());
+          var elem$5 = false;
+          elem$5 = false;
+          $n($m_s_package$().s_package$__f_List);
+          var elem$6 = $m_sci_Nil$();
+          var elem$7 = null;
+          elem$7 = elem$6;
+          var this$16 = $n(remaining$1);
+          var these = this$16;
+          while ((!$n(these).isEmpty__Z())) {
+            var arg1$2 = $n(these).head__O();
+            var i$2 = $uI(arg1$2);
+            var proposed = ($uD($n(currentW).apply__O__O(i$2)) + share);
+            if ((proposed < 0.0)) {
+              $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$2, 0.0);
+              var ev$34 = true;
+              elem$5 = ev$34
+            } else if ((proposed > 1.0)) {
+              $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$2, 1.0);
+              var ev$35 = (elem$4 - 1.0);
+              elem$4 = ev$35;
+              var ev$36 = true;
+              elem$5 = ev$36
+            } else {
+              var this$17 = $n($as_sci_List(elem$7));
+              var ev$37 = new $c_sci_$colon$colon(i$2, this$17);
+              elem$7 = ev$37;
+              ev$37 = null
+            };
+            these = $as_sci_List($n(these).tail__O())
+          };
+          if ((!elem$5)) {
+            var this$18 = $n($as_sci_List(elem$7));
+            var these$1 = this$18;
+            while ((!$n(these$1).isEmpty__Z())) {
+              var arg1$3 = $n(these$1).head__O();
+              var i$3 = $uI(arg1$3);
+              $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$3, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($uD($n(currentW).apply__O__O(i$3)) + share)));
+              these$1 = $as_sci_List($n(these$1).tail__O())
+            };
+            done = true
+          } else {
+            remaining$1 = $as_sci_List(elem$7)
+          }
+        } else {
+          break
+        }
+      };
+      break matchResult8
+    };
+    matchAlts1: {
+      matchAlts2: {
+        if ((mode === "equal")) {
+          break matchAlts2
+        };
+        if ((mode === "proportional")) {
+          break matchAlts2
+        };
+        break matchAlts1
+      };
+      var this$19 = $n(result);
+      if ((!this$19.isEmpty__Z())) {
+        var sMod = $uD($n($as_sc_IterableOnceOps($n(activeModified).map__F1__O($m_s_Predef$().wrapDoubleArray__AD__scm_ArraySeq$ofDouble($n(sess).Lrta_backend_TrainingEngine$Session__f_weights)))).sum__s_math_Numeric__O($m_s_math_Numeric$DoubleIsFractional$()));
+        if ((sMod >= (1.0 - $thiz.Lrta_backend_TrainingEngine$__f_EPSILON))) {
+          var this$20 = $n(result);
+          var these$2 = this$20;
+          while ((!$n(these$2).isEmpty__Z())) {
+            var arg1$4 = $n(these$2).head__O();
+            var i$4 = $uI(arg1$4);
+            $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$4, 0.0);
+            these$2 = $as_sci_List($n(these$2).tail__O())
+          };
+          if ((sMod > $thiz.Lrta_backend_TrainingEngine$__f_EPSILON)) {
+            $n(activeModified).foreach__F1__V(new $c_sjsr_AnonFunction1(((v1$4) => {
+              var i$5 = $uI(v1$4);
+              $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$5, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(i$5) / sMod)))
+            })))
+          }
+        } else {
+          var targetUnmod = (1.0 - sMod);
+          if ((mode === "proportional")) {
+            var this$21 = $n($n(result).map__F1__sci_List(getOldW));
+            var num$1 = $m_s_math_Numeric$DoubleIsFractional$();
+            var sUnmod = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$21, num$1));
+            if ((sUnmod > $thiz.Lrta_backend_TrainingEngine$__f_EPSILON)) {
+              var scale = (targetUnmod / sUnmod);
+              var this$22 = $n(result);
+              var these$3 = this$22;
+              while ((!$n(these$3).isEmpty__Z())) {
+                var arg1$5 = $n(these$3).head__O();
+                var i$6 = $uI(arg1$5);
+                $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$6, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($uD($n(getOldW).apply__O__O(i$6)) * scale)));
+                these$3 = $as_sci_List($n(these$3).tail__O())
+              }
+            } else {
+              var this$23 = $n(result);
+              var share$4 = (targetUnmod / this$23.length__I());
+              var this$24 = $n(result);
+              var these$4 = this$24;
+              while ((!$n(these$4).isEmpty__Z())) {
+                var arg1$6 = $n(these$4).head__O();
+                var i$7 = $uI(arg1$6);
+                $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$7, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, share$4));
+                these$4 = $as_sci_List($n(these$4).tail__O())
+              }
+            }
+          } else {
+            var remaining$2 = result;
+            var elem$8 = 0.0;
+            elem$8 = targetUnmod;
+            var done$2 = false;
+            while (true) {
+              if ((!done$2)) {
+                var this$26 = $n(remaining$2);
+                var $$x3 = (!this$26.isEmpty__Z())
+              } else {
+                var $$x3 = false
+              };
+              if ($$x3) {
+                var this$27 = $n($n(remaining$2).map__F1__sci_List(getOldW));
+                var num$2 = $m_s_math_Numeric$DoubleIsFractional$();
+                var sUnmod$2 = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$27, num$2));
+                var diff$2 = (elem$8 - sUnmod$2);
+                var this$28 = $n(remaining$2);
+                var share$6 = (diff$2 / this$28.length__I());
+                var elem$9 = false;
+                elem$9 = false;
+                $n($m_s_package$().s_package$__f_List);
+                var elem$10 = $m_sci_Nil$();
+                var elem$11 = null;
+                elem$11 = elem$10;
+                var this$32 = $n(remaining$2);
+                var these$5 = this$32;
+                while ((!$n(these$5).isEmpty__Z())) {
+                  var arg1$7 = $n(these$5).head__O();
+                  var i$8 = $uI(arg1$7);
+                  var oldW = $uD($n(getOldW).apply__O__O(i$8));
+                  var proposed$1 = (oldW + share$6);
+                  if ((proposed$1 < 0.0)) {
+                    $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$8, 0.0);
+                    var ev$38 = true;
+                    elem$9 = ev$38
+                  } else if ((proposed$1 > 1.0)) {
+                    $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$8, 1.0);
+                    var ev$39 = (elem$8 - 1.0);
+                    elem$8 = ev$39;
+                    var ev$40 = true;
+                    elem$9 = ev$40
+                  } else {
+                    var this$33 = $n($as_sci_List(elem$11));
+                    var ev$41 = new $c_sci_$colon$colon(i$8, this$33);
+                    elem$11 = ev$41;
+                    ev$41 = null
+                  };
+                  these$5 = $as_sci_List($n(these$5).tail__O())
+                };
+                if ((!elem$9)) {
+                  var this$34 = $n($as_sci_List(elem$11));
+                  var these$6 = this$34;
+                  while ((!$n(these$6).isEmpty__Z())) {
+                    var arg1$8 = $n(these$6).head__O();
+                    var i$9 = $uI(arg1$8);
+                    $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$9, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($uD($n(getOldW).apply__O__O(i$9)) + share$6)));
+                    these$6 = $as_sci_List($n(these$6).tail__O())
+                  };
+                  done$2 = true
+                } else {
+                  remaining$2 = $as_sci_List(elem$11)
+                }
+              } else {
+                break
+              }
+            }
+          }
+        };
+        break matchResult8
+      }
+    };
+    var this$35 = $n($n(activeIdxs).map__F1__sci_List($m_s_Predef$().wrapDoubleArray__AD__scm_ArraySeq$ofDouble($n(sess).Lrta_backend_TrainingEngine$Session__f_weights)));
+    var num$3 = $m_s_math_Numeric$DoubleIsFractional$();
+    var totalSum = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$35, num$3));
+    if ((totalSum < $thiz.Lrta_backend_TrainingEngine$__f_EPSILON)) {
+      var this$36 = $n(activeIdxs);
+      var uniform = (1.0 / this$36.length__I());
+      var this$37 = $n(activeIdxs);
+      var these$7 = this$37;
+      while ((!$n(these$7).isEmpty__Z())) {
+        var arg1$9 = $n(these$7).head__O();
+        var i$10 = $uI(arg1$9);
+        $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$10, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, uniform));
+        these$7 = $as_sci_List($n(these$7).tail__O())
+      }
+    } else {
+      var this$38 = $n(activeIdxs);
+      var these$8 = this$38;
+      while ((!$n(these$8).isEmpty__Z())) {
+        var arg1$10 = $n(these$8).head__O();
+        var i$11 = $uI(arg1$10);
+        $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$11, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(i$11) / totalSum)));
+        these$8 = $as_sci_List($n(these$8).tail__O())
+      }
+    }
+  }
+}
 function $p_Lrta_backend_TrainingEngine$__processEvent__Lrta_backend_TrainingEngine$Session__T__Z($thiz, sess, eventLabel) {
   $n($m_s_package$().s_package$__f_List);
   var elems = $m_sr_ScalaRunTime$().wrapRefArray__AO__sci_ArraySeq(new ($d_T.getArrayOf().constr)([eventLabel]));
@@ -11482,599 +11951,59 @@ function $p_Lrta_backend_TrainingEngine$__processEvent__Lrta_backend_TrainingEng
           var p = $m_s_Predef$().wrapBooleanArray__AZ__scm_ArraySeq$ofBoolean($n(sess).Lrta_backend_TrainingEngine$Session__f_activeArr);
           var stActiveIdxs = $p_sci_List__filterCommon__F1__Z__sci_List(this$72, p, false);
           var this$73 = $n(modifiedByHyper);
-          var modifiedIdxs = $m_sci_Set$().from__sc_IterableOnce__sci_Set(this$73);
-          var mode = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_rx).Lrta_syntax_Program2$RxGraph__f_distributionMode;
-          var f$1 = ((i) => {
+          $p_Lrta_backend_TrainingEngine$__distributeWeights__Lrta_backend_TrainingEngine$Session__Lrta_syntax_Program2$QName__sci_Set__sci_List__T__F1__V($thiz, sess, st$3, $m_sci_Set$().from__sc_IterableOnce__sci_Set(this$73), stActiveIdxs, $n($n(sess).Lrta_backend_TrainingEngine$Session__f_rx).Lrta_syntax_Program2$RxGraph__f_distributionMode, new $c_sjsr_AnonFunction1(((i) => {
             var i$1 = $uI(i);
             return $n(preHyperWeights).get(i$1)
-          });
-          _return$1: {
-            if (($n($n(sess).Lrta_backend_TrainingEngine$Session__f_rx).Lrta_syntax_Program2$RxGraph__f_paradigm === "fuzzy")) {
-              break _return$1
-            };
-            if ($n(stActiveIdxs).isEmpty__Z()) {
-              break _return$1
-            };
-            var activeModified = $as_sci_Set($n(modifiedIdxs).filter__F1__O(new $c_sjsr_AnonFunction1(((elem$2) => {
-              var elem$3 = $uI(elem$2);
-              return $n(stActiveIdxs).contains__O__Z(elem$3)
-            }))));
-            var this$74 = $n(stActiveIdxs);
-            var f$2 = ((elem$2$1) => {
-              var elem$4 = $uI(elem$2$1);
-              return $n(activeModified).contains__O__Z(elem$4)
-            });
-            var l = this$74;
-            block: {
-              var result;
-              while (true) {
-                if ($n(l).isEmpty__Z()) {
-                  var result = $m_sci_Nil$();
-                  break
-                } else {
-                  var h = $n(l).head__O();
-                  var t = $as_sci_List($n(l).tail__O());
-                  if (($uZ(f$2(h)) === true)) {
-                    l = t;
-                    continue
-                  };
-                  var start = l;
-                  var remaining = t;
-                  while (true) {
-                    if ($n(remaining).isEmpty__Z()) {
-                      var result = start;
-                      break block
-                    } else {
-                      var x$2 = $n(remaining).head__O();
-                      if (($uZ(f$2(x$2)) !== true)) {
-                        remaining = $as_sci_List($n(remaining).tail__O());
-                        continue
-                      };
-                      var firstMiss = remaining;
-                      var newHead = new $c_sci_$colon$colon($n(start).head__O(), $m_sci_Nil$());
-                      var toProcess = $as_sci_List($n(start).tail__O());
-                      var currentLast = newHead;
-                      while ((toProcess !== firstMiss)) {
-                        var newElem = new $c_sci_$colon$colon($n(toProcess).head__O(), $m_sci_Nil$());
-                        $n(currentLast).sci_$colon$colon__f_next = newElem;
-                        currentLast = newElem;
-                        toProcess = $as_sci_List($n(toProcess).tail__O())
-                      };
-                      var next = $as_sci_List($n(firstMiss).tail__O());
-                      var nextToCopy = next;
-                      while ((!$n(next).isEmpty__Z())) {
-                        var head = $n(next).head__O();
-                        if (($uZ(f$2(head)) !== true)) {
-                          next = $as_sci_List($n(next).tail__O())
-                        } else {
-                          while ((nextToCopy !== next)) {
-                            var newElem$2 = new $c_sci_$colon$colon($n(nextToCopy).head__O(), $m_sci_Nil$());
-                            $n(currentLast).sci_$colon$colon__f_next = newElem$2;
-                            currentLast = newElem$2;
-                            nextToCopy = $as_sci_List($n(nextToCopy).tail__O())
-                          };
-                          nextToCopy = $as_sci_List($n(next).tail__O());
-                          next = $as_sci_List($n(next).tail__O())
-                        }
-                      };
-                      if ((!$n(nextToCopy).isEmpty__Z())) {
-                        $n(currentLast).sci_$colon$colon__f_next = nextToCopy
-                      };
-                      var result = newHead;
-                      break block
-                    }
-                  }
-                }
-              }
-            };
-            matchResult8: {
-              matchAlts1: {
-                matchAlts2: {
-                  if ((mode === "equal")) {
-                    break matchAlts2
-                  };
-                  if ((mode === "proportional")) {
-                    break matchAlts2
-                  };
-                  break matchAlts1
-                };
-                var this$75 = $n(result);
-                if ((!this$75.isEmpty__Z())) {
-                  var sMod = $uD($n($as_sc_IterableOnceOps($n(activeModified).map__F1__O($m_s_Predef$().wrapDoubleArray__AD__scm_ArraySeq$ofDouble($n(sess).Lrta_backend_TrainingEngine$Session__f_weights)))).sum__s_math_Numeric__O($m_s_math_Numeric$DoubleIsFractional$()));
-                  if ((sMod >= (1.0 - $thiz.Lrta_backend_TrainingEngine$__f_EPSILON))) {
-                    var this$76 = $n(result);
-                    var these$2 = this$76;
-                    while ((!$n(these$2).isEmpty__Z())) {
-                      var arg1$4 = $n(these$2).head__O();
-                      var i$2 = $uI(arg1$4);
-                      $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$2, 0.0);
-                      these$2 = $as_sci_List($n(these$2).tail__O())
-                    };
-                    if ((sMod > $thiz.Lrta_backend_TrainingEngine$__f_EPSILON)) {
-                      $n(activeModified).foreach__F1__V(new $c_sjsr_AnonFunction1(((v1$2) => {
-                        var i$3 = $uI(v1$2);
-                        $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$3, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(i$3) / sMod)))
-                      })))
-                    }
-                  } else {
-                    var targetUnmod = (1.0 - sMod);
-                    if ((mode === "proportional")) {
-                      var this$77 = $n(result);
-                      if ((this$77 === $m_sci_Nil$())) {
-                        var $$x8 = $m_sci_Nil$()
-                      } else {
-                        var arg1$5 = this$77.head__O();
-                        var h$1 = new $c_sci_$colon$colon(f$1(arg1$5), $m_sci_Nil$());
-                        var t$1 = h$1;
-                        var rest = $as_sci_List(this$77.tail__O());
-                        while ((rest !== $m_sci_Nil$())) {
-                          var arg1$6 = $n(rest).head__O();
-                          var nx = new $c_sci_$colon$colon(f$1(arg1$6), $m_sci_Nil$());
-                          $n(t$1).sci_$colon$colon__f_next = nx;
-                          t$1 = nx;
-                          rest = $as_sci_List($n(rest).tail__O())
-                        };
-                        var $$x8 = h$1
-                      };
-                      var this$78 = $n($$x8);
-                      var num = $m_s_math_Numeric$DoubleIsFractional$();
-                      var sUnmod = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$78, num));
-                      if ((sUnmod > $thiz.Lrta_backend_TrainingEngine$__f_EPSILON)) {
-                        var scale = (targetUnmod / sUnmod);
-                        var this$79 = $n(result);
-                        var these$3 = this$79;
-                        while ((!$n(these$3).isEmpty__Z())) {
-                          var arg1$7 = $n(these$3).head__O();
-                          var i$4 = $uI(arg1$7);
-                          $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$4, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($uD(f$1(i$4)) * scale)));
-                          these$3 = $as_sci_List($n(these$3).tail__O())
-                        }
-                      } else {
-                        var this$80 = $n(result);
-                        var share = (targetUnmod / this$80.length__I());
-                        var this$81 = $n(result);
-                        var these$4 = this$81;
-                        while ((!$n(these$4).isEmpty__Z())) {
-                          var arg1$8 = $n(these$4).head__O();
-                          var i$5 = $uI(arg1$8);
-                          $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$5, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, share));
-                          these$4 = $as_sci_List($n(these$4).tail__O())
-                        }
-                      }
-                    } else {
-                      var remaining$1 = result;
-                      var elem$5 = 0.0;
-                      elem$5 = targetUnmod;
-                      var done = false;
-                      while (true) {
-                        if ((!done)) {
-                          var this$83 = $n(remaining$1);
-                          var $$x10 = (!this$83.isEmpty__Z())
-                        } else {
-                          var $$x10 = false
-                        };
-                        if ($$x10) {
-                          var this$84 = $n(remaining$1);
-                          if ((this$84 === $m_sci_Nil$())) {
-                            var $$x9 = $m_sci_Nil$()
-                          } else {
-                            var arg1$9 = this$84.head__O();
-                            var h$2 = new $c_sci_$colon$colon(f$1(arg1$9), $m_sci_Nil$());
-                            var t$2 = h$2;
-                            var rest$1 = $as_sci_List(this$84.tail__O());
-                            while ((rest$1 !== $m_sci_Nil$())) {
-                              var arg1$10 = $n(rest$1).head__O();
-                              var nx$1 = new $c_sci_$colon$colon(f$1(arg1$10), $m_sci_Nil$());
-                              $n(t$2).sci_$colon$colon__f_next = nx$1;
-                              t$2 = nx$1;
-                              rest$1 = $as_sci_List($n(rest$1).tail__O())
-                            };
-                            var $$x9 = h$2
-                          };
-                          var this$85 = $n($$x9);
-                          var num$1 = $m_s_math_Numeric$DoubleIsFractional$();
-                          var sUnmod$2 = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$85, num$1));
-                          var diff = (elem$5 - sUnmod$2);
-                          var this$86 = $n(remaining$1);
-                          var share$3 = (diff / this$86.length__I());
-                          var elem$6 = false;
-                          elem$6 = false;
-                          $n($m_s_package$().s_package$__f_List);
-                          var elem$7 = $m_sci_Nil$();
-                          var elem$8 = null;
-                          elem$8 = elem$7;
-                          var this$90 = $n(remaining$1);
-                          var these$5 = this$90;
-                          while ((!$n(these$5).isEmpty__Z())) {
-                            var arg1$11 = $n(these$5).head__O();
-                            var i$6 = $uI(arg1$11);
-                            var oldW = $uD(f$1(i$6));
-                            var proposed = (oldW + share$3);
-                            if ((proposed < 0.0)) {
-                              $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$6, 0.0);
-                              var ev$33 = true;
-                              elem$6 = ev$33
-                            } else if ((proposed > 1.0)) {
-                              $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$6, 1.0);
-                              var ev$34 = (elem$5 - 1.0);
-                              elem$5 = ev$34;
-                              var ev$35 = true;
-                              elem$6 = ev$35
-                            } else {
-                              var this$91 = $n($as_sci_List(elem$8));
-                              var ev$36 = new $c_sci_$colon$colon(i$6, this$91);
-                              elem$8 = ev$36;
-                              ev$36 = null
-                            };
-                            these$5 = $as_sci_List($n(these$5).tail__O())
-                          };
-                          if ((!elem$6)) {
-                            var this$92 = $n($as_sci_List(elem$8));
-                            var these$6 = this$92;
-                            while ((!$n(these$6).isEmpty__Z())) {
-                              var arg1$12 = $n(these$6).head__O();
-                              var i$7 = $uI(arg1$12);
-                              $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$7, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($uD(f$1(i$7)) + share$3)));
-                              these$6 = $as_sci_List($n(these$6).tail__O())
-                            };
-                            done = true
-                          } else {
-                            remaining$1 = $as_sci_List(elem$8)
-                          }
-                        } else {
-                          break
-                        }
-                      }
-                    }
-                  };
-                  break matchResult8
-                }
-              };
-              var this$93 = $n($n(stActiveIdxs).map__F1__sci_List($m_s_Predef$().wrapDoubleArray__AD__scm_ArraySeq$ofDouble($n(sess).Lrta_backend_TrainingEngine$Session__f_weights)));
-              var num$2 = $m_s_math_Numeric$DoubleIsFractional$();
-              var totalSum = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$93, num$2));
-              if ((totalSum < $thiz.Lrta_backend_TrainingEngine$__f_EPSILON)) {
-                var this$94 = $n(stActiveIdxs);
-                var uniform = (1.0 / this$94.length__I());
-                var this$95 = $n(stActiveIdxs);
-                var these$7 = this$95;
-                while ((!$n(these$7).isEmpty__Z())) {
-                  var arg1$13 = $n(these$7).head__O();
-                  var i$8 = $uI(arg1$13);
-                  $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$8, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, uniform));
-                  these$7 = $as_sci_List($n(these$7).tail__O())
-                }
-              } else {
-                var this$96 = $n(stActiveIdxs);
-                var these$8 = this$96;
-                while ((!$n(these$8).isEmpty__Z())) {
-                  var arg1$14 = $n(these$8).head__O();
-                  var i$9 = $uI(arg1$14);
-                  $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$9, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(i$9) / totalSum)));
-                  these$8 = $as_sci_List($n(these$8).tail__O())
-                }
-              }
-            }
-          };
-          var this$97 = $n(stActiveIdxs);
-          var these$9 = this$97;
-          while ((!$n(these$9).isEmpty__Z())) {
-            var arg1$15 = $n(these$9).head__O();
-            var idx$1 = $uI(arg1$15);
-            var $$x12 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_hits);
-            var $$x11 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(idx$1);
-            var this$98 = $uJ($n($n(sess).Lrta_backend_TrainingEngine$Session__f_totals).apply__O__O(st$3));
-            var a = ($$x11 * $m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toDouble__I__I__D(this$98.RTLong__f_lo, this$98.RTLong__f_hi));
-            var this$100 = $m_RTLong$();
+          })));
+          var this$74 = $n(stActiveIdxs);
+          var these$2 = this$74;
+          while ((!$n(these$2).isEmpty__Z())) {
+            var arg1$4 = $n(these$2).head__O();
+            var idx$1 = $uI(arg1$4);
+            var $$x9 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_hits);
+            var $$x8 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(idx$1);
+            var this$75 = $uJ($n($n(sess).Lrta_backend_TrainingEngine$Session__f_totals).apply__O__O(st$3));
+            var a = ($$x8 * $m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toDouble__I__I__D(this$75.RTLong__f_lo, this$75.RTLong__f_hi));
+            var this$77 = $m_RTLong$();
             var value = $uD(Math.round(a));
-            var lo = this$100.org$scalajs$linker$runtime$RuntimeLong$$fromDoubleImpl__D__I(value);
-            var hi = this$100.RTLong$__f_org$scalajs$linker$runtime$RuntimeLong$$hiReturn;
-            $$x12.set(idx$1, new $c_RTLong(lo, hi));
-            these$9 = $as_sci_List($n(these$9).tail__O())
+            var lo = this$77.org$scalajs$linker$runtime$RuntimeLong$$fromDoubleImpl__D__I(value);
+            var hi = this$77.RTLong$__f_org$scalajs$linker$runtime$RuntimeLong$$hiReturn;
+            $$x9.set(idx$1, new $c_RTLong(lo, hi));
+            these$2 = $as_sci_List($n(these$2).tail__O())
           }
         })))
       }
     };
-    var this$101 = $n($as_sci_List($n($n(sess).Lrta_backend_TrainingEngine$Session__f_stateToEdges).getOrElse__O__F0__O(srcState, new $c_sjsr_AnonFunction0((() => $m_s_package$().s_package$__f_Nil)))));
+    var this$78 = $n($as_sci_List($n($n(sess).Lrta_backend_TrainingEngine$Session__f_stateToEdges).getOrElse__O__F0__O(srcState, new $c_sjsr_AnonFunction0((() => $m_s_package$().s_package$__f_Nil)))));
     var p$1 = $m_s_Predef$().wrapBooleanArray__AZ__scm_ArraySeq$ofBoolean($n(sess).Lrta_backend_TrainingEngine$Session__f_activeArr);
-    var activeAfterIdxs = $p_sci_List__filterCommon__F1__Z__sci_List(this$101, p$1, false);
-    var this$102 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights);
-    var preTrainWeights = $n(this$102).clone__O();
+    var activeAfterIdxs = $p_sci_List__filterCommon__F1__Z__sci_List(this$78, p$1, false);
+    var this$79 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights);
+    var preTrainWeights = $n(this$79).clone__O();
     if ($n(sess).Lrta_backend_TrainingEngine$Session__f_isAggregation) {
-      var oldW$1 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(firedIdx);
-      $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(firedIdx, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, $m_Lrta_syntax_Aggregation$().compute__T__D__D__D__D($n($n(sess).Lrta_backend_TrainingEngine$Session__f_rx).Lrta_syntax_Program2$RxGraph__f_trainingAgg, oldW$1, $n($n(sess).Lrta_backend_TrainingEngine$Session__f_rx).Lrta_syntax_Program2$RxGraph__f_trainingLambda, oldW$1)));
+      var oldW = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(firedIdx);
+      $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(firedIdx, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, $m_Lrta_syntax_Aggregation$().compute__T__D__D__D__D($n($n(sess).Lrta_backend_TrainingEngine$Session__f_rx).Lrta_syntax_Program2$RxGraph__f_trainingAgg, oldW, $n($n(sess).Lrta_backend_TrainingEngine$Session__f_rx).Lrta_syntax_Program2$RxGraph__f_trainingLambda, oldW)));
       if (($n($n(sess).Lrta_backend_TrainingEngine$Session__f_rx).Lrta_syntax_Program2$RxGraph__f_paradigm === "probabilistic")) {
-        var this$103 = $n($m_s_Predef$().s_Predef$__f_Set);
+        var this$80 = $n($m_s_Predef$().s_Predef$__f_Set);
         var elems$1 = $m_sr_ScalaRunTime$().wrapIntArray__AI__sci_ArraySeq(new $ac_I(new Int32Array([firedIdx])));
-        var modifiedIdxs$1 = this$103.from__sc_IterableOnce__sci_Set(elems$1);
-        var mode$1 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_rx).Lrta_syntax_Program2$RxGraph__f_distributionMode;
-        var f$3 = ((i$10) => {
-          var i$11 = $uI(i$10);
-          return $n(preTrainWeights).get(i$11)
-        });
-        _return$2: {
-          if (($n($n(sess).Lrta_backend_TrainingEngine$Session__f_rx).Lrta_syntax_Program2$RxGraph__f_paradigm === "fuzzy")) {
-            break _return$2
-          };
-          if ($n(activeAfterIdxs).isEmpty__Z()) {
-            break _return$2
-          };
-          var activeModified$1 = $as_sci_Set($n(modifiedIdxs$1).filter__F1__O(new $c_sjsr_AnonFunction1(((elem$9) => {
-            var elem$10 = $uI(elem$9);
-            return $n(activeAfterIdxs).contains__O__Z(elem$10)
-          }))));
-          var this$105 = $n(activeAfterIdxs);
-          var f$4 = ((elem$2$2) => {
-            var elem$11 = $uI(elem$2$2);
-            return $n(activeModified$1).contains__O__Z(elem$11)
-          });
-          var l$1 = this$105;
-          block$2: {
-            var result$1;
-            while (true) {
-              if ($n(l$1).isEmpty__Z()) {
-                var result$1 = $m_sci_Nil$();
-                break
-              } else {
-                var h$3 = $n(l$1).head__O();
-                var t$3 = $as_sci_List($n(l$1).tail__O());
-                if (($uZ(f$4(h$3)) === true)) {
-                  l$1 = t$3;
-                  continue
-                };
-                var start$1 = l$1;
-                var remaining$2 = t$3;
-                while (true) {
-                  if ($n(remaining$2).isEmpty__Z()) {
-                    var result$1 = start$1;
-                    break block$2
-                  } else {
-                    var x$3 = $n(remaining$2).head__O();
-                    if (($uZ(f$4(x$3)) !== true)) {
-                      remaining$2 = $as_sci_List($n(remaining$2).tail__O());
-                      continue
-                    };
-                    var firstMiss$1 = remaining$2;
-                    var newHead$1 = new $c_sci_$colon$colon($n(start$1).head__O(), $m_sci_Nil$());
-                    var toProcess$1 = $as_sci_List($n(start$1).tail__O());
-                    var currentLast$1 = newHead$1;
-                    while ((toProcess$1 !== firstMiss$1)) {
-                      var newElem$1 = new $c_sci_$colon$colon($n(toProcess$1).head__O(), $m_sci_Nil$());
-                      $n(currentLast$1).sci_$colon$colon__f_next = newElem$1;
-                      currentLast$1 = newElem$1;
-                      toProcess$1 = $as_sci_List($n(toProcess$1).tail__O())
-                    };
-                    var next$1 = $as_sci_List($n(firstMiss$1).tail__O());
-                    var nextToCopy$1 = next$1;
-                    while ((!$n(next$1).isEmpty__Z())) {
-                      var head$1 = $n(next$1).head__O();
-                      if (($uZ(f$4(head$1)) !== true)) {
-                        next$1 = $as_sci_List($n(next$1).tail__O())
-                      } else {
-                        while ((nextToCopy$1 !== next$1)) {
-                          var newElem$2$1 = new $c_sci_$colon$colon($n(nextToCopy$1).head__O(), $m_sci_Nil$());
-                          $n(currentLast$1).sci_$colon$colon__f_next = newElem$2$1;
-                          currentLast$1 = newElem$2$1;
-                          nextToCopy$1 = $as_sci_List($n(nextToCopy$1).tail__O())
-                        };
-                        nextToCopy$1 = $as_sci_List($n(next$1).tail__O());
-                        next$1 = $as_sci_List($n(next$1).tail__O())
-                      }
-                    };
-                    if ((!$n(nextToCopy$1).isEmpty__Z())) {
-                      $n(currentLast$1).sci_$colon$colon__f_next = nextToCopy$1
-                    };
-                    var result$1 = newHead$1;
-                    break block$2
-                  }
-                }
-              }
-            }
-          };
-          matchResult8$1: {
-            matchAlts1$1: {
-              matchAlts2$1: {
-                if ((mode$1 === "equal")) {
-                  break matchAlts2$1
-                };
-                if ((mode$1 === "proportional")) {
-                  break matchAlts2$1
-                };
-                break matchAlts1$1
-              };
-              var this$106 = $n(result$1);
-              if ((!this$106.isEmpty__Z())) {
-                var sMod$1 = $uD($n($as_sc_IterableOnceOps($n(activeModified$1).map__F1__O($m_s_Predef$().wrapDoubleArray__AD__scm_ArraySeq$ofDouble($n(sess).Lrta_backend_TrainingEngine$Session__f_weights)))).sum__s_math_Numeric__O($m_s_math_Numeric$DoubleIsFractional$()));
-                if ((sMod$1 >= (1.0 - $thiz.Lrta_backend_TrainingEngine$__f_EPSILON))) {
-                  var this$107 = $n(result$1);
-                  var these$10 = this$107;
-                  while ((!$n(these$10).isEmpty__Z())) {
-                    var arg1$16 = $n(these$10).head__O();
-                    var i$12 = $uI(arg1$16);
-                    $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$12, 0.0);
-                    these$10 = $as_sci_List($n(these$10).tail__O())
-                  };
-                  if ((sMod$1 > $thiz.Lrta_backend_TrainingEngine$__f_EPSILON)) {
-                    $n(activeModified$1).foreach__F1__V(new $c_sjsr_AnonFunction1(((v1$2$1) => {
-                      var i$13 = $uI(v1$2$1);
-                      $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$13, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(i$13) / sMod$1)))
-                    })))
-                  }
-                } else {
-                  var targetUnmod$1 = (1.0 - sMod$1);
-                  if ((mode$1 === "proportional")) {
-                    var this$108 = $n(result$1);
-                    if ((this$108 === $m_sci_Nil$())) {
-                      var $$x13 = $m_sci_Nil$()
-                    } else {
-                      var arg1$17 = this$108.head__O();
-                      var h$4 = new $c_sci_$colon$colon(f$3(arg1$17), $m_sci_Nil$());
-                      var t$4 = h$4;
-                      var rest$2 = $as_sci_List(this$108.tail__O());
-                      while ((rest$2 !== $m_sci_Nil$())) {
-                        var arg1$18 = $n(rest$2).head__O();
-                        var nx$2 = new $c_sci_$colon$colon(f$3(arg1$18), $m_sci_Nil$());
-                        $n(t$4).sci_$colon$colon__f_next = nx$2;
-                        t$4 = nx$2;
-                        rest$2 = $as_sci_List($n(rest$2).tail__O())
-                      };
-                      var $$x13 = h$4
-                    };
-                    var this$109 = $n($$x13);
-                    var num$3 = $m_s_math_Numeric$DoubleIsFractional$();
-                    var sUnmod$1 = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$109, num$3));
-                    if ((sUnmod$1 > $thiz.Lrta_backend_TrainingEngine$__f_EPSILON)) {
-                      var scale$1 = (targetUnmod$1 / sUnmod$1);
-                      var this$110 = $n(result$1);
-                      var these$11 = this$110;
-                      while ((!$n(these$11).isEmpty__Z())) {
-                        var arg1$19 = $n(these$11).head__O();
-                        var i$14 = $uI(arg1$19);
-                        $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$14, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($uD(f$3(i$14)) * scale$1)));
-                        these$11 = $as_sci_List($n(these$11).tail__O())
-                      }
-                    } else {
-                      var this$111 = $n(result$1);
-                      var share$1 = (targetUnmod$1 / this$111.length__I());
-                      var this$112 = $n(result$1);
-                      var these$12 = this$112;
-                      while ((!$n(these$12).isEmpty__Z())) {
-                        var arg1$20 = $n(these$12).head__O();
-                        var i$15 = $uI(arg1$20);
-                        $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$15, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, share$1));
-                        these$12 = $as_sci_List($n(these$12).tail__O())
-                      }
-                    }
-                  } else {
-                    var remaining$3 = result$1;
-                    var elem$12 = 0.0;
-                    elem$12 = targetUnmod$1;
-                    var done$1 = false;
-                    while (true) {
-                      if ((!done$1)) {
-                        var this$114 = $n(remaining$3);
-                        var $$x15 = (!this$114.isEmpty__Z())
-                      } else {
-                        var $$x15 = false
-                      };
-                      if ($$x15) {
-                        var this$115 = $n(remaining$3);
-                        if ((this$115 === $m_sci_Nil$())) {
-                          var $$x14 = $m_sci_Nil$()
-                        } else {
-                          var arg1$21 = this$115.head__O();
-                          var h$5 = new $c_sci_$colon$colon(f$3(arg1$21), $m_sci_Nil$());
-                          var t$5 = h$5;
-                          var rest$3 = $as_sci_List(this$115.tail__O());
-                          while ((rest$3 !== $m_sci_Nil$())) {
-                            var arg1$22 = $n(rest$3).head__O();
-                            var nx$3 = new $c_sci_$colon$colon(f$3(arg1$22), $m_sci_Nil$());
-                            $n(t$5).sci_$colon$colon__f_next = nx$3;
-                            t$5 = nx$3;
-                            rest$3 = $as_sci_List($n(rest$3).tail__O())
-                          };
-                          var $$x14 = h$5
-                        };
-                        var this$116 = $n($$x14);
-                        var num$4 = $m_s_math_Numeric$DoubleIsFractional$();
-                        var sUnmod$2$1 = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$116, num$4));
-                        var diff$1 = (elem$12 - sUnmod$2$1);
-                        var this$117 = $n(remaining$3);
-                        var share$3$1 = (diff$1 / this$117.length__I());
-                        var elem$13 = false;
-                        elem$13 = false;
-                        $n($m_s_package$().s_package$__f_List);
-                        var elem$14 = $m_sci_Nil$();
-                        var elem$15 = null;
-                        elem$15 = elem$14;
-                        var this$121 = $n(remaining$3);
-                        var these$13 = this$121;
-                        while ((!$n(these$13).isEmpty__Z())) {
-                          var arg1$23 = $n(these$13).head__O();
-                          var i$16 = $uI(arg1$23);
-                          var oldW$2 = $uD(f$3(i$16));
-                          var proposed$1 = (oldW$2 + share$3$1);
-                          if ((proposed$1 < 0.0)) {
-                            $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$16, 0.0);
-                            var ev$33$1 = true;
-                            elem$13 = ev$33$1
-                          } else if ((proposed$1 > 1.0)) {
-                            $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$16, 1.0);
-                            var ev$34$1 = (elem$12 - 1.0);
-                            elem$12 = ev$34$1;
-                            var ev$35$1 = true;
-                            elem$13 = ev$35$1
-                          } else {
-                            var this$122 = $n($as_sci_List(elem$15));
-                            var ev$36$1 = new $c_sci_$colon$colon(i$16, this$122);
-                            elem$15 = ev$36$1;
-                            ev$36$1 = null
-                          };
-                          these$13 = $as_sci_List($n(these$13).tail__O())
-                        };
-                        if ((!elem$13)) {
-                          var this$123 = $n($as_sci_List(elem$15));
-                          var these$14 = this$123;
-                          while ((!$n(these$14).isEmpty__Z())) {
-                            var arg1$24 = $n(these$14).head__O();
-                            var i$17 = $uI(arg1$24);
-                            $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$17, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($uD(f$3(i$17)) + share$3$1)));
-                            these$14 = $as_sci_List($n(these$14).tail__O())
-                          };
-                          done$1 = true
-                        } else {
-                          remaining$3 = $as_sci_List(elem$15)
-                        }
-                      } else {
-                        break
-                      }
-                    }
-                  }
-                };
-                break matchResult8$1
-              }
-            };
-            var this$124 = $n($n(activeAfterIdxs).map__F1__sci_List($m_s_Predef$().wrapDoubleArray__AD__scm_ArraySeq$ofDouble($n(sess).Lrta_backend_TrainingEngine$Session__f_weights)));
-            var num$5 = $m_s_math_Numeric$DoubleIsFractional$();
-            var totalSum$1 = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$124, num$5));
-            if ((totalSum$1 < $thiz.Lrta_backend_TrainingEngine$__f_EPSILON)) {
-              var this$125 = $n(activeAfterIdxs);
-              var uniform$1 = (1.0 / this$125.length__I());
-              var this$126 = $n(activeAfterIdxs);
-              var these$15 = this$126;
-              while ((!$n(these$15).isEmpty__Z())) {
-                var arg1$25 = $n(these$15).head__O();
-                var i$18 = $uI(arg1$25);
-                $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$18, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, uniform$1));
-                these$15 = $as_sci_List($n(these$15).tail__O())
-              }
-            } else {
-              var this$127 = $n(activeAfterIdxs);
-              var these$16 = this$127;
-              while ((!$n(these$16).isEmpty__Z())) {
-                var arg1$26 = $n(these$16).head__O();
-                var i$19 = $uI(arg1$26);
-                $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$19, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(i$19) / totalSum$1)));
-                these$16 = $as_sci_List($n(these$16).tail__O())
-              }
-            }
-          }
-        };
-        var this$128 = $n(activeAfterIdxs);
-        var these$17 = this$128;
-        while ((!$n(these$17).isEmpty__Z())) {
-          var arg1$27 = $n(these$17).head__O();
-          var idx$2 = $uI(arg1$27);
-          var $$x17 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_hits);
-          var $$x16 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(idx$2);
-          var this$129 = $uJ($n($n(sess).Lrta_backend_TrainingEngine$Session__f_totals).apply__O__O(srcState));
-          var a$1 = ($$x16 * $m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toDouble__I__I__D(this$129.RTLong__f_lo, this$129.RTLong__f_hi));
-          var this$131 = $m_RTLong$();
+        $p_Lrta_backend_TrainingEngine$__distributeWeights__Lrta_backend_TrainingEngine$Session__Lrta_syntax_Program2$QName__sci_Set__sci_List__T__F1__V($thiz, sess, srcState, this$80.from__sc_IterableOnce__sci_Set(elems$1), activeAfterIdxs, $n($n(sess).Lrta_backend_TrainingEngine$Session__f_rx).Lrta_syntax_Program2$RxGraph__f_distributionMode, new $c_sjsr_AnonFunction1(((i$2) => {
+          var i$3 = $uI(i$2);
+          return $n(preTrainWeights).get(i$3)
+        })));
+        var this$81 = $n(activeAfterIdxs);
+        var these$3 = this$81;
+        while ((!$n(these$3).isEmpty__Z())) {
+          var arg1$5 = $n(these$3).head__O();
+          var idx$2 = $uI(arg1$5);
+          var $$x11 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_hits);
+          var $$x10 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(idx$2);
+          var this$82 = $uJ($n($n(sess).Lrta_backend_TrainingEngine$Session__f_totals).apply__O__O(srcState));
+          var a$1 = ($$x10 * $m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toDouble__I__I__D(this$82.RTLong__f_lo, this$82.RTLong__f_hi));
+          var this$84 = $m_RTLong$();
           var value$1 = $uD(Math.round(a$1));
-          var lo$1 = this$131.org$scalajs$linker$runtime$RuntimeLong$$fromDoubleImpl__D__I(value$1);
-          var hi$1 = this$131.RTLong$__f_org$scalajs$linker$runtime$RuntimeLong$$hiReturn;
-          $$x17.set(idx$2, new $c_RTLong(lo$1, hi$1));
-          these$17 = $as_sci_List($n(these$17).tail__O())
+          var lo$1 = this$84.org$scalajs$linker$runtime$RuntimeLong$$fromDoubleImpl__D__I(value$1);
+          var hi$1 = this$84.RTLong$__f_org$scalajs$linker$runtime$RuntimeLong$$hiReturn;
+          $$x11.set(idx$2, new $c_RTLong(lo$1, hi$1));
+          these$3 = $as_sci_List($n(these$3).tail__O())
         }
       }
     } else {
@@ -12083,311 +12012,41 @@ function $p_Lrta_backend_TrainingEngine$__processEvent__Lrta_backend_TrainingEng
       var lo$2 = ((1 + b.RTLong__f_lo) | 0);
       var hi$2 = ((lo$2 === 0) ? ((1 + bhi) | 0) : bhi);
       $n($n(sess).Lrta_backend_TrainingEngine$Session__f_totals).update__O__O__V(srcState, new $c_RTLong(lo$2, hi$2));
-      var $$x18 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_hits);
+      var $$x12 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_hits);
       var b$1 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_hits).get(firedIdx);
       var bhi$1 = b$1.RTLong__f_hi;
       var lo$3 = ((1 + b$1.RTLong__f_lo) | 0);
       var hi$3 = ((lo$3 === 0) ? ((1 + bhi$1) | 0) : bhi$1);
-      $$x18.set(firedIdx, new $c_RTLong(lo$3, hi$3));
-      var $$x19 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights);
-      var this$134 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_hits).get(firedIdx);
-      $$x19.set(firedIdx, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toDouble__I__I__D(this$134.RTLong__f_lo, this$134.RTLong__f_hi) / $m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toDouble__I__I__D(lo$2, hi$2))));
-      var this$135 = $n($m_s_Predef$().s_Predef$__f_Set);
+      $$x12.set(firedIdx, new $c_RTLong(lo$3, hi$3));
+      var $$x13 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights);
+      var this$87 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_hits).get(firedIdx);
+      $$x13.set(firedIdx, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toDouble__I__I__D(this$87.RTLong__f_lo, this$87.RTLong__f_hi) / $m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toDouble__I__I__D(lo$2, hi$2))));
+      var this$88 = $n($m_s_Predef$().s_Predef$__f_Set);
       var elems$2 = $m_sr_ScalaRunTime$().wrapIntArray__AI__sci_ArraySeq(new $ac_I(new Int32Array([firedIdx])));
-      var modifiedIdxs$2 = this$135.from__sc_IterableOnce__sci_Set(elems$2);
-      var mode$2 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_rx).Lrta_syntax_Program2$RxGraph__f_distributionMode;
-      var f$5 = ((newTotal$2) => ((i$2$1) => {
-        var i$20 = $uI(i$2$1);
-        var this$136 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_hits).get(i$20);
-        return ($m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toDouble__I__I__D(this$136.RTLong__f_lo, this$136.RTLong__f_hi) / $m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toDouble__I__I__D(newTotal$2.RTLong__f_lo, newTotal$2.RTLong__f_hi))
-      }))(new $c_RTLong(lo$2, hi$2));
-      _return$3: {
-        if (($n($n(sess).Lrta_backend_TrainingEngine$Session__f_rx).Lrta_syntax_Program2$RxGraph__f_paradigm === "fuzzy")) {
-          break _return$3
-        };
-        if ($n(activeAfterIdxs).isEmpty__Z()) {
-          break _return$3
-        };
-        var activeModified$2 = $as_sci_Set($n(modifiedIdxs$2).filter__F1__O(new $c_sjsr_AnonFunction1(((elem$16) => {
-          var elem$17 = $uI(elem$16);
-          return $n(activeAfterIdxs).contains__O__Z(elem$17)
-        }))));
-        var this$138 = $n(activeAfterIdxs);
-        var f$6 = ((elem$2$3) => {
-          var elem$18 = $uI(elem$2$3);
-          return $n(activeModified$2).contains__O__Z(elem$18)
-        });
-        var l$2 = this$138;
-        block$4: {
-          var result$2;
-          while (true) {
-            if ($n(l$2).isEmpty__Z()) {
-              var result$2 = $m_sci_Nil$();
-              break
-            } else {
-              var h$6 = $n(l$2).head__O();
-              var t$6 = $as_sci_List($n(l$2).tail__O());
-              if (($uZ(f$6(h$6)) === true)) {
-                l$2 = t$6;
-                continue
-              };
-              var start$2 = l$2;
-              var remaining$4 = t$6;
-              while (true) {
-                if ($n(remaining$4).isEmpty__Z()) {
-                  var result$2 = start$2;
-                  break block$4
-                } else {
-                  var x$4 = $n(remaining$4).head__O();
-                  if (($uZ(f$6(x$4)) !== true)) {
-                    remaining$4 = $as_sci_List($n(remaining$4).tail__O());
-                    continue
-                  };
-                  var firstMiss$2 = remaining$4;
-                  var newHead$2 = new $c_sci_$colon$colon($n(start$2).head__O(), $m_sci_Nil$());
-                  var toProcess$2 = $as_sci_List($n(start$2).tail__O());
-                  var currentLast$2 = newHead$2;
-                  while ((toProcess$2 !== firstMiss$2)) {
-                    var newElem$3 = new $c_sci_$colon$colon($n(toProcess$2).head__O(), $m_sci_Nil$());
-                    $n(currentLast$2).sci_$colon$colon__f_next = newElem$3;
-                    currentLast$2 = newElem$3;
-                    toProcess$2 = $as_sci_List($n(toProcess$2).tail__O())
-                  };
-                  var next$2 = $as_sci_List($n(firstMiss$2).tail__O());
-                  var nextToCopy$2 = next$2;
-                  while ((!$n(next$2).isEmpty__Z())) {
-                    var head$2 = $n(next$2).head__O();
-                    if (($uZ(f$6(head$2)) !== true)) {
-                      next$2 = $as_sci_List($n(next$2).tail__O())
-                    } else {
-                      while ((nextToCopy$2 !== next$2)) {
-                        var newElem$2$2 = new $c_sci_$colon$colon($n(nextToCopy$2).head__O(), $m_sci_Nil$());
-                        $n(currentLast$2).sci_$colon$colon__f_next = newElem$2$2;
-                        currentLast$2 = newElem$2$2;
-                        nextToCopy$2 = $as_sci_List($n(nextToCopy$2).tail__O())
-                      };
-                      nextToCopy$2 = $as_sci_List($n(next$2).tail__O());
-                      next$2 = $as_sci_List($n(next$2).tail__O())
-                    }
-                  };
-                  if ((!$n(nextToCopy$2).isEmpty__Z())) {
-                    $n(currentLast$2).sci_$colon$colon__f_next = nextToCopy$2
-                  };
-                  var result$2 = newHead$2;
-                  break block$4
-                }
-              }
-            }
-          }
-        };
-        matchResult8$2: {
-          matchAlts1$2: {
-            matchAlts2$2: {
-              if ((mode$2 === "equal")) {
-                break matchAlts2$2
-              };
-              if ((mode$2 === "proportional")) {
-                break matchAlts2$2
-              };
-              break matchAlts1$2
-            };
-            var this$139 = $n(result$2);
-            if ((!this$139.isEmpty__Z())) {
-              var sMod$2 = $uD($n($as_sc_IterableOnceOps($n(activeModified$2).map__F1__O($m_s_Predef$().wrapDoubleArray__AD__scm_ArraySeq$ofDouble($n(sess).Lrta_backend_TrainingEngine$Session__f_weights)))).sum__s_math_Numeric__O($m_s_math_Numeric$DoubleIsFractional$()));
-              if ((sMod$2 >= (1.0 - $thiz.Lrta_backend_TrainingEngine$__f_EPSILON))) {
-                var this$140 = $n(result$2);
-                var these$18 = this$140;
-                while ((!$n(these$18).isEmpty__Z())) {
-                  var arg1$28 = $n(these$18).head__O();
-                  var i$21 = $uI(arg1$28);
-                  $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$21, 0.0);
-                  these$18 = $as_sci_List($n(these$18).tail__O())
-                };
-                if ((sMod$2 > $thiz.Lrta_backend_TrainingEngine$__f_EPSILON)) {
-                  $n(activeModified$2).foreach__F1__V(new $c_sjsr_AnonFunction1(((v1$2$2) => {
-                    var i$22 = $uI(v1$2$2);
-                    $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$22, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(i$22) / sMod$2)))
-                  })))
-                }
-              } else {
-                var targetUnmod$2 = (1.0 - sMod$2);
-                if ((mode$2 === "proportional")) {
-                  var this$141 = $n(result$2);
-                  if ((this$141 === $m_sci_Nil$())) {
-                    var $$x20 = $m_sci_Nil$()
-                  } else {
-                    var arg1$29 = this$141.head__O();
-                    var h$7 = new $c_sci_$colon$colon(f$5(arg1$29), $m_sci_Nil$());
-                    var t$7 = h$7;
-                    var rest$4 = $as_sci_List(this$141.tail__O());
-                    while ((rest$4 !== $m_sci_Nil$())) {
-                      var arg1$30 = $n(rest$4).head__O();
-                      var nx$4 = new $c_sci_$colon$colon(f$5(arg1$30), $m_sci_Nil$());
-                      $n(t$7).sci_$colon$colon__f_next = nx$4;
-                      t$7 = nx$4;
-                      rest$4 = $as_sci_List($n(rest$4).tail__O())
-                    };
-                    var $$x20 = h$7
-                  };
-                  var this$142 = $n($$x20);
-                  var num$6 = $m_s_math_Numeric$DoubleIsFractional$();
-                  var sUnmod$3 = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$142, num$6));
-                  if ((sUnmod$3 > $thiz.Lrta_backend_TrainingEngine$__f_EPSILON)) {
-                    var scale$2 = (targetUnmod$2 / sUnmod$3);
-                    var this$143 = $n(result$2);
-                    var these$19 = this$143;
-                    while ((!$n(these$19).isEmpty__Z())) {
-                      var arg1$31 = $n(these$19).head__O();
-                      var i$23 = $uI(arg1$31);
-                      $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$23, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($uD(f$5(i$23)) * scale$2)));
-                      these$19 = $as_sci_List($n(these$19).tail__O())
-                    }
-                  } else {
-                    var this$144 = $n(result$2);
-                    var share$2 = (targetUnmod$2 / this$144.length__I());
-                    var this$145 = $n(result$2);
-                    var these$20 = this$145;
-                    while ((!$n(these$20).isEmpty__Z())) {
-                      var arg1$32 = $n(these$20).head__O();
-                      var i$24 = $uI(arg1$32);
-                      $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$24, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, share$2));
-                      these$20 = $as_sci_List($n(these$20).tail__O())
-                    }
-                  }
-                } else {
-                  var remaining$5 = result$2;
-                  var elem$19 = 0.0;
-                  elem$19 = targetUnmod$2;
-                  var done$2 = false;
-                  while (true) {
-                    if ((!done$2)) {
-                      var this$147 = $n(remaining$5);
-                      var $$x22 = (!this$147.isEmpty__Z())
-                    } else {
-                      var $$x22 = false
-                    };
-                    if ($$x22) {
-                      var this$148 = $n(remaining$5);
-                      if ((this$148 === $m_sci_Nil$())) {
-                        var $$x21 = $m_sci_Nil$()
-                      } else {
-                        var arg1$33 = this$148.head__O();
-                        var h$8 = new $c_sci_$colon$colon(f$5(arg1$33), $m_sci_Nil$());
-                        var t$8 = h$8;
-                        var rest$5 = $as_sci_List(this$148.tail__O());
-                        while ((rest$5 !== $m_sci_Nil$())) {
-                          var arg1$34 = $n(rest$5).head__O();
-                          var nx$5 = new $c_sci_$colon$colon(f$5(arg1$34), $m_sci_Nil$());
-                          $n(t$8).sci_$colon$colon__f_next = nx$5;
-                          t$8 = nx$5;
-                          rest$5 = $as_sci_List($n(rest$5).tail__O())
-                        };
-                        var $$x21 = h$8
-                      };
-                      var this$149 = $n($$x21);
-                      var num$7 = $m_s_math_Numeric$DoubleIsFractional$();
-                      var sUnmod$2$2 = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$149, num$7));
-                      var diff$2 = (elem$19 - sUnmod$2$2);
-                      var this$150 = $n(remaining$5);
-                      var share$3$2 = (diff$2 / this$150.length__I());
-                      var elem$20 = false;
-                      elem$20 = false;
-                      $n($m_s_package$().s_package$__f_List);
-                      var elem$21 = $m_sci_Nil$();
-                      var elem$22 = null;
-                      elem$22 = elem$21;
-                      var this$154 = $n(remaining$5);
-                      var these$21 = this$154;
-                      while ((!$n(these$21).isEmpty__Z())) {
-                        var arg1$35 = $n(these$21).head__O();
-                        var i$25 = $uI(arg1$35);
-                        var oldW$3 = $uD(f$5(i$25));
-                        var proposed$2 = (oldW$3 + share$3$2);
-                        if ((proposed$2 < 0.0)) {
-                          $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$25, 0.0);
-                          var ev$33$2 = true;
-                          elem$20 = ev$33$2
-                        } else if ((proposed$2 > 1.0)) {
-                          $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$25, 1.0);
-                          var ev$34$2 = (elem$19 - 1.0);
-                          elem$19 = ev$34$2;
-                          var ev$35$2 = true;
-                          elem$20 = ev$35$2
-                        } else {
-                          var this$155 = $n($as_sci_List(elem$22));
-                          var ev$36$2 = new $c_sci_$colon$colon(i$25, this$155);
-                          elem$22 = ev$36$2;
-                          ev$36$2 = null
-                        };
-                        these$21 = $as_sci_List($n(these$21).tail__O())
-                      };
-                      if ((!elem$20)) {
-                        var this$156 = $n($as_sci_List(elem$22));
-                        var these$22 = this$156;
-                        while ((!$n(these$22).isEmpty__Z())) {
-                          var arg1$36 = $n(these$22).head__O();
-                          var i$26 = $uI(arg1$36);
-                          $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$26, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($uD(f$5(i$26)) + share$3$2)));
-                          these$22 = $as_sci_List($n(these$22).tail__O())
-                        };
-                        done$2 = true
-                      } else {
-                        remaining$5 = $as_sci_List(elem$22)
-                      }
-                    } else {
-                      break
-                    }
-                  }
-                }
-              };
-              break matchResult8$2
-            }
-          };
-          var this$157 = $n($n(activeAfterIdxs).map__F1__sci_List($m_s_Predef$().wrapDoubleArray__AD__scm_ArraySeq$ofDouble($n(sess).Lrta_backend_TrainingEngine$Session__f_weights)));
-          var num$8 = $m_s_math_Numeric$DoubleIsFractional$();
-          var totalSum$2 = $uD($f_sc_IterableOnceOps__sum__s_math_Numeric__O(this$157, num$8));
-          if ((totalSum$2 < $thiz.Lrta_backend_TrainingEngine$__f_EPSILON)) {
-            var this$158 = $n(activeAfterIdxs);
-            var uniform$2 = (1.0 / this$158.length__I());
-            var this$159 = $n(activeAfterIdxs);
-            var these$23 = this$159;
-            while ((!$n(these$23).isEmpty__Z())) {
-              var arg1$37 = $n(these$23).head__O();
-              var i$27 = $uI(arg1$37);
-              $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$27, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, uniform$2));
-              these$23 = $as_sci_List($n(these$23).tail__O())
-            }
-          } else {
-            var this$160 = $n(activeAfterIdxs);
-            var these$24 = this$160;
-            while ((!$n(these$24).isEmpty__Z())) {
-              var arg1$38 = $n(these$24).head__O();
-              var i$28 = $uI(arg1$38);
-              $n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).set(i$28, $p_Lrta_backend_TrainingEngine$__clamp__D__D($thiz, ($n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(i$28) / totalSum$2)));
-              these$24 = $as_sci_List($n(these$24).tail__O())
-            }
-          }
-        }
-      };
-      var this$161 = $n(activeAfterIdxs);
-      var these$25 = this$161;
-      while ((!$n(these$25).isEmpty__Z())) {
-        var arg1$39 = $n(these$25).head__O();
-        var idx$3 = $uI(arg1$39);
-        var $$x23 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_hits);
+      $p_Lrta_backend_TrainingEngine$__distributeWeights__Lrta_backend_TrainingEngine$Session__Lrta_syntax_Program2$QName__sci_Set__sci_List__T__F1__V($thiz, sess, srcState, this$88.from__sc_IterableOnce__sci_Set(elems$2), activeAfterIdxs, $n($n(sess).Lrta_backend_TrainingEngine$Session__f_rx).Lrta_syntax_Program2$RxGraph__f_distributionMode, new $c_sjsr_AnonFunction1(((newTotal$2) => ((i$2$1) => {
+        var i$4 = $uI(i$2$1);
+        var this$89 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_hits).get(i$4);
+        return ($m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toDouble__I__I__D(this$89.RTLong__f_lo, this$89.RTLong__f_hi) / $m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toDouble__I__I__D(newTotal$2.RTLong__f_lo, newTotal$2.RTLong__f_hi))
+      }))(new $c_RTLong(lo$2, hi$2))));
+      var this$90 = $n(activeAfterIdxs);
+      var these$4 = this$90;
+      while ((!$n(these$4).isEmpty__Z())) {
+        var arg1$6 = $n(these$4).head__O();
+        var idx$3 = $uI(arg1$6);
+        var $$x14 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_hits);
         var a$2 = ($n($n(sess).Lrta_backend_TrainingEngine$Session__f_weights).get(idx$3) * $m_RTLong$().org$scalajs$linker$runtime$RuntimeLong$$toDouble__I__I__D(lo$2, hi$2));
-        var this$163 = $m_RTLong$();
+        var this$92 = $m_RTLong$();
         var value$2 = $uD(Math.round(a$2));
-        var lo$4 = this$163.org$scalajs$linker$runtime$RuntimeLong$$fromDoubleImpl__D__I(value$2);
-        var hi$4 = this$163.RTLong$__f_org$scalajs$linker$runtime$RuntimeLong$$hiReturn;
-        $$x23.set(idx$3, new $c_RTLong(lo$4, hi$4));
-        these$25 = $as_sci_List($n(these$25).tail__O())
+        var lo$4 = this$92.org$scalajs$linker$runtime$RuntimeLong$$fromDoubleImpl__D__I(value$2);
+        var hi$4 = this$92.RTLong$__f_org$scalajs$linker$runtime$RuntimeLong$$hiReturn;
+        $$x14.set(idx$3, new $c_RTLong(lo$4, hi$4));
+        these$4 = $as_sci_List($n(these$4).tail__O())
       }
     };
-    var $$x24 = $n(sess);
-    var this$164 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_currentStates);
-    var this$165 = $n(this$164.excl__O__sci_SetOps(srcState));
-    $$x24.Lrta_backend_TrainingEngine$Session__f_currentStates = $as_sci_Set(this$165.incl__O__sci_SetOps(dstState));
+    var $$x15 = $n(sess);
+    var this$93 = $n($n(sess).Lrta_backend_TrainingEngine$Session__f_currentStates);
+    var this$94 = $n(this$93.excl__O__sci_SetOps(srcState));
+    $$x15.Lrta_backend_TrainingEngine$Session__f_currentStates = $as_sci_Set(this$94.incl__O__sci_SetOps(dstState));
     return true
   };
   throw new $c_s_MatchError(firedIdxOpt)
@@ -12482,9 +12141,9 @@ $c_Lrta_backend_TrainingEngine$.prototype.trainFromLines__Lrta_syntax_Program2$R
           var bhi = b.RTLong__f_hi;
           var lo = ((1 + b.RTLong__f_lo) | 0);
           var hi = ((lo === 0) ? ((1 + bhi) | 0) : bhi);
-          var ev$37__lo = lo;
-          var ev$37__hi = hi;
-          eventCount.sr_LongRef__f_elem = new $c_RTLong(ev$37__lo, ev$37__hi)
+          var ev$42__lo = lo;
+          var ev$42__hi = hi;
+          eventCount.sr_LongRef__f_elem = new $c_RTLong(ev$42__lo, ev$42__hi)
         }
       }))(sess, eventCount);
       var len = $n(events).u.length;
@@ -12561,10 +12220,10 @@ $c_Lrta_backend_TrainingEngine$.prototype.trainFromLines__Lrta_syntax_Program2$R
       var bhi$1 = b$1__hi;
       var lo$2 = ((1 + b$1__lo) | 0);
       var hi$2 = ((lo$2 === 0) ? ((1 + bhi$1) | 0) : bhi$1);
-      var ev$38__lo = lo$2;
-      var ev$38__hi = hi$2;
-      elem__lo = ev$38__lo;
-      elem__hi = ev$38__hi;
+      var ev$43__lo = lo$2;
+      var ev$43__hi = hi$2;
+      elem__lo = ev$43__lo;
+      elem__hi = ev$43__hi;
       var this$16__lo = elem__lo;
       var this$16__hi = elem__hi;
       var this$17 = $m_RTLong$();
@@ -13471,6 +13130,61 @@ function $p_Lrta_frontend_RTAAPI$__stringToQName__T__Lrta_syntax_Program2$QName(
     return new $c_Lrta_syntax_Program2$QName(n$1)
   }
 }
+function $p_Lrta_frontend_RTAAPI$__runtimeValueToJson__Lrta_syntax_RuntimeValue__T($thiz, v) {
+  if ((v instanceof $c_Lrta_syntax_RuntimeValue$VInt)) {
+    var x$1 = $as_Lrta_syntax_RuntimeValue$VInt(v);
+    var this$2 = $n(x$1);
+    var x111 = this$2.Lrta_syntax_RuntimeValue$VInt__f_value;
+    var this$3 = $n(x$1);
+    var this$4 = $n(x$1);
+    return ("" + x111)
+  };
+  if ((v instanceof $c_Lrta_syntax_RuntimeValue$VFloat)) {
+    var x$1$1 = $as_Lrta_syntax_RuntimeValue$VFloat(v);
+    var this$7 = $n(x$1$1);
+    var x106 = this$7.Lrta_syntax_RuntimeValue$VFloat__f_value;
+    var this$8 = $n(x$1$1);
+    var this$9 = $n(x$1$1);
+    return ("" + x106)
+  };
+  if ((v instanceof $c_Lrta_syntax_RuntimeValue$VBool)) {
+    var x$1$2 = $as_Lrta_syntax_RuntimeValue$VBool(v);
+    var this$12 = $n(x$1$2);
+    var x103 = this$12.Lrta_syntax_RuntimeValue$VBool__f_value;
+    return ("" + x103)
+  };
+  if ((v instanceof $c_Lrta_syntax_RuntimeValue$VArray)) {
+    var x$1$3 = $as_Lrta_syntax_RuntimeValue$VArray(v);
+    var this$15 = $n(x$1$3);
+    var x98 = this$15.Lrta_syntax_RuntimeValue$VArray__f_value;
+    var this$16 = $n(x$1$3);
+    var this$17 = $n(x$1$3);
+    var this$19 = $n(x98);
+    var f = ((v$2) => {
+      var v$1 = $as_Lrta_syntax_RuntimeValue(v$2);
+      return $p_Lrta_frontend_RTAAPI$__runtimeValueToJson__Lrta_syntax_RuntimeValue__T($thiz, v$1)
+    });
+    if ((this$19 === $m_sci_Nil$())) {
+      var $$x1 = $m_sci_Nil$()
+    } else {
+      var arg1 = this$19.head__O();
+      var h = new $c_sci_$colon$colon(f(arg1), $m_sci_Nil$());
+      var t = h;
+      var rest = $as_sci_List(this$19.tail__O());
+      while ((rest !== $m_sci_Nil$())) {
+        var arg1$1 = $n(rest).head__O();
+        var nx = new $c_sci_$colon$colon(f(arg1$1), $m_sci_Nil$());
+        $n(t).sci_$colon$colon__f_next = nx;
+        t = nx;
+        rest = $as_sci_List($n(rest).tail__O())
+      };
+      var $$x1 = h
+    };
+    var this$20 = $n($$x1);
+    return (("[" + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$20, "", ", ", "")) + "]")
+  };
+  throw new $c_s_MatchError(v)
+}
 function $p_Lrta_frontend_RTAAPI$__generateSimulationJson__Lrta_syntax_Program2$RxGraph__s_Option__T($thiz, graph, traversedEdge) {
   var graphElementsJson = $m_Lrta_backend_CytoscapeConverter$().apply__Lrta_syntax_Program2$RxGraph__T(graph);
   var eventTransitions = $as_sci_Set($n($m_Lrta_backend_RxSemantics$().nextEdge__Lrta_syntax_Program2$RxGraph__sci_Set(graph)).map__F1__O(new $c_sjsr_AnonFunction1(((_$6) => {
@@ -13499,28 +13213,28 @@ function $p_Lrta_frontend_RTAAPI$__generateSimulationJson__Lrta_syntax_Program2$
     if ((x$1$3 !== null)) {
       var n = $as_Lrta_syntax_Program2$QName($n(x$1$3)._1__O());
       var v = $as_Lrta_syntax_RuntimeValue($n(x$1$3)._2__O());
-      return (((("\"" + $n(n).show__T()) + "\": \"") + $n(v).value__O()) + "\"")
+      return ((("\"" + $n(n).show__T()) + "\": ") + $p_Lrta_frontend_RTAAPI$__runtimeValueToJson__Lrta_syntax_RuntimeValue__T($thiz, v))
     };
     throw new $c_s_MatchError(x$1$3)
   })))));
   var valEnvJson = $f_sc_IterableOnceOps__mkString__T__T__T__T(this$7, "", ",", "");
-  matchResult30: {
+  matchResult31: {
     var traversedJson;
     if ((traversedEdge instanceof $c_s_Some)) {
-      var x105 = $as_T4($n($as_s_Some(traversedEdge)).s_Some__f_value);
-      if ((x105 !== null)) {
-        var from$1 = $as_Lrta_syntax_Program2$QName($n(x105).T4__f__1);
-        var to$1 = $as_Lrta_syntax_Program2$QName($n(x105).T4__f__2);
-        var id$1 = $as_Lrta_syntax_Program2$QName($n(x105).T4__f__3);
-        var lbl$1 = $as_Lrta_syntax_Program2$QName($n(x105).T4__f__4);
+      var x124 = $as_T4($n($as_s_Some(traversedEdge)).s_Some__f_value);
+      if ((x124 !== null)) {
+        var from$1 = $as_Lrta_syntax_Program2$QName($n(x124).T4__f__1);
+        var to$1 = $as_Lrta_syntax_Program2$QName($n(x124).T4__f__2);
+        var id$1 = $as_Lrta_syntax_Program2$QName($n(x124).T4__f__3);
+        var lbl$1 = $as_Lrta_syntax_Program2$QName($n(x124).T4__f__4);
         var traversedJson = (((((((("{\"from\":\"" + from$1) + "\", \"to\":\"") + to$1) + "\", \"tId\":\"") + id$1) + "\", \"label\":\"") + lbl$1) + "\"}");
-        break matchResult30
+        break matchResult31
       }
     };
     var x = $m_s_None$();
     if ((x === traversedEdge)) {
       var traversedJson = "null";
-      break matchResult30
+      break matchResult31
     };
     throw new $c_s_MatchError(traversedEdge)
   };
@@ -14554,66 +14268,39 @@ $c_Lrta_frontend_RTAAPI$.prototype.findBestPath__sjs_js_Dynamic__T = (function(p
   };
   throw new $c_s_MatchError(x92)
 });
-$c_Lrta_frontend_RTAAPI$.prototype.translateToGLTS = (function() {
-  return this.translateToGLTS__T()
+$c_Lrta_frontend_RTAAPI$.prototype.getPrismModel2 = (function() {
+  return this.getPrismModel2__T()
 });
-$c_Lrta_frontend_RTAAPI$.prototype.getCurrentStateText = (function() {
-  return this.getCurrentStateText__T()
-});
-$c_Lrta_frontend_RTAAPI$.prototype.getMcrl2 = (function() {
-  return this.getMcrl2__T()
-});
-$c_Lrta_frontend_RTAAPI$.prototype.mergeModels = (function(arg, arg$2, arg$3, arg$4) {
+$c_Lrta_frontend_RTAAPI$.prototype.loadModel = (function(arg) {
   var prep0 = $as_T(arg);
-  var prep1 = $as_T(arg$2);
-  var prep2 = $as_T(arg$3);
-  var prep3 = $as_T(arg$4);
-  return this.mergeModels__T__T__T__T__T(prep0, prep1, prep2, prep3)
-});
-$c_Lrta_frontend_RTAAPI$.prototype.exportDeltaCutModel = (function(arg) {
-  var prep0 = $uD(arg);
-  return this.exportDeltaCutModel__D__T(prep0)
-});
-$c_Lrta_frontend_RTAAPI$.prototype.findBestPath = (function(arg) {
-  return this.findBestPath__sjs_js_Dynamic__T(arg)
-});
-$c_Lrta_frontend_RTAAPI$.prototype.getCurrentStateMermaidSimple = (function() {
-  return this.getCurrentStateMermaidSimple__T()
+  return this.loadModel__T__T(prep0)
 });
 $c_Lrta_frontend_RTAAPI$.prototype.checkProblems = (function() {
   return this.checkProblems__T()
 });
-$c_Lrta_frontend_RTAAPI$.prototype.getStats = (function() {
-  return this.getStats__T()
-});
-$c_Lrta_frontend_RTAAPI$.prototype.getUpdatedSource = (function() {
-  return this.getUpdatedSource__T()
-});
-$c_Lrta_frontend_RTAAPI$.prototype.takeStep = (function(arg) {
-  var prep0 = $as_T(arg);
-  return this.takeStep__T__T(prep0)
-});
-$c_Lrta_frontend_RTAAPI$.prototype.trainWithDataStream = (function(arg) {
-  var prep0 = $as_T(arg);
-  return this.trainWithDataStream__T__T(prep0)
-});
-$c_Lrta_frontend_RTAAPI$.prototype.getPrismModel2 = (function() {
-  return this.getPrismModel2__T()
-});
-$c_Lrta_frontend_RTAAPI$.prototype.trainMassiveRaw = (function(arg) {
-  var prep0 = $as_T(arg);
-  return this.trainMassiveRaw__T__T(prep0)
-});
-$c_Lrta_frontend_RTAAPI$.prototype.getExamples = (function() {
-  return this.getExamples__T()
+$c_Lrta_frontend_RTAAPI$.prototype.getCurrentStateMermaid = (function() {
+  return this.getCurrentStateMermaid__T()
 });
 $c_Lrta_frontend_RTAAPI$.prototype.applySavedWeights = (function(arg) {
   var prep0 = $as_T(arg);
   return this.applySavedWeights__T__T(prep0)
 });
-$c_Lrta_frontend_RTAAPI$.prototype.trainBatch = (function(arg) {
+$c_Lrta_frontend_RTAAPI$.prototype.getStats = (function() {
+  return this.getStats__T()
+});
+$c_Lrta_frontend_RTAAPI$.prototype.findBestPath = (function(arg) {
+  return this.findBestPath__sjs_js_Dynamic__T(arg)
+});
+$c_Lrta_frontend_RTAAPI$.prototype.exportDeltaCutModel = (function(arg) {
+  var prep0 = $uD(arg);
+  return this.exportDeltaCutModel__D__T(prep0)
+});
+$c_Lrta_frontend_RTAAPI$.prototype.takeStep = (function(arg) {
   var prep0 = $as_T(arg);
-  return this.trainBatch__T__T(prep0)
+  return this.takeStep__T__T(prep0)
+});
+$c_Lrta_frontend_RTAAPI$.prototype.undo = (function() {
+  return this.undo__T()
 });
 $c_Lrta_frontend_RTAAPI$.prototype.runPdl = (function(arg, arg$2, arg$3, arg$4, arg$5) {
   var prep0 = $as_T(arg);
@@ -14623,19 +14310,46 @@ $c_Lrta_frontend_RTAAPI$.prototype.runPdl = (function(arg, arg$2, arg$3, arg$4, 
   var prep4 = $uD(arg$5);
   return this.runPdl__T__T__I__I__D__T(prep0, prep1, prep2, prep3, prep4)
 });
-$c_Lrta_frontend_RTAAPI$.prototype.loadModel = (function(arg) {
+$c_Lrta_frontend_RTAAPI$.prototype.trainWithDataStream = (function(arg) {
   var prep0 = $as_T(arg);
-  return this.loadModel__T__T(prep0)
+  return this.trainWithDataStream__T__T(prep0)
+});
+$c_Lrta_frontend_RTAAPI$.prototype.getCurrentStateMermaidSimple = (function() {
+  return this.getCurrentStateMermaidSimple__T()
+});
+$c_Lrta_frontend_RTAAPI$.prototype.translateToGLTS = (function() {
+  return this.translateToGLTS__T()
+});
+$c_Lrta_frontend_RTAAPI$.prototype.mergeModels = (function(arg, arg$2, arg$3, arg$4) {
+  var prep0 = $as_T(arg);
+  var prep1 = $as_T(arg$2);
+  var prep2 = $as_T(arg$3);
+  var prep3 = $as_T(arg$4);
+  return this.mergeModels__T__T__T__T__T(prep0, prep1, prep2, prep3)
+});
+$c_Lrta_frontend_RTAAPI$.prototype.getCurrentStateText = (function() {
+  return this.getCurrentStateText__T()
+});
+$c_Lrta_frontend_RTAAPI$.prototype.trainBatch = (function(arg) {
+  var prep0 = $as_T(arg);
+  return this.trainBatch__T__T(prep0)
+});
+$c_Lrta_frontend_RTAAPI$.prototype.getExamples = (function() {
+  return this.getExamples__T()
+});
+$c_Lrta_frontend_RTAAPI$.prototype.trainMassiveRaw = (function(arg) {
+  var prep0 = $as_T(arg);
+  return this.trainMassiveRaw__T__T(prep0)
 });
 $c_Lrta_frontend_RTAAPI$.prototype.trainSingleSession = (function(arg) {
   var prep0 = $as_T(arg);
   return this.trainSingleSession__T__T(prep0)
 });
-$c_Lrta_frontend_RTAAPI$.prototype.getCurrentStateMermaid = (function() {
-  return this.getCurrentStateMermaid__T()
+$c_Lrta_frontend_RTAAPI$.prototype.getUpdatedSource = (function() {
+  return this.getUpdatedSource__T()
 });
-$c_Lrta_frontend_RTAAPI$.prototype.undo = (function() {
-  return this.undo__T()
+$c_Lrta_frontend_RTAAPI$.prototype.getMcrl2 = (function() {
+  return this.getMcrl2__T()
 });
 $c_Lrta_frontend_RTAAPI$.prototype.getAllStepsMermaid = (function() {
   return this.getAllStepsMermaid__T()

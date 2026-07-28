@@ -1,22 +1,8 @@
-// ============================================================
-// PROJETO COM PASTAS — substitui/atualiza js/script/project.js
-// ============================================================
-// Mantém os mesmos nomes de função já referenciados no index.html:
-//   saveUserModel(), overwriteUserModel(), deleteUserModel(),
-//   createNewModel(), updateProjectTree()
-// para não precisares de tocar no HTML (exceto opcionalmente
-// adicionar um botão "Nova pasta" — ver secção final).
-//
-// Estrutura persistida em localStorage (chave STORAGE_KEY):
-//   {
-//     folders: { [id]: { name, parentId } },
-//     files:   { [id]: { name, parentId, content } }
-//   }
-// parentId === null significa "raiz de Meus Ficheiros".
+
 
 (function () {
   var STORAGE_KEY = "re_project_v2";
-  var currentFileId = null; // ficheiro atualmente aberto/associado ao editor
+  var currentFileId = null;
   var expanded = new Set(["examples-root", "my-root"]);
 
   function loadStore() {
@@ -64,7 +50,6 @@
     });
   }
 
-  // ---------- Render ----------
 
   function renderNode(container, node, store, depth) {
     var row = document.createElement("div");
@@ -145,7 +130,7 @@
     row.appendChild(document.createTextNode(key + ".Re"));
     row.title = "Exemplo incorporado (só leitura)";
     row.onclick = function () {
-      currentFileId = null; // exemplos não são "sobrescrevíveis"
+      currentFileId = null;
       if (typeof editor !== "undefined") editor.setValue(content);
       if (typeof showCanvasTab === "function") showCanvasTab("editorTab");
       if (typeof loadAndRender === "function") loadAndRender();
@@ -162,7 +147,6 @@
     root.innerHTML = "";
     var store = loadStore();
 
-    // --- Pasta "Exemplos" (só leitura) ---
     var exFolderOpen = expanded.has("examples-root");
     var exHeader = document.createElement("div");
     exHeader.className = "tree-item";
@@ -187,7 +171,6 @@
       } catch (e) { /* ignore */ }
     }
 
-    // --- Pasta "Meus Ficheiros" (com subpastas) ---
     var myOpen = expanded.has("my-root");
     var myHeader = document.createElement("div");
     myHeader.className = "tree-item";
@@ -233,7 +216,6 @@
     renderTree();
   }
 
-  // ---------- Context menu de pasta (renomear / apagar / nova subpasta) ----------
 
   function showFolderMenu(e, folderId, store) {
     var old = document.getElementById("folder-context-menu");
@@ -312,7 +294,6 @@
     delete store.folders[folderId];
   }
 
-  // ---------- API pública (mesmos nomes usados no index.html) ----------
 
   window.updateProjectTree = renderTree;
 
@@ -381,8 +362,7 @@
     if (sb) sb.textContent = "Nenhum modelo guardado";
   };
 
-  // Botão extra "Nova pasta" na raiz — injectado no menu de contexto
-  // já existente (#project-context-menu), sem precisar de editar o HTML.
+
   document.addEventListener("DOMContentLoaded", function () {
     var menu = document.getElementById("project-context-menu");
     if (menu) {

@@ -1,6 +1,5 @@
-// ============================================================
-// bestpath.js — Path Optimizer panel
-// ============================================================
+
+
 
 function updateBPValueDropdown() {
     const type         = document.getElementById('bpType').value;

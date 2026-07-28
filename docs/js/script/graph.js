@@ -1,6 +1,4 @@
-// ============================================================
-// cy/graph.js — Cytoscape init, update, updateAllViews
-// ============================================================
+
 
 var currentCytoscapeInstance = null;
 var textTraceHistory = [];
@@ -8,7 +6,6 @@ var autoDelayTimer   = null;
 var storedDelayValue = 1.0;
 var jsTextHistory    = [];
 
-// ── Key helpers ──────────────────────────────────────────────
 
 const simpleHash = s => {
     let h = 0;
@@ -21,7 +18,6 @@ const getLayoutKey = s => {
     return match && match[1] ? "name_" + match[1] : simpleHash(s.replace(/\s+/g, ''));
 };
 
-// ── updateAllViews ───────────────────────────────────────────
 
 window.updateAllViews = function (json) {
     try {
@@ -54,7 +50,6 @@ window.updateAllViews = function (json) {
     }
 };
 
-// ── Graph render (initial / incremental) ─────────────────────
 
 function renderCytoscapeGraph(mainContainerId, dataOrJson, isFirstRender) {
     var mainContainer = document.getElementById(mainContainerId);
@@ -77,7 +72,6 @@ function renderCytoscapeGraph(mainContainerId, dataOrJson, isFirstRender) {
         currentCytoscapeInstance.remove(toRemove);
         currentCytoscapeInstance.json({ elements: data.graphElements });
 
-        // Position brand-new event/deadlock nodes near their source state
         currentCytoscapeInstance.nodes().filter(n => !existingNodes.includes(n.id())).forEach(node => {
             if (node.hasClass('event-node') || node.hasClass('deadlock-node')) {
                 var parts     = node.id().split('_');
@@ -89,7 +83,6 @@ function renderCytoscapeGraph(mainContainerId, dataOrJson, isFirstRender) {
             }
         });
 
-        // Flash the last taken transition
         if (data.lastTransition) {
             var trans       = data.lastTransition;
             var actionNodeId = `event_${trans.from}_${trans.to}_${trans.tId}_${trans.label}`;
@@ -109,7 +102,6 @@ function renderCytoscapeGraph(mainContainerId, dataOrJson, isFirstRender) {
     }
 }
 
-// ── Full Cytoscape setup ─────────────────────────────────────
 
 async function setupInitialCytoscape(mainContainerId, data) {
     var mainContainer = document.getElementById(mainContainerId);
@@ -148,7 +140,6 @@ async function setupInitialCytoscape(mainContainerId, data) {
         pixelRatio: 1
     });
 
-    // Edge-editing extension
     if (cy.edgeEditing) {
         cy.edgeEditing({
             undoable: false,
@@ -167,7 +158,6 @@ async function setupInitialCytoscape(mainContainerId, data) {
         });
     }
 
-    // Auto-save layout on drag
     let saveTimeout;
     const triggerAutoSave = () => {
         clearTimeout(saveTimeout);
@@ -180,7 +170,6 @@ async function setupInitialCytoscape(mainContainerId, data) {
     cy.on('dragfree',  'node', triggerAutoSave);
     cy.on('cedragfree','edge', triggerAutoSave);
 
-    // Step on event node tap
     cy.on('tap', 'node.event-node.enabled', function (evt) {
         var node  = evt.target;
         var parts = node.id().split('_');
@@ -193,7 +182,6 @@ async function setupInitialCytoscape(mainContainerId, data) {
         }
     });
 
-    // Hover cursor
     cy.on('mouseover', 'node.event-node, edge', function (evt) {
         evt.target.addClass('hovered');
         if (evt.target.isNode() && evt.target.hasClass('event-node') && evt.target.hasClass('enabled')) {
@@ -207,7 +195,6 @@ async function setupInitialCytoscape(mainContainerId, data) {
         }
     });
 
-    // Edge detail modal on double-tap
     cy.on('dbltap', 'edge.has-details', function (evt) {
         var rawText      = evt.target.data('full_label');
         var contentPre   = document.getElementById('edgeDetailContent');
@@ -224,7 +211,6 @@ async function setupInitialCytoscape(mainContainerId, data) {
     if (window.applyFilters) window.applyFilters();
 }
 
-// ── Misc helpers ─────────────────────────────────────────────
 
 function formatCode(code) {
     if (!code) return "";
@@ -295,7 +281,6 @@ function downloadString(filename, content) {
 function showStats()    { document.getElementById("analysisResult").innerText = RTA.getStats(); }
 function checkProblems(){ document.getElementById("analysisResult").innerText = RTA.checkProblems(); }
 
-// ── jQuery ready ─────────────────────────────────────────────
 
 $(document).ready(function () {
     loadAppSettings();

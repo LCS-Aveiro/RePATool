@@ -1,8 +1,4 @@
-// ============================================================
-// export.js — SVG, PNG, LaTeX/TikZ, PRISM, PCTL exports
-// ============================================================
 
-// ── SVG (Mermaid) ────────────────────────────────────────────
 
 function MermaidSVG() {
     const container  = document.getElementById('mermaidContainer');
@@ -62,7 +58,6 @@ function downloadMermaidSVG() {
     document.body.removeChild(downloadLink);
 }
 
-// ── PNG (Cytoscape) ──────────────────────────────────────────
 
 function downloadPNG() {
     if (!currentCytoscapeInstance) {
@@ -78,7 +73,6 @@ function downloadPNG() {
     document.body.removeChild(link);
 }
 
-// ── LaTeX / TikZ ─────────────────────────────────────────────
 
 function svgToTikz(svgElement) {
     const viewBox = svgElement.viewBox.baseVal;
@@ -216,12 +210,10 @@ function downloadLatex() {
     URL.revokeObjectURL(url);
 }
 
-// ── PRISM ────────────────────────────────────────────────────
 
 function downloadPrism()  { downloadString("model.pm", RTA.getPrismModel());  }
 function downloadPrism2() { downloadString("model.pm", RTA.getPrismModel2()); }
 
-// ── PCTL helpers ─────────────────────────────────────────────
 
 function updatePctlDropdowns(data) {
     var stateSelect = document.getElementById('pctlStateSelect');

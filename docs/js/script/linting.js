@@ -1,21 +1,4 @@
-// ============================================================
-// LINTING EM TEMPO REAL
-// ============================================================
-// Requer o patch RTAAPI_checkSyntax_patch.scala (RTA.checkSyntax)
-// recompilado. Sem ele, este ficheiro degrada graciosamente:
-// mostra apenas um aviso na consola e não faz nada.
-//
-// Adicionar ao index.html:
-//   <script src="js/script/linting.js"></script>
-// (depois do <script> que cria `editor`)
-//
-// CSS sugerido (podes pôr em css/style.css):
-//   .cm-lint-error-line { background: rgba(220, 38, 38, 0.08); }
-//   .cm-lint-error-mark { border-bottom: 2px wavy #dc2626; }
-//   .cm-lint-gutter-marker { color: #dc2626; font-weight: bold; cursor: help; }
-//   #lint-status { font-size: 11px; padding: 2px 8px; }
-//   #lint-status.ok { color: #16a34a; }
-//   #lint-status.error { color: #dc2626; }
+
 
 (function () {
   var DEBOUNCE_MS = 500;
@@ -32,7 +15,6 @@
   }
 
   function parseErrorLocation(msg) {
-    // Mensagens no formato: "Erro na Linha 4, Coluna 2:\n..."
     var m = /Linha\s+(\d+)(?:,\s*Coluna\s+(\d+))?/i.exec(msg || "");
     if (!m) return null;
     return { line: parseInt(m[1], 10) - 1, col: m[2] ? parseInt(m[2], 10) - 1 : 0 };
@@ -47,7 +29,7 @@
 
   function runLint(cm) {
     if (typeof RTA === "undefined" || typeof RTA.checkSyntax !== "function") {
-      return; // patch do Scala ainda não aplicado/recompilado
+      return;
     }
     var source = cm.getValue();
     clearMarks(cm);
@@ -89,7 +71,6 @@
   }
 
   function attachLinting(cm) {
-    // barra de estado simples por baixo do editor, se ainda não existir
     if (!document.getElementById("lint-status")) {
       var bar = document.createElement("div");
       bar.id = "lint-status";
@@ -102,7 +83,6 @@
       timer = setTimeout(function () { runLint(instance); }, DEBOUNCE_MS);
     });
 
-    // primeira verificação
     setTimeout(function () { runLint(cm); }, 300);
   }
 

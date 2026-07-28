@@ -84,6 +84,30 @@ object TrainingEngine {
     val unmodified = activeIdxs.filterNot(activeModified.contains)
 
     mode match {
+      case "revise_equal" =>
+        var remainingTarget = 1.0
+        var remaining = activeIdxs
+        val currentW = activeIdxs.map(i => i -> (if (activeModified.contains(i)) sess.weights(i) else getOldW(i))).toMap
+        
+        var done = false
+        while (!done && remaining.nonEmpty) {
+          val currentSum = remaining.map(currentW).sum
+          val diff = remainingTarget - currentSum
+          val share = diff / remaining.size
+          var clampedAny = false
+          var next = List.empty[Int]
+          
+          for (i <- remaining) {
+            val proposed = currentW(i) + share
+            if (proposed < 0.0) { sess.weights(i) = 0.0; clampedAny = true }
+            else if (proposed > 1.0) { sess.weights(i) = 1.0; remainingTarget -= 1.0; clampedAny = true }
+            else next = i :: next
+          }
+          if (!clampedAny) {
+            for (i <- next) sess.weights(i) = clamp(currentW(i) + share)
+            done = true
+          } else remaining = next
+        }
       case "equal" | "proportional" if unmodified.nonEmpty =>
         val sMod = activeModified.map(sess.weights).sum
         if (sMod >= 1.0 - EPSILON) {

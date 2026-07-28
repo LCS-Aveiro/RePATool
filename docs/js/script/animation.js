@@ -1,6 +1,3 @@
-// ============================================================
-// cy/animation.js — Graph animation: value iteration + domino trace + counterexample
-// ============================================================
 
 window.runGraphAnimationTrace = function (traceData, startNodeId) {
     if (!currentCytoscapeInstance || !traceData) return;
@@ -12,22 +9,18 @@ window.runGraphAnimationTrace = function (traceData, startNodeId) {
     if (!startNode || startNode.length === 0) startNode = cy.nodes('.current-state');
     if (startNode.length === 0) return;
 
-    // ── A) Value Iteration ────────────────────────────────────
     if (traceData.valueIterationTrace && traceData.valueIterationTrace.length > 0) {
         _animateValueIteration(cy, traceData.valueIterationTrace, startNode);
         return;
     }
 
-    // ── B) Domino trace (PDL / linear) ───────────────────────
     _animateDominoTrace(cy, traceData, startNode);
 };
 
-// ── Value iteration (backwards propagation) ──────────────────
 
 function _animateValueIteration(cy, viTrace, startNode) {
-    const frameRate = 700; // ms per iteration
+    const frameRate = 700; 
 
-    // Create floating overlay
     let overlay = document.getElementById('vi-overlay');
     if (!overlay) {
         overlay = document.createElement('div');
@@ -45,7 +38,6 @@ function _animateValueIteration(cy, viTrace, startNode) {
     cy.animate({}, {
         duration: 500,
         complete: function () {
-            // Initialise all state nodes with V=0
             cy.nodes('.state-node').addClass('anim-vi-node').forEach(n => {
                 n.data('vi_val', 0);
                 let baseName = n.data('label') ? n.data('label').split('\n')[0] : n.id();
@@ -92,7 +84,6 @@ function _animateValueIteration(cy, viTrace, startNode) {
                             n.addClass('vi-updated');
                             setTimeout(() => n.removeClass('vi-updated'), frameRate - 100);
 
-                            // Light up contributing paths
                             n.outgoers('edge').forEach(e1 => {
                                 let eventNode = e1.target();
                                 if (!eventNode.hasClass('event-node')) return;
@@ -129,7 +120,6 @@ function _animateValueIteration(cy, viTrace, startNode) {
     });
 }
 
-// ── Domino trace ─────────────────────────────────────────────
 
 function _animateDominoTrace(cy, traceData, startNode) {
     const visitedNodes      = new Set(traceData.visitedNodes);
@@ -212,7 +202,6 @@ function _animateDominoTrace(cy, traceData, startNode) {
     );
 }
 
-// ── Counterexample playback ───────────────────────────────────
 
 window.playCounterexample = function () {
     if (!window.lastCounterexample || !currentCytoscapeInstance) return;

@@ -1,6 +1,4 @@
-// ============================================================
-// cy/styles.js — All Cytoscape stylesheet definitions
-// ============================================================
+
 
 function getCytoscapeStyles() {
     return [
@@ -68,7 +66,6 @@ function getCytoscapeStyles() {
         },
         { selector: '.current-state', style: { 'background-color': '#86EFAC', 'border-color': '#166534', 'border-width': 4 } },
 
-        // ── Event nodes ───────────────────────────────────────
         {
             selector: 'node.event-node',
             style: {
@@ -81,10 +78,9 @@ function getCytoscapeStyles() {
 
                     if (p !== undefined) {
                         const isRule = ele.hasClass('rule-node');
-                        const symbol = isRule ? "Δ" : "P";
-                        if (isRule) return `${baseName}\n(${symbol}=${p.toFixed(3)})`;
+                        if (isRule) return `${baseName}\n(${p.toFixed(3)})`;
                         const nm = (data.transID == data.lbl ? "" : data.transID);
-                        return `${nm}\n(${symbol}=${p.toFixed(3)})`;
+                        return `${nm}\n(${p.toFixed(3)})`;
                     }
                     return data.label || "";
                 },

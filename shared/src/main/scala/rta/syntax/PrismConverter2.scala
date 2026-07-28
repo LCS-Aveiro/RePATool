@@ -211,6 +211,34 @@ object PrismConverter2 {
           val sumUnmodBase = if (unmodifiedOut.isEmpty) "0" else unmodifiedOut.map(e => activeMathCheck(e, s"w_int_${sanitize(e._4.show)}")).mkString(" + ")
 
           rx.distributionMode match {
+            case "revise_equal" =>
+              val nActiveParts = outEdges.map { e =>
+                val nextAct = generatedNextActs.getOrElse((tLbl, e._4), actCheckExpr(e._4))
+                val condOpt = rx.edgeConditions.get(e).flatten
+                
+                val combinedCond = condOpt match {
+                  case Some(c) =>
+                    val cStr = conditionToPrism(c)
+                    if (nextAct == "false") "false"
+                    else if (nextAct == "true") cStr
+                    else s"($nextAct & $cStr)"
+                  case None => nextAct
+                }
+                
+                if (combinedCond == "false") "0" else if (combinedCond == "true") "1" else s"($combinedCond ? 1 : 0)"
+              }.filter(_ != "0")
+              val nActiveExpr = if (nActiveParts.isEmpty) "0" else nActiveParts.mkString(" + ")
+
+              for (e <- outEdges.sortBy(_._4.toString)) {
+                if (!generatedUpdates.contains((tLbl, e._4))) {
+                  val sE = sanitize(e._4.show)
+                  val base = if (modifiedOut.contains(e)) s"base_upd_${sT}_$sE" else s"w_int_$sE"
+                  val newExpr = s"floor($base + (10000 - ($sumModExp) - ($sumUnmodBase)) / max(1, $nActiveExpr))"
+                  val fName = s"final_upd_${sT}_$sE"
+                  formulasSb.append(s"formula $fName = min(10000, max(0, $newExpr));\n")
+                  generatedUpdates((tLbl, e._4)) = fName
+                }
+              }
             case "normalize" =>
               val totalSumExp = s"max(1, $sumModExp + $sumUnmodBase)"
               for (e <- outEdges.sortBy(_._4.toString)) {

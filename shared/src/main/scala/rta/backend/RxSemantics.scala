@@ -174,6 +174,32 @@ object RxSemantics {
     val unmodified = outgoingActive -- activeModified
 
     mode match {
+      case "revise_equal" =>
+        var remainingTarget = 1.0
+        var remainingEdges = outgoingActive
+        val currentW = outgoingActive.map(e => e -> (if (activeModified.contains(e)) updatedWeights.getOrElse(e, 0.0) else oldWeights.getOrElse(e, 0.0))).toMap
+        
+        var done = false
+        while (!done && remainingEdges.nonEmpty) {
+          val currentSum = remainingEdges.toList.map(currentW).sum
+          val diff = remainingTarget - currentSum
+          val share = diff / remainingEdges.size
+          var clampedAny = false
+          var nextRemaining = Set.empty[Edge]
+          
+          for (e <- remainingEdges) {
+            val proposed = currentW(e) + share
+            if (proposed < 0.0) { updatedWeights += (e -> 0.0); clampedAny = true }
+            else if (proposed > 1.0) { updatedWeights += (e -> 1.0); remainingTarget -= 1.0; clampedAny = true }
+            else { nextRemaining += e }
+          }
+          if (!clampedAny) {
+            for (e <- nextRemaining) updatedWeights += (e -> clamp(currentW(e) + share))
+            done = true
+          } else {
+            remainingEdges = nextRemaining
+          }
+        }
       case "equal" | "proportional" if unmodified.nonEmpty =>
         val sMod = activeModified.toList.map(e => updatedWeights.getOrElse(e, 0.0)).sum
         if (sMod >= 1.0 - EPSILON) {

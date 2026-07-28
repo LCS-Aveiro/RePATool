@@ -503,7 +503,6 @@
 
 <div class="wrapper">
 
-  <!-- ── SIDEBAR ── -->
   <aside>
     <div class="side-section">
       <div class="side-label">Getting Started</div>
@@ -541,11 +540,9 @@
     </div>
   </aside>
 
-  <!-- ── MAIN ── -->
   <main>
     <div class="doc-container">
 
-      <!-- HERO -->
       <div class="hero">
         <div class="hero-eyebrow">RePA Tool — Language Reference</div>
         <h1>The <span>ReLang</span> Handbook</h1>
@@ -640,6 +637,7 @@
           <tr><td>normalize</td><td>All other active edges are scaled proportionally so the total remains 1 (default).</td></tr>
           <tr><td>proportional</td><td>The remainder is shared in proportion to the unmodified edges' original weights.</td></tr>
           <tr><td>equal</td><td>The remainder is shared equally across unmodified edges.</td></tr>
+          <tr><td>revise_equal</td><td>The remainder/excess is shared equally across <em>all</em> active edges, including the modified one.</td></tr>
         </table>
 
         <h3>training</h3>

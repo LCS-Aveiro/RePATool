@@ -1,10 +1,7 @@
-// ============================================================
-// cy/views.js — Text view + Mermaid view
-// ============================================================
+
 
 var currentMermaidMode = 'full';
 
-// ── Text view ────────────────────────────────────────────────
 
 function renderTextView() {
     var container = document.getElementById("textContainer");
@@ -69,7 +66,6 @@ function parseStateText(rawText) {
     return html;
 }
 
-// ── Mermaid view ─────────────────────────────────────────────
 
 function setMermaidMode(mode) {
     currentMermaidMode = mode;
@@ -84,7 +80,7 @@ function showLTS() {
 function renderMermaidView() {
     var container = document.getElementById('mermaidContainer');
     if (!container) return;
-    if (container.offsetParent === null) return;   // tab not visible
+    if (container.offsetParent === null) return;   
 
     if (!currentMermaidMode) currentMermaidMode = 'full';
 
