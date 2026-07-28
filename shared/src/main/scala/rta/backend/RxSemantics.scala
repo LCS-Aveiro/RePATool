@@ -362,26 +362,39 @@ object RxSemantics {
           val newActualTotal = currentTotal + 1
           nextEnv += (totalVisitsVar -> RuntimeValue.VInt(newActualTotal.toInt))
 
-          val oldHits = Math.round(preTrainW * currentTotal).toInt
-          val updatedHits = oldHits + 1
-          val forcedProb = clamp(updatedHits.toDouble / newActualTotal.toDouble)
-          finalWeights += (edge -> forcedProb)
-
-          val hitRatios = currentAct.map { e =>
-             val wAfter = weightsAfterRules.getOrElse(e, 0.0)
-             val h = Math.round(wAfter * currentTotal).toInt
-             e -> clamp(h.toDouble / newActualTotal.toDouble)
-          }.toMap
-
-          finalWeights = distributeWeights(sourceState, hitRatios, finalWeights, Set(edge), currentAct, rx.distributionMode, rx)
-
           val outgoingEdges = rx.edg.getOrElse(sourceState, Set.empty).map(t => (sourceState, t._1, t._2, t._3))
-          for (e <- outgoingEdges) {
-            val lbl = e._4.show
-            val hitsVar = QName(List(s"__hits_${sourceName}_$lbl"))
-            val newProb = finalWeights.getOrElse(e, 0.0)
-            val backCalculatedHits = Math.round(newProb * newActualTotal).toInt
-            nextEnv += (hitsVar -> RuntimeValue.VInt(backCalculatedHits))
+
+          if (rx.distributionMode == "normalize") {
+            for (e <- outgoingEdges if currentAct.contains(e)) {
+              val lbl = e._4.show
+              val hitsVar = QName(List(s"__hits_${sourceName}_$lbl"))
+              val oldHits = nextEnv.get(hitsVar).map(Condition.extractDouble).getOrElse(rx.weights.getOrElse(e, 1.0) * INITIAL_SAMPLES).toLong
+              val newHits = if (e == edge) oldHits + 1L else oldHits
+              nextEnv += (hitsVar -> RuntimeValue.VInt(newHits.toInt))
+              val p = clamp(newHits.toDouble / newActualTotal.toDouble)
+              finalWeights += (e -> p)
+            }
+          } else {
+            val oldHits = Math.round(preTrainW * currentTotal).toInt
+            val updatedHits = oldHits + 1
+            val forcedProb = clamp(updatedHits.toDouble / newActualTotal.toDouble)
+            finalWeights += (edge -> forcedProb)
+
+            val hitRatios = currentAct.map { e =>
+               val wAfter = weightsAfterRules.getOrElse(e, 0.0)
+               val h = Math.round(wAfter * currentTotal).toInt
+               e -> clamp(h.toDouble / newActualTotal.toDouble)
+            }.toMap
+
+            finalWeights = distributeWeights(sourceState, hitRatios, finalWeights, Set(edge), currentAct, rx.distributionMode, rx)
+
+            for (e <- outgoingEdges) {
+              val lbl = e._4.show
+              val hitsVar = QName(List(s"__hits_${sourceName}_$lbl"))
+              val newProb = finalWeights.getOrElse(e, 0.0)
+              val backCalculatedHits = Math.round(newProb * newActualTotal).toInt
+              nextEnv += (hitsVar -> RuntimeValue.VInt(backCalculatedHits))
+            }
           }
         }
       }

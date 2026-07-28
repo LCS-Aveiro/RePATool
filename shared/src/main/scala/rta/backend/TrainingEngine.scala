@@ -225,12 +225,18 @@ object TrainingEngine {
           val newTotal = sess.totals(srcState) + 1L
           sess.totals(srcState) = newTotal
           sess.hits(firedIdx) += 1L
-          sess.weights(firedIdx) = clamp(sess.hits(firedIdx).toDouble / newTotal.toDouble)
-          
-          distributeWeights(sess, srcState, Set(firedIdx), activeAfterIdxs, sess.rx.distributionMode, i => sess.hits(i).toDouble / newTotal.toDouble)
-          
-          for (idx <- activeAfterIdxs) {
-            sess.hits(idx) = Math.round(sess.weights(idx) * newTotal.toDouble)
+
+          if (sess.rx.distributionMode == "normalize") {
+            for (idx <- activeAfterIdxs) {
+              sess.weights(idx) = clamp(sess.hits(idx).toDouble / newTotal.toDouble)
+            }
+          } else {
+            sess.weights(firedIdx) = clamp(sess.hits(firedIdx).toDouble / newTotal.toDouble)
+            distributeWeights(sess, srcState, Set(firedIdx), activeAfterIdxs, sess.rx.distributionMode, i => sess.hits(i).toDouble / newTotal.toDouble)
+            
+            for (idx <- activeAfterIdxs) {
+              sess.hits(idx) = Math.round(sess.weights(idx) * newTotal.toDouble)
+            }
           }
         }
 
