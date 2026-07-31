@@ -962,6 +962,7 @@ object RTAAPI {
      s"""
        |{
        |  "graphElements": $graphElementsJson,
+       |  "paradigm": "${graph.paradigm}",
        |  "panelData": { 
        |     "enabled": [$eventTransitionsJson], 
        |     "variables": {$valEnvJson}, 

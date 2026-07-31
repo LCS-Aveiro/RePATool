@@ -35,16 +35,20 @@ window.applyFilters = function () {
     currentCytoscapeInstance.style().update();
 
     const delta = window.currentDeltaCut;
+    const hideTauCheckbox = document.getElementById('hideTauToggle');
+    const isHideTau = hideTauCheckbox ? hideTauCheckbox.checked : false;
     currentCytoscapeInstance.batch(() => {
+        currentCytoscapeInstance.elements().removeClass('filtered-out');
         currentCytoscapeInstance.nodes('.event-node').forEach(node => {
             const p   = node.data('p');
             const lbl = node.data('label') || "";
             if (p !== undefined && p < delta && !lbl.includes('deadlock')) {
                 node.addClass('filtered-out');
-            } else {
-                node.removeClass('filtered-out');
             }
         });
+        if (isHideTau) {
+            currentCytoscapeInstance.elements('[label *= "tau"], .deadlock-node, .deadlock-edge').addClass('filtered-out');
+        }
     });
 
     if (typeof lastModelData !== 'undefined' && lastModelData) {

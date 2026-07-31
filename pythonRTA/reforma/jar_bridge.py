@@ -42,9 +42,9 @@ def _bundled_jar_path() -> Optional[Path]:
 
 def _make_tempfile(suffix: str, content: str) -> str:
     """
-    Cria um ficheiro temporário com o conteúdo dado, fecha-o e devolve o path.
-    Usar delete=False + close explícito garante compatibilidade com Windows,
-    onde ficheiros abertos não podem ser relidos por outro processo.
+    Creates a temporary file with the given content, closes it, and returns the path.
+    Using delete=False + explicit close ensures compatibility with Windows,
+    where open files cannot be read by another process.
     """
     fd, path = tempfile.mkstemp(suffix=suffix)
     try:
@@ -57,7 +57,7 @@ def _make_tempfile(suffix: str, content: str) -> str:
 
 
 def _make_empty_tempfile(suffix: str) -> str:
-    """Cria um ficheiro temporário vazio e devolve o path (para output do JAR)."""
+    """Creates an empty temporary file and returns the path (for JAR output)."""
     fd, path = tempfile.mkstemp(suffix=suffix)
     os.close(fd)
     return path
@@ -174,10 +174,10 @@ class JarBridge:
 
     def _run_to_file(self, *args: str) -> str:
         """
-        Corre o JAR com os argumentos dados.
-        O último argumento deve ser o path do ficheiro de saída.
-        Lê e devolve o conteúdo desse ficheiro.
-        Progresso/logs do JAR vão para stderr — ignorados aqui.
+        Runs the JAR with the given arguments.
+        The last argument must be the output file path.
+        Reads and returns the content of this output file.
+        JAR progress/logs go to stderr — ignored here.
         """
         cmd = [self.java_bin, "-jar", self.jar_path, *args]
         result = subprocess.run(
@@ -193,7 +193,7 @@ class JarBridge:
         out_path = args[-1]
         if not os.path.exists(out_path):
             raise JarError(
-                f"JAR não gerou o ficheiro de saída esperado: {out_path}\n"
+                f"JAR did not generate the expected output file: {out_path}\n"
                 f"stderr: {result.stderr.strip()}"
             )
         with open(out_path, "r", encoding="utf-8") as f:
@@ -214,10 +214,10 @@ class JarBridge:
 
     def train(self, source: str, log_lines: list[str]) -> str:
         """
-        Treina o modelo com uma lista de sessões e devolve o source actualizado.
+        Trains the model with a list of sessions and returns the updated source.
 
-        O comando -train escreve o resultado num ficheiro (não no stdout),
-        por isso usamos _run_to_file em vez de _run.
+        The -train command writes the result to a file (not stdout),
+        so we use _run_to_file instead of _run.
         """
         model_tmp = _make_tempfile(".r",   source)
         log_tmp   = _make_tempfile(".txt", "\n".join(log_lines))

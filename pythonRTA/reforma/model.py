@@ -51,22 +51,22 @@ class SimulationState:
         return None
 
     def summary(self) -> str:
-        """Retorna uma string formatada com o estado atual e probabilidades."""
-        linhas = [f"📍 Estado Atual: {', '.join(self.current_states)}"]
+        """Returns a formatted string containing the current state and probabilities."""
+        lines = [f"📍 Current State: {', '.join(self.current_states)}"]
         
         if self.variables:
             vars_str = ", ".join(f"{k}={v}" for k, v in self.variables.items())
-            linhas.append(f"🔢 Variáveis: {vars_str}")
+            lines.append(f"🔢 Variables: {vars_str}")
             
-        linhas.append("⚡ Transições Habilitadas:")
+        lines.append("⚡ Enabled Transitions:")
         
         if not self.enabled:
-            linhas.append("  (Nenhuma - Deadlock)")
+            lines.append("  (None - Deadlock)")
         else:
             for t in self.enabled:
-                linhas.append(f"  - [{t.label}] para {t.to_state} (P = {t.probability:.3f})")
+                lines.append(f"  - [{t.label}] to {t.to_state} (P = {t.probability:.3f})")
                 
-        return "\n".join(linhas)
+        return "\n".join(lines)
 
     def __repr__(self) -> str:
         enabled_labels = [t.label for t in self.enabled]

@@ -91,23 +91,22 @@ class ReForma:
         save_traces_path: Optional[str] = None
     ) -> list[list[str]]:
         """
-        Descobre o modelo RePA diretamente de um DataFrame Pandas.
+        Discovers the RePA model directly from a Pandas DataFrame.
         
-        :param df: DataFrame do Pandas com os dados.
-        :param session_col: Nome da coluna que identifica as sessões dos utilizadores.
-        :param event_col: Nome da coluna com a ação/evento.
-        :param time_col: Nome da coluna com o timestamp.
-        :param model_name: Nome a dar ao autómato.
-        :param save_model_path: Se preenchido, guarda o código .rta gerado neste ficheiro.
-        :param save_traces_path: Se preenchido, guarda o log de sessões .txt neste ficheiro.
-        :return: Uma lista de sessões (cada sessão é uma lista de IDs de transições).
+        :param df: Pandas DataFrame containing the dataset.
+        :param session_col: Column name identifying user sessions.
+        :param event_col: Column name containing the action/event.
+        :param time_col: Column name containing the timestamp.
+        :param model_name: Name to give the automaton.
+        :param save_model_path: If set, saves the generated .rta code to this file path.
+        :param save_traces_path: If set, saves the session logs (.txt) to this file path.
+        :return: A list of sessions (each session is a list of transition IDs).
         """
         try:
             import pandas as pd
             import re
         except ImportError:
-            raise RuntimeError("Para usar o process mining precisas de instalar: pip install pandas")
-
+            raise RuntimeError("To use process mining you need to install: pip install pandas")
         def sanitize(text):
             return re.sub(r'[^a-zA-Z0-9_]', '_', str(text))
 
@@ -155,7 +154,7 @@ class ReForma:
                 edge_counter += 1
 
         loop_edge_id = f"e{edge_counter}"
-        rta_output.append("\n// Loop no estado final para evitar deadlock no PRISM")
+        rta_output.append("\n// Loop at the final state to avoid deadlock in PRISM")
         rta_output.append(f"exit -loop-> exit : {loop_edge_id} (1.0000)")
 
         df['edge_tuple'] = list(zip(df['clean_event'], df['clean_next']))
@@ -189,6 +188,7 @@ class ReForma:
         """Runs a random walk to find deadlocks, unreachable states, or inconsistencies."""
         self._require_model()
         return self._bridge.check_problems(self._model.source)
+        
     def get_stats(self) -> str:
         """Explores the state space and counts total reachable states and transitions."""
         self._require_model()
@@ -262,13 +262,14 @@ class ReForma:
         return self
 
     def save_image_plt(self, path: str) -> None:
+        """Saves a static image of the graph using Matplotlib."""
         self._require_model()
         
         try:
             import networkx as nx
             import matplotlib.pyplot as plt
         except ImportError:
-            raise RuntimeError("Para usar este método precisas de instalar: pip install networkx matplotlib")
+            raise RuntimeError("To use this method you need to install: pip install networkx matplotlib")
 
         cy_json_str = self._bridge.get_cytoscape(self._model.source, self._history)
         elements = json.loads(cy_json_str)
@@ -345,6 +346,7 @@ class ReForma:
     
     
     def step(self, label: str) -> SimulationState:
+        """Takes a transition given its label."""
         self._require_model()
         if self._state and not self._state.transition_named(label):
             enabled = [t.label for t in self._state.enabled]
@@ -375,6 +377,7 @@ class ReForma:
         self._layout_pos = pos_dict
     
     def show_interactive(self, height: int = 500) -> None:
+        """Renders an interactive Jupyter graph."""
         self._require_model()
         
         try:
@@ -383,7 +386,7 @@ class ReForma:
             import json
             import networkx as nx
         except ImportError:
-            raise RuntimeError("Para usar este método precisas de estar a correr no Jupyter com networkx instalado.")
+            raise RuntimeError("To use this method you need to be running in Jupyter with networkx installed.")
 
         cy_json_str = self._bridge.get_cytoscape(self._current_source, self._history)
         elements = json.loads(cy_json_str)
@@ -429,12 +432,12 @@ class ReForma:
             </style>
         </head>
         <body>
-            <button class="btn-export" onclick="exportLayout()">Salvar Posições no Python</button>
+            <button class="btn-export" onclick="exportLayout()">Save Positions to Python</button>
             
             <div id="overlay">
-                <p style="margin-top:0; font-size: 13px; color: #333;"><b>1.</b> Copia o código abaixo.<br><b>2.</b> Cola-o numa nova célula no teu Jupyter e executa-o.</p>
+                <p style="margin-top:0; font-size: 13px; color: #333;"><b>1.</b> Copy the code below.<br><b>2.</b> Paste it into a new cell in your Jupyter notebook and run it.</p>
                 <textarea id="pycode" readonly></textarea>
-                <button onclick="document.getElementById('overlay').style.display='none'" style="width: 100%; padding: 6px; cursor: pointer;">Fechar</button>
+                <button onclick="document.getElementById('overlay').style.display='none'" style="width: 100%; padding: 6px; cursor: pointer;">Close</button>
             </div>
 
             <div id="cy"></div>
@@ -522,7 +525,7 @@ class ReForma:
                     var posDict = {{}};
                     cy.nodes().forEach(function(n) {{
                         var pos = n.position();
-                        // Dividimos por 400 para voltar à escala original do Python
+                        // Divided by 400 to return to the original Python scale
                         posDict[n.id()] = [pos.x / 400.0, pos.y / 400.0];
                     }});
                     
@@ -561,7 +564,7 @@ class ReForma:
             import json
             import re
         except ImportError:
-            raise RuntimeError("Para usar este método precisas de estar a correr no Jupyter.")
+            raise RuntimeError("To use this method you need to be running in Jupyter.")
             
         mermaid_str = self.export_mermaid(full_lts=True)
         
@@ -709,6 +712,7 @@ class ReForma:
         display(HTML(iframe_wrapper))
 
     def undo(self) -> SimulationState:
+        """Undoes the last transition."""
         self._require_model()
         if not self._history: raise RuntimeError("Nothing to undo.")
         self._history.pop()
@@ -718,12 +722,14 @@ class ReForma:
         return self._state
 
     def reset(self) -> SimulationState:
+        """Resets the simulation to the initial state."""
         self._require_model()
         self._history = []
         self._state = self._parse_simulation(self._bridge.list_transitions(self._model.source))
         return self._state
 
     def check_pdl(self, state: str, formula: str) -> str:
+        """Evaluates a formula and returns the raw string."""
         self._require_model()
         return self._bridge.check_pdl(self._model.source, state, formula, self._history)
 
@@ -856,6 +862,8 @@ class ReForma:
             )
 
     def _parse_simulation(self, jar_output: str) -> SimulationState:
+        # Note: Do NOT translate the string matchers below ("Estado Atual:", "Variaveis:") 
+        # as they parse the explicit console output format coming from the Java JAR.
         lines = jar_output.strip().splitlines()
         current_states: list[str] = []
         enabled: list[Transition] = []
@@ -895,14 +903,14 @@ class ReForma:
 
 
 def _get_local_js(filename: str) -> str:
-    """Lê o ficheiro JS local para ser injetado no HTML."""
+    """Reads the local JS file to be injected into HTML."""
     base_dir = os.path.dirname(__file__)
     js_path = os.path.join(base_dir, "bin", "js", filename)
     try:
         with open(js_path, "r", encoding="utf-8") as f:
             return f.read()
     except FileNotFoundError:
-        raise RuntimeError(f"Ficheiro JS não encontrado: {js_path}. Verifica se fizeste o download.")
+        raise RuntimeError(f"JS file not found: {js_path}. Make sure you have downloaded it.")
 
 
 
@@ -925,6 +933,7 @@ def _update_init(source: str, new_state: str) -> str:
 
 
 def _parse_pdl_result(raw: str) -> "float | bool | str":
+
     m = re.search(r"(?:Result(?:ado)?)\s*:\s*(.+)$", raw, re.IGNORECASE | re.MULTILINE)
     if not m:
         return raw

@@ -407,7 +407,7 @@ object RxSemantics {
       ))
     }
 
-    if (transitions.isEmpty && rx.inits.nonEmpty) {
+    if (transitions.isEmpty && rx.inits.nonEmpty && rx.paradigm != "fuzzy") {
       rx.inits.map { st =>
         val edge: Edge = (st, st, QName(List("tau")), QName(List("deadlock")))
         (edge, rx)

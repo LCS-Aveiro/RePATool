@@ -362,7 +362,7 @@ object Program2:
         val updText    = if withConditions then rx.edgeUpdates.getOrElse(edge, Nil).map(_.toString).mkString(" ") else ""
         val condText   = if withConditions then rx.edgeConditions.getOrElse(edge, None).map(_.toMermaidString).getOrElse("") else ""
         val p = rx.weights.getOrElse(edge, 1.0)
-        val weightText = if (withConditions && p != 1.0) f"($p%.3f)" else ""
+        val weightText = if (withConditions && p != 1.0) f"($p%.3f)".replace(",", ".") else ""
         
         val combined   = List(condText, qNameLabel, weightText, updText).filter(_.nonEmpty).mkString(" ")
         val edgeLabel = if combined.nonEmpty then s"|\"${combined}\"|" else ""

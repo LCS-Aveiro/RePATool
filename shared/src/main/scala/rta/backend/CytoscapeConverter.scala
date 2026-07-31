@@ -37,14 +37,14 @@ object CytoscapeConverter {
 
   def apply(rx: RxGraph): String = {
     val allStates = rx.states ++ rx.inits
-    val deadlockEdges = allStates.flatMap { st =>
+    val deadlockEdges = if (rx.paradigm == "fuzzy") Set.empty[Edge] else allStates.flatMap { st =>
       val outEdges = rx.edg.getOrElse(st, Set.empty)
       val validOut = outEdges.filter { t =>
         val edge = (st, t._1, t._2, t._3)
         rx.act.contains(edge) && rx.edgeConditions.getOrElse(edge, None).forall(c => RxSemantics.evalCondition(c, rx))
       }
       if (validOut.isEmpty) Some((st, st, QName(List("tau")), QName(List("deadlock")))) else None
-    }.toSet
+     }.toSet
     val activeDeadlocks = deadlockEdges.filter(e => rx.inits.contains(e._1))
 
     val allSimpleEdges: Set[Edge] = rx.edg.flatMap { case (f, ts) => ts.map(t => (f, t._1, t._2, t._3)) }.toSet ++ deadlockEdges
@@ -79,7 +79,8 @@ object CytoscapeConverter {
 
       val p = if (deadlockEdges.contains(edge)) 1.0 else rx.weights.getOrElse(edge, 1.0)
       val isRule = allOnEdges.contains(edge) || allOffEdges.contains(edge)
-      val weightStr = if (isRule) f"\\n(Δ=$p%.3f)" else f"\\n(P=$p%.3f)"
+      val prefix = if (rx.paradigm == "fuzzy") "F" else "P"
+      val weightStr = if (isRule) f"\\n(Δ=$p%.3f)".replace(",", ".") else f"\\n($prefix=$p%.3f)".replace(",", ".")
       val displayLabel = visualLabel + weightStr
 
       val parentId = List(lbl, from, to).find(_.n.size > 1).map(_.asInstanceOf[QName].scope.toString)

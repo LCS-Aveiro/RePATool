@@ -141,9 +141,9 @@
         </label>
 
         <label style="font-size: 12px; margin: 0 5px; display:flex; align-items:center; gap:4px; cursor:pointer;" title="Hides invisible transitions (tau) and deadlocks for clean screenshots">
-            <input type="checkbox" onchange="if(currentCytoscapeInstance) { this.checked ? currentCytoscapeInstance.elements('[label *= \'tau\'], .deadlock-node, .deadlock-edge').hide() : currentCytoscapeInstance.elements('[label *= \'tau\'], .deadlock-node, .deadlock-edge').show(); }">
-            Hide Tau
-        </label>
+            <input type="checkbox" id="hideTauToggle" onchange="if(window.applyFilters) window.applyFilters()">
+             Hide Tau
+         </label>
         
         <div class="tb-sep"></div>
 

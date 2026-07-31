@@ -100,12 +100,12 @@ function getCytoscapeStyles() {
             selector: 'node.event-node.hovered',
             style: {
                 'label': function (ele) {
-                    let hlbl = ele.data('hover_label') || "";
-                    if (window.isPossibilisticView) {
-                        return hlbl.replace(/\s*\([PΔ]=[\d.]+\)/, '');
-                    }
-                    return hlbl;
-                },
+                     let hlbl = ele.data('hover_label') || "";
+                     if (window.isPossibilisticView) {
+                        return hlbl.replace(/\s*\([PFΔ]=[\d.,]+\)/, '');
+                     }
+                     return hlbl;
+                 },
                 'z-index': 9999
             }
         },
