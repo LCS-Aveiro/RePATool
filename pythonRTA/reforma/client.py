@@ -360,8 +360,10 @@ class ReForma:
         raw = self._bridge.list_transitions(self._model.source, self._history)
         next_state = self._parse_simulation(raw)
 
+        resolved_states = next_state.current_states if next_state.current_states else self._state.current_states
+
         self._state = SimulationState(
-            current_states=next_state.current_states,
+            current_states=resolved_states,
             enabled=next_state.enabled,
             variables=next_state.variables,
             can_undo=len(self._history) > 0,
@@ -869,20 +871,32 @@ class ReForma:
         enabled: list[Transition] = []
         variables: dict[str, int] = {}
 
+        import re
+        
         for line in lines:
-            if line.startswith("Estado Atual:"):
-                parts = line.split(":", 1)[1].strip()
-                current_states = [s.strip() for s in parts.split(",")]
+            if line.startswith("Estado Atual:") or line.startswith("Current State:"):
+                st_parts = line.split(":", 1)[1].strip()
+                current_states = [s.strip() for s in st_parts.split(",")]
             
-            elif line.startswith("Variaveis:"):
-                parts = line.split(":", 1)[1].strip()
-                for kv in parts.split(","):
-                    if "=" in kv:
-                        k, v = kv.split("=", 1)
-                        variables[k.strip()] = int(v.strip())
+            elif line.startswith("Variaveis:") or line.startswith("Variables:"):
+                var_parts = line.split(":", 1)[1].strip()
+                matches = re.finditer(r"([a-zA-Z0-9_]+)\s*=\s*(?:VInt\(\s*([^,)]+)|VFloat\(\s*([^,)]+)|VBool\(\s*([^,)]+)|([^,]+))", var_parts)
+                
+                for m in matches:
+                    k = m.group(1)
+                    val_str = m.group(2) or m.group(3) or m.group(4) or m.group(5)
+                    if val_str:
+                        val_str = val_str.strip()
+                        try:
+                            variables[k] = int(val_str)
+                        except ValueError:
+                            try:
+                                variables[k] = float(val_str)
+                            except ValueError:
+                                variables[k] = val_str
 
             m = re.match(
-                r"\s*-\s*\[(.+?)\]\s+de\s+(\S+)\s+para\s+(\S+)\s+\(P=([\d.,]+)\)",
+                r"\s*-\s*\[(.+?)\]\s+(?:de|from)\s+(\S+)\s+(?:para|to)\s+(\S+)\s+\(P=([\d.,]+)\)",
                 line,
             )
             if m:
@@ -900,7 +914,6 @@ class ReForma:
             last_transition=None,
             raw={},
         )
-
 
 def _get_local_js(filename: str) -> str:
     """Reads the local JS file to be injected into HTML."""

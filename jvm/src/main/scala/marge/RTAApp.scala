@@ -8,7 +8,7 @@ import java.io.{File, PrintWriter}
 import scala.io.Source
 import rta.syntax.{Parser2, PdlParser, Program2, RTATranslator}
 import rta.syntax.Program2.{RxGraph, QName}
-import rta.backend.{RxSemantics, PdlEvaluator, PrismConverter2, AnalyseLTS,TrainingEngine}
+import rta.backend.{RxSemantics, PdlEvaluator, PrismConverter2, AnalyseLTS, TrainingEngine}
 
 object RTACLI {
 
@@ -32,7 +32,7 @@ object RTACLI {
 
     try {
       val rawSource = Source.fromFile(inputFile).mkString
-      // Remove o comando "name" para o parser funcionar no CLI
+      // Remove the "name" command so the parser works in the CLI
       val cleanSource = rawSource.replaceAll("(?m)^\\s*name\\s+[a-zA-Z0-9_]+[;\\s]*\n?", "")
       val graph = Parser2.parseProgram(cleanSource)
 
@@ -53,12 +53,12 @@ object RTACLI {
           saveOrPrint(prismCode, args, 2)
           
         case "-latex" =>
-          println("Aviso: A exportacao para LaTeX (TikZ) e feita a partir da renderizacao visual.")
-          println("Por favor, use o Modo Servidor (sem argumentos) e exporte via Interface Grafica.")
+          println("Warning: LaTeX (TikZ) export is done from the visual rendering.")
+          println("Please use Server Mode (no arguments) and export via the Graphical Interface.")
         
         case "-step" =>
           var currentGraph = graph
-          // Se o Python enviar o histórico, simula-o primeiro!
+          // If Python sends the history, simulate it first!
           if (args.length > 2 && args(2).trim.nonEmpty) {
              val steps = args(2).split(',')
              for (step <- steps) {
@@ -68,18 +68,18 @@ object RTACLI {
           }
           val transitions = RxSemantics.nextEdge(currentGraph)
           
-          // Imprimir também o estado das variáveis atualizadas
+          // Also print the updated variable state
           if (currentGraph.val_env.nonEmpty) {
-             println(s"Variaveis: ${currentGraph.val_env.map(kv => s"${kv._1.show}=${kv._2}").mkString(", ")}")
+             println(s"Variables: ${currentGraph.val_env.map(kv => s"${kv._1.show}=${kv._2}").mkString(", ")}")
           }
 
-          if (transitions.isEmpty) println("Deadlock: Nenhuma transicao habilitada.")
+          if (transitions.isEmpty) println("Deadlock: No enabled transitions.")
           else {
-            println(s"Estado Atual: ${currentGraph.inits.mkString(", ")}")
-            println("Transicoes Habilitadas:")
+            println(s"Current State: ${currentGraph.inits.mkString(", ")}")
+            println("Enabled Transitions:")
             transitions.foreach { case ((from, to, tId, lbl), _) =>
               val weight = currentGraph.weights.getOrElse((from, to, tId, lbl), 1.0)
-              println(s"  - [${lbl.show}] de ${from.show} para ${to.show} (P=${f"$weight%.3f"})")
+              println(s"  - [${lbl.show}] from ${from.show} to ${to.show} (P=${f"$weight%.3f"})")
             }
           }
 
@@ -98,12 +98,12 @@ object RTACLI {
               toVisit = toVisit ++ nexts.toList
             }
           }
-          val msg = if (visited.size >= limit) s" (parou após $limit estados)" else ""
-          println(s"== Estatísticas ==\nEstados: ${visited.size}$msg\nTransições: $edgesCount")
+          val msg = if (visited.size >= limit) s" (stopped after $limit states)" else ""
+          println(s"== Statistics ==\nStates: ${visited.size}$msg\nTransitions: $edgesCount")
 
         case "-check" =>
           val res = AnalyseLTS.randomWalk(graph)._4
-          if (res.isEmpty) println("Nenhum problema encontrado.")
+          if (res.isEmpty) println("No problems found.")
           else println(res.mkString("\n"))
 
         case "-deltacut" =>
@@ -135,10 +135,10 @@ object RTACLI {
           AnalyseLTS.findBestPath(graph, goal, isMax) match {
             case Some(result) =>
               val pathStr = result.path.map(e => s"${e._4.show}").mkString(" -> ")
-              val label = if (isMax) "Mais Provável" else "Menos Provável"
-              println(s"Caminho $label encontrado!\nProbabilidade: ${f"${result.probability}%.4f"}\nCaminho: $pathStr")
+              val label = if (isMax) "Most Probable" else "Least Probable"
+              println(s"$label path found!\nProbability: ${f"${result.probability}%.4f"}\nPath: $pathStr")
             case None =>
-              println("Não foi possível encontrar um caminho para o objetivo.")
+              println("Could not find a path to the target.")
           }
 
         case "-cytoscape" =>
@@ -159,7 +159,7 @@ object RTACLI {
 
         case "-pdl" =>
           if (args.length < 4) {
-            println("Uso: -pdl <modelo.r> <estado_inicial> <formula_pdl> [historico]")
+            println("Usage: -pdl <model.r> <initial_state> <pdl_formula> [history]")
           } else {
             val stateStr = args(2)
             val formulaStr = args(3)
@@ -177,13 +177,13 @@ object RTACLI {
             qnameRes match {
               case Right(startState) =>
                 if (!currentGraph.states.contains(startState) && !currentGraph.inits.contains(startState)) {
-                  println(s"Erro: Estado '$stateStr' nao encontrado no modelo.")
+                  println(s"Error: State '$stateStr' not found in the model.")
                 } else {
                   val formula = PdlParser.parsePdlFormula(formulaStr)
                   val result = PdlEvaluator.evaluateFormula(startState, formula, currentGraph)
-                  println(s"Resultado: $result")
+                  println(s"Result: $result")
                 }
-              case Left(err) => println(s"Erro ao ler estado: $err")
+              case Left(err) => println(s"Error reading state: $err")
             }
           }
 
@@ -214,10 +214,10 @@ object RTACLI {
 
         case "-train2" =>
           if (args.length < 3) {
-            println("Uso: -train2 <modelo.r> <dados_treino.txt> [saida.r]")
+            println("Usage: -train2 <model.r> <training_data.txt> [output.r]")
           } else {
             val trainingFile = args(2)
-            println(s"A iniciar treino massivo a partir de $trainingFile ...")
+            println(s"Starting massive training from $trainingFile ...")
             
             var currentGraph = graph.copy(trainingMode = true)
             var count = 0
@@ -241,33 +241,29 @@ object RTACLI {
               
               count += 1
               if (count % 100000 == 0) {
-                println(s"Processadas $count linhas...")
+                println(s"Processed $count lines...")
               }
             }
 
             val finalGraph = currentGraph.copy(inits = graph.inits)
             val elapsed = (System.currentTimeMillis() - startTime) / 1000.0
-            println(s"Treino concluido! $count sessoes processadas em $elapsed segundos.")
+            println(s"Training completed! $count sessions processed in $elapsed seconds.")
 
-            // Extrai o código fonte atualizado
+            // Extract the updated source code
             val updatedSource = getUpdatedSource(finalGraph, rawSource)
             saveOrPrint(updatedSource, args, 3)
           }
 
-        
-
         case "-lts" =>
           println(generateLTSMermaid(graph))
-
-        
 
         case _ => printHelp()
       }
 
     } catch {
-      case e: java.io.FileNotFoundException => println(s"Arquivo não encontrado: $inputFile")
+      case e: java.io.FileNotFoundException => println(s"File not found: $inputFile")
       case e: Exception => 
-        println("Erro durante a execucao:")
+        println("Error during execution:")
         e.printStackTrace()
     }
   }
@@ -297,7 +293,7 @@ object RTACLI {
     if (args.length > outIdx) {
       val outName = args(outIdx)
       new PrintWriter(outName) { write(content); close() }
-      println(s"Resultado salvo com sucesso em: $outName")
+      println(s"Result successfully saved to: $outName")
     } else {
       println(content)
     }
@@ -359,27 +355,27 @@ object RTACLI {
         |===================================================================
         |                        RePA Tool CLI
         |===================================================================
-        |Uso: java -jar RTATool.jar [COMANDO] <MODELO.r> [OPCOES_EXTRAS]
+        |Usage: java -jar RTATool.jar [COMMAND] <MODEL.r> [EXTRA_OPTIONS]
         |
-        |Sem argumentos: Abre a Interface Grafica no Navegador (Servidor Local).
+        |No arguments: Opens the Graphical Interface in the Browser (Local Server).
         |
-        |Comandos:
-        |  -prism <arq>                 : Exporta para PRISM (.pm)
-        |  -translate <arq>             : Traduz o codigo para GLTS
-        |  -train <arq> <treino.txt>    : Treina o modelo com log e atualiza pesos
-        |  -text <arq>                  : Imprime o estado textual
-        |  -mermaid <arq>               : Imprime grafo simples do estado inicial
-        |  -step <arq>                  : Lista transicoes habilitadas
-        |  -lts <arq>                   : Gera o diagrama Mermaid completo (LTS)
-        |  -pdl <arq> <estado> <form>   : Avalia formula PDL/PCTL 
-        |  -stats <arq>                 : Conta estados/transicoes acessiveis
-        |  -check <arq>                 : Inspeciona inconsistencias/deadlocks
-        |  -deltacut <arq> <delta>      : Aplica poda no modelo dado um delta
-        |  -merge <A.r> <B.r> <op> <ag> : Combina 2 modelos (union/intersect)
-        |  -bestpath <arq> <t> <v> <n>  : Descobre melhor caminho estatistico
+        |Commands:
+        |  -prism <file>                 : Export to PRISM (.pm)
+        |  -translate <file>             : Translate code to GLTS
+        |  -train <file> <train.txt>     : Train model with log and update weights
+        |  -text <file>                  : Print textual state
+        |  -mermaid <file>               : Print simple graph of initial state
+        |  -step <file>                  : List enabled transitions
+        |  -lts <file>                   : Generate full Mermaid diagram (LTS)
+        |  -pdl <file> <state> <form>    : Evaluate PDL/PCTL formula
+        |  -stats <file>                 : Count reachable states/transitions
+        |  -check <file>                 : Inspect inconsistencies/deadlocks
+        |  -deltacut <file> <delta>      : Prune model given a delta
+        |  -merge <A.r> <B.r> <op> <ag>  : Combine 2 models (union/intersect)
+        |  -bestpath <file> <t> <v> <n>  : Discover best statistical path
         |
-        |Nota: Se adicionar um nome de ficheiro no final, a saida sera salva
-        |      nesse ficheiro em vez de aparecer no terminal.
+        |Note: If you add a filename at the end, the output will be saved
+        |      to that file instead of printing to the terminal.
         |===================================================================
         |""".stripMargin)
   }
@@ -407,7 +403,7 @@ object RTACLI {
     server.createContext("/", new ResourceHandler())
     server.start()
     val url = s"http://localhost:${server.getAddress.getPort}/index.html"
-    println(s"Interface Grafica rodando em: $url")
+    println(s"Graphical Interface running at: $url")
     
     if (Desktop.isDesktopSupported && Desktop.getDesktop.isSupported(Desktop.Action.BROWSE)) {
       Desktop.getDesktop.browse(new URI(url))

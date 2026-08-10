@@ -1,9 +1,9 @@
-
-
 let lastModelData = null;
 
 const stripNameCommand = s =>
-    s.replace(/^\s*name\s+[a-zA-Z0-9_]+[;\s]*/gm, '');
+    s.replace(/^\s*name\s+[a-zA-Z0-9_]+[;\s]*/gm, '')
+     .replace(/^\s*(possibilisticView|possibilistic)\b[;\s]*/gmi, '')
+     .replace(/^\s*hideTau\b[;\s]*/gmi, '');
 
 
 function loadExample() {
@@ -29,6 +29,21 @@ function loadExample() {
 
 function loadAndRender() {
     var fullCode  = editor.getValue();
+    
+    var isPoss = /^\s*(possibilisticView|possibilistic)\b/mi.test(fullCode);
+    var isHideTau = /^\s*hideTau\b/mi.test(fullCode);
+
+    var possCheckbox = document.getElementById('possibilisticToggle');
+    if (possCheckbox) {
+        possCheckbox.checked = isPoss;
+        window.isPossibilisticView = isPoss;
+    }
+
+    var hideCheckbox = document.getElementById('hideTauToggle');
+    if (hideCheckbox) {
+        hideCheckbox.checked = isHideTau;
+    }
+
     var cleanCode = stripNameCommand(fullCode);
     console.log(fullCode);
     console.log(cleanCode);

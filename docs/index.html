@@ -669,8 +669,7 @@ function doUndo() {
 mermaid.initialize({ startOnLoad: false });
 
 CodeMirror.defineMode("rta", function() {
-    var keywords = ["name","init","aut","int","training","if","then","else","disabled","calibration","proportional","normalize","equal","revise_equal","paradigm","fuzzy","probabilistic"];
-    return {
+var keywords = ["name","init","aut","int","training","if","then","else","disabled","calibration","proportional","normalize","equal","revise_equal","paradigm","fuzzy","probabilistic", "possibilisticView", "hideTau"];    return {
         token: function(stream) {
             if (stream.eatSpace()) return null;
             if (stream.match("//")) { stream.skipToEnd(); return "comment"; }
@@ -716,8 +715,14 @@ document.addEventListener("DOMContentLoaded", function() {
     
     try {
         const examples = JSON.parse(RTA.getExamples());
-        if (examples["Simple"]) {
-            editor.setValue(examples["Simple"]);
+        const urlParams = new URLSearchParams(window.location.search);
+        let targetExample = urlParams.get('ex');
+        
+        if (!targetExample || !examples[targetExample]) {
+            targetExample = "Simple";
+        }
+        if (examples[targetExample]) {
+            editor.setValue(examples[targetExample]);
             
             loadAndRender(); 
             

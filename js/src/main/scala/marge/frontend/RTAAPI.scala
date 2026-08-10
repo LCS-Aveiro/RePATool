@@ -618,134 +618,6 @@ object RTAAPI {
     |A_PREACCEPTED -W_Completeren_aanvraag-> W_Completeren_aanvraag : e15 (1.0000)
     |A_CANCELLED -W_Completeren_aanvraag-> W_Completeren_aanvraag : e16 (1.0000)""".stripMargin,
 
-    "BPI COMPLETE" ->
-    """name BPI_2012_Automated;
-    |init A_SUBMITTED;
-    |A_ACCEPTED -O_SELECTED-> O_SELECTED : e1 (0.5631)
-    |A_ACCEPTED -A_FINALIZED-> A_FINALIZED : e2 (0.4086)
-    |A_ACCEPTED -W_Completeren_aanvraag-> W_Completeren_aanvraag : e3 (0.0145)
-    |A_ACCEPTED -A_CANCELLED-> A_CANCELLED : e4 (0.0090)
-    |A_ACCEPTED -A_DECLINED-> A_DECLINED : e5 (0.0049)
-    |A_FINALIZED -O_CREATED-> O_CREATED : e6 (0.5797)
-    |A_FINALIZED -O_SELECTED-> O_SELECTED : e7 (0.4203)
-    |O_ACCEPTED -A_ACTIVATED-> A_ACTIVATED : e8 (0.2523)
-    |O_ACCEPTED -A_APPROVED-> A_APPROVED : e9 (0.2916)
-    |O_ACCEPTED -A_REGISTERED-> A_REGISTERED : e10 (0.3437)
-    |O_ACCEPTED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e11 (0.1025)
-    |O_ACCEPTED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e12 (0.0098)
-    |A_PREACCEPTED -W_Completeren_aanvraag-> W_Completeren_aanvraag : e13 (1.0000)
-    |O_DECLINED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e14 (0.3990)
-    |O_DECLINED -A_DECLINED-> A_DECLINED : e15 (0.5224)
-    |O_DECLINED -W_Nabellen_offertes-> W_Nabellen_offertes : e16 (0.0337)
-    |O_DECLINED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e17 (0.0449)
-    |O_SELECTED -A_FINALIZED-> A_FINALIZED : e18 (0.4135)
-    |O_SELECTED -O_CREATED-> O_CREATED : e19 (0.4478)
-    |O_SELECTED -O_CANCELLED-> O_CANCELLED : e20 (0.1385)
-    |O_SELECTED -W_Nabellen_offertes-> W_Nabellen_offertes : e21 (0.0001)
-    |A_APPROVED -O_ACCEPTED-> O_ACCEPTED : e22 (0.2110)
-    |A_APPROVED -A_REGISTERED-> A_REGISTERED : e23 (0.3037)
-    |A_APPROVED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e24 (0.1224)
-    |A_APPROVED -A_ACTIVATED-> A_ACTIVATED : e25 (0.3513)
-    |A_APPROVED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e26 (0.0116)
-    |W_Wijzigen_contractgegevens -W_Valideren_aanvraag-> W_Valideren_aanvraag : e27 (0.2500)
-    |W_Wijzigen_contractgegevens -W_Wijzigen_contractgegevens-> W_Wijzigen_contractgegevens : e28 (0.6250)
-    |W_Wijzigen_contractgegevens -W_Nabellen_offertes-> W_Nabellen_offertes : e29 (0.1250)
-    |O_CREATED -O_SENT-> O_SENT : e30 (1.0000)
-    |W_Afhandelen_leads -W_Afhandelen_leads-> W_Afhandelen_leads : e31 (0.4879)
-    |W_Afhandelen_leads -A_PREACCEPTED-> A_PREACCEPTED : e32 (0.1755)
-    |W_Afhandelen_leads -W_Completeren_aanvraag-> W_Completeren_aanvraag : e33 (0.1756)
-    |W_Afhandelen_leads -A_DECLINED-> A_DECLINED : e34 (0.1559)
-    |W_Afhandelen_leads -W_Beoordelen_fraude-> W_Beoordelen_fraude : e35 (0.0051)
-    |W_Afhandelen_leads -A_CANCELLED-> A_CANCELLED : e36 (0.0001)
-    |A_SUBMITTED -A_PARTLYSUBMITTED-> A_PARTLYSUBMITTED : e37 (1.0000)
-    |O_SENT -W_Nabellen_offertes-> W_Nabellen_offertes : e38 (0.9435)
-    |O_SENT -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e39 (0.0563)
-    |O_SENT -W_Completeren_aanvraag-> W_Completeren_aanvraag : e40 (0.0001)
-    |O_CANCELLED -O_CREATED-> O_CREATED : e41 (0.2885)
-    |O_CANCELLED -A_CANCELLED-> A_CANCELLED : e42 (0.2272)
-    |O_CANCELLED -O_SELECTED-> O_SELECTED : e43 (0.3084)
-    |O_CANCELLED -W_Nabellen_offertes-> W_Nabellen_offertes : e44 (0.1517)
-    |O_CANCELLED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e45 (0.0207)
-    |O_CANCELLED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e46 (0.0036)
-    |A_ACTIVATED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e47 (0.4190)
-    |A_ACTIVATED -A_REGISTERED-> A_REGISTERED : e48 (0.2431)
-    |A_ACTIVATED -A_APPROVED-> A_APPROVED : e49 (0.2128)
-    |A_ACTIVATED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e50 (0.0396)
-    |A_ACTIVATED -O_ACCEPTED-> O_ACCEPTED : e51 (0.0855)
-    |A_PARTLYSUBMITTED -A_PREACCEPTED-> A_PREACCEPTED : e52 (0.3707)
-    |A_PARTLYSUBMITTED -A_DECLINED-> A_DECLINED : e53 (0.2620)
-    |A_PARTLYSUBMITTED -W_Afhandelen_leads-> W_Afhandelen_leads : e54 (0.3621)
-    |A_PARTLYSUBMITTED -W_Beoordelen_fraude-> W_Beoordelen_fraude : e55 (0.0051)
-    |O_SENT_BACK -W_Valideren_aanvraag-> W_Valideren_aanvraag : e56 (1.0000)
-    |W_Valideren_aanvraag -W_Nabellen_offertes-> W_Nabellen_offertes : e57 (0.1802)
-    |W_Valideren_aanvraag -A_REGISTERED-> A_REGISTERED : e58 (0.0126)
-    |W_Valideren_aanvraag -W_Valideren_aanvraag-> W_Valideren_aanvraag : e59 (0.3238)
-    |W_Valideren_aanvraag -O_ACCEPTED-> O_ACCEPTED : e60 (0.0629)
-    |W_Valideren_aanvraag -W_Wijzigen_contractgegevens-> W_Wijzigen_contractgegevens : e61 (0.0002)
-    |W_Valideren_aanvraag -A_DECLINED-> A_DECLINED : e62 (0.0177)
-    |W_Valideren_aanvraag -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e63 (0.3273)
-    |W_Valideren_aanvraag -A_APPROVED-> A_APPROVED : e64 (0.0271)
-    |W_Valideren_aanvraag -O_DECLINED-> O_DECLINED : e65 (0.0193)
-    |W_Valideren_aanvraag -A_ACTIVATED-> A_ACTIVATED : e66 (0.0110)
-    |W_Valideren_aanvraag -O_CANCELLED-> O_CANCELLED : e67 (0.0061)
-    |W_Valideren_aanvraag -O_SELECTED-> O_SELECTED : e68 (0.0059)
-    |W_Valideren_aanvraag -W_Beoordelen_fraude-> W_Beoordelen_fraude : e69 (0.0051)
-    |W_Valideren_aanvraag -A_CANCELLED-> A_CANCELLED : e70 (0.0007)
-    |W_Nabellen_offertes -W_Completeren_aanvraag-> W_Completeren_aanvraag : e71 (0.0989)
-    |W_Nabellen_offertes -W_Nabellen_offertes-> W_Nabellen_offertes : e72 (0.7114)
-    |W_Nabellen_offertes -O_SENT_BACK-> O_SENT_BACK : e73 (0.0641)
-    |W_Nabellen_offertes -W_Valideren_aanvraag-> W_Valideren_aanvraag : e74 (0.0632)
-    |W_Nabellen_offertes -O_SELECTED-> O_SELECTED : e75 (0.0151)
-    |W_Nabellen_offertes -O_CANCELLED-> O_CANCELLED : e76 (0.0307)
-    |W_Nabellen_offertes -A_DECLINED-> A_DECLINED : e77 (0.0005)
-    |W_Nabellen_offertes -A_CANCELLED-> A_CANCELLED : e78 (0.0155)
-    |W_Nabellen_offertes -W_Wijzigen_contractgegevens-> W_Wijzigen_contractgegevens : e79 (0.0000)
-    |W_Nabellen_offertes -O_DECLINED-> O_DECLINED : e80 (0.0004)
-    |W_Nabellen_offertes -O_CREATED-> O_CREATED : e81 (0.0000)
-    |A_REGISTERED -A_APPROVED-> A_APPROVED : e82 (0.2588)
-    |A_REGISTERED -A_ACTIVATED-> A_ACTIVATED : e83 (0.2984)
-    |A_REGISTERED -O_ACCEPTED-> O_ACCEPTED : e84 (0.1479)
-    |A_REGISTERED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e85 (0.2690)
-    |A_REGISTERED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e86 (0.0258)
-    |A_CANCELLED -W_Completeren_aanvraag-> W_Completeren_aanvraag : e87 (0.3485)
-    |A_CANCELLED -W_Nabellen_offertes-> W_Nabellen_offertes : e88 (0.2170)
-    |A_CANCELLED -O_CANCELLED-> O_CANCELLED : e89 (0.4015)
-    |A_CANCELLED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e90 (0.0265)
-    |A_CANCELLED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e91 (0.0065)
-    |W_Beoordelen_fraude -W_Completeren_aanvraag-> W_Completeren_aanvraag : e92 (0.0099)
-    |W_Beoordelen_fraude -W_Beoordelen_fraude-> W_Beoordelen_fraude : e93 (0.6046)
-    |W_Beoordelen_fraude -A_DECLINED-> A_DECLINED : e94 (0.0939)
-    |W_Beoordelen_fraude -W_Valideren_aanvraag-> W_Valideren_aanvraag : e95 (0.1532)
-    |W_Beoordelen_fraude -W_Afhandelen_leads-> W_Afhandelen_leads : e96 (0.1384)
-    |W_Completeren_aanvraag -W_Completeren_aanvraag-> W_Completeren_aanvraag : e97 (0.7183)
-    |W_Completeren_aanvraag -A_ACCEPTED-> A_ACCEPTED : e98 (0.0966)
-    |W_Completeren_aanvraag -W_Nabellen_offertes-> W_Nabellen_offertes : e99 (0.0948)
-    |W_Completeren_aanvraag -A_CANCELLED-> A_CANCELLED : e100 (0.0212)
-    |W_Completeren_aanvraag -W_Afhandelen_leads-> W_Afhandelen_leads : e101 (0.0476)
-    |W_Completeren_aanvraag -A_DECLINED-> A_DECLINED : e102 (0.0206)
-    |W_Completeren_aanvraag -W_Beoordelen_fraude-> W_Beoordelen_fraude : e103 (0.0001)
-    |W_Completeren_aanvraag -O_SELECTED-> O_SELECTED : e104 (0.0005)
-    |W_Completeren_aanvraag -A_FINALIZED-> A_FINALIZED : e105 (0.0004)
-    |A_DECLINED -W_Completeren_aanvraag-> W_Completeren_aanvraag : e106 (0.2646)
-    |A_DECLINED -O_DECLINED-> O_DECLINED : e107 (0.0911)
-    |A_DECLINED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e108 (0.0119)
-    |A_DECLINED -W_Afhandelen_leads-> W_Afhandelen_leads : e109 (0.5311)
-    |A_DECLINED -W_Beoordelen_fraude-> W_Beoordelen_fraude : e110 (0.0136)
-    |A_DECLINED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e111 (0.0827)
-    |A_DECLINED -W_Nabellen_offertes-> W_Nabellen_offertes : e112 (0.0050)
-    |W_Nabellen_incomplete_dossiers -W_Valideren_aanvraag-> W_Valideren_aanvraag : e113 (0.2207)
-    |W_Nabellen_incomplete_dossiers -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e114 (0.7468)
-    |W_Nabellen_incomplete_dossiers -O_DECLINED-> O_DECLINED : e115 (0.0020)
-    |W_Nabellen_incomplete_dossiers -O_SELECTED-> O_SELECTED : e116 (0.0040)
-    |W_Nabellen_incomplete_dossiers -O_SENT_BACK-> O_SENT_BACK : e117 (0.0081)
-    |W_Nabellen_incomplete_dossiers -O_CANCELLED-> O_CANCELLED : e118 (0.0061)
-    |W_Nabellen_incomplete_dossiers -O_ACCEPTED-> O_ACCEPTED : e119 (0.0044)
-    |W_Nabellen_incomplete_dossiers -A_APPROVED-> A_APPROVED : e120 (0.0018)
-    |W_Nabellen_incomplete_dossiers -A_DECLINED-> A_DECLINED : e121 (0.0015)
-    |W_Nabellen_incomplete_dossiers -A_ACTIVATED-> A_ACTIVATED : e122 (0.0009)
-    |W_Nabellen_incomplete_dossiers -A_CANCELLED-> A_CANCELLED : e123 (0.0029)
-    |W_Nabellen_incomplete_dossiers -A_REGISTERED-> A_REGISTERED : e124 (0.0008)
-    |W_Nabellen_incomplete_dossiers -W_Wijzigen_contractgegevens-> W_Wijzigen_contractgegevens : e125 (0.0000)""".stripMargin,
 
     "commerce" ->
     """name ECommerce_Journey;
@@ -820,24 +692,71 @@ object RTAAPI {
         |
         |cara ->> cara: viciar (1.0)""".stripMargin,
       "Moeda2" ->
-      """name Moeda2
+      """name Coin
+      |
       |calibration proportional
+      |
       |init start
       |
+      |start -toss -> tails : toss1 (0.500)
+      |start -toss -> heads : toss2 (0.500)
+      |tails -toss -> heads : tossHeads1 (0.500)
+      |tails -toss -> tails : tossTails (0.500)
+      |heads -toss -> tails : tossTails (0.500)
+      |heads -toss -> heads : tossHeads2 (0.500)
       |
-      |start -lancar-> coroa: lancar1
-      |start -lancar-> cara: lancar2
+      |tossHeads1 ->> tossHeads1 : c1 (0.100)
+      |tossHeads2 ->> tossHeads2 : c2 (0.100)
       |
-      |coroa -lancar-> cara: lancarCara1
-      |coroa -lancar-> coroa: lancarCoroa
-      |cara -lancar-> coroa: lancarCoroa
-      |cara -lancar-> cara: lancarCara2
-      |
-      |
-      |lancarCara1 ->> lancarCara1:c1
-      |lancarCara2 ->>lancarCara2:c2
-      |lancar2 ->>lancarCara1:c3
-      |lancar2 ->> lancarCara2:c4""".stripMargin,
+      |toss2 ->> tossHeads1 : c3 (0.100)
+      |toss2 ->> tossHeads2 : c4 (0.100)""".stripMargin,
+      "EX1" ->
+      """name EX1
+        |possibilisticView
+        |hideTau
+        |
+        |init w1
+        |
+        |w1 ---> w2: w12
+        |w2 ---> w1: w21 disabled
+        |
+        |w12 ->> w21: onW
+        |
+        |w1 ---> w3: w13
+        |w3 ---> w1: w31 disabled
+        |
+        |w13 --! w31: onW2
+        |w13 ->> w12: offW""".stripMargin,
+        "EX2" ->
+        """name EX2
+        |paradigm fuzzy
+        |
+        |init w1
+        |
+        |w1 ---> w2: w12 (0.5)
+        |w2 ---> w1: w21 (1.0) disabled
+        |
+        |w12 ->> w21: onW (0.5)
+        |
+        |w1 ---> w3: w13 (0.5)
+        |w3 ---> w1: w31 (1.0) disabled
+        |
+        |w13 --! w31: onW2 (0.1)
+        |w13 ->> w12: offW (0.1)""".stripMargin,
+        "EX3" ->
+        """name EX
+       |init w1
+        |
+        |w1 ---> w2: w12 (0.5)
+        |w2 ---> w1: w21 (1.0) disabled
+        |
+        |w12 ->> w21: onW (0.5)
+        |
+        |w1 ---> w3: w13 (0.5)
+        |w3 ---> w1: w31 (1.0) disabled
+        |
+        |w13 --! w31: onW2 (0.1)
+        |w13 ->> w12: offW (0.1)""".stripMargin,
 
 
     )

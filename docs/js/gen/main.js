@@ -13324,13 +13324,13 @@ function $p_Lrta_frontend_RTAAPI$__generateSimulationJson__Lrta_syntax_Program2$
 }
 function $p_Lrta_frontend_RTAAPI$__getId$1__sr_ObjectRef__sr_IntRef__Lrta_syntax_Program2$RxGraph__I($thiz, stateToId$1, idCounter$1, g) {
   return $uI($n($as_sci_Map($n(stateToId$1).sr_ObjectRef__f_elem)).getOrElse__O__F0__O(g, new $c_sjsr_AnonFunction0((() => {
-    var ev$29 = ((1 + $n(idCounter$1).sr_IntRef__f_elem) | 0);
-    $n(idCounter$1).sr_IntRef__f_elem = ev$29;
+    var ev$31 = ((1 + $n(idCounter$1).sr_IntRef__f_elem) | 0);
+    $n(idCounter$1).sr_IntRef__f_elem = ev$31;
     var this$4 = $n($as_sci_Map($n(stateToId$1).sr_ObjectRef__f_elem));
     var y = $n(idCounter$1).sr_IntRef__f_elem;
-    var ev$30 = $as_sci_Map(this$4.updated__O__O__sci_MapOps(g, y));
-    $n(stateToId$1).sr_ObjectRef__f_elem = ev$30;
-    ev$30 = null;
+    var ev$32 = $as_sci_Map(this$4.updated__O__O__sci_MapOps(g, y));
+    $n(stateToId$1).sr_ObjectRef__f_elem = ev$32;
+    ev$32 = null;
     return $n(idCounter$1).sr_IntRef__f_elem
   }))))
 }
@@ -13379,9 +13379,9 @@ $c_Lrta_frontend_RTAAPI$.prototype.getAllStepsMermaid__T = (function() {
       var this$13 = $n($as_sci_List(queue.sr_ObjectRef__f_elem));
       if (((!this$13.isEmpty__Z()) && ($n($as_sci_Set(visited.sr_ObjectRef__f_elem)).size__I() < 500))) {
         var current = $as_Lrta_syntax_Program2$RxGraph($n($as_sci_List(queue.sr_ObjectRef__f_elem)).head__O());
-        var ev$31 = $as_sci_List($n($as_sci_List(queue.sr_ObjectRef__f_elem)).tail__O());
-        queue.sr_ObjectRef__f_elem = ev$31;
-        ev$31 = null;
+        var ev$33 = $as_sci_List($n($as_sci_List(queue.sr_ObjectRef__f_elem)).tail__O());
+        queue.sr_ObjectRef__f_elem = ev$33;
+        ev$33 = null;
         var sourceId = $p_Lrta_frontend_RTAAPI$__getId$1__sr_ObjectRef__sr_IntRef__Lrta_syntax_Program2$RxGraph__I(this, stateToId, idCounter, current);
         var edgeNexts = $m_Lrta_backend_RxSemantics$().nextEdge__Lrta_syntax_Program2$RxGraph__sci_Set(current);
         var this$15 = $n(edgeNexts);
@@ -13405,18 +13405,18 @@ $c_Lrta_frontend_RTAAPI$.prototype.getAllStepsMermaid__T = (function() {
               };
               var elem$1$1 = ((((sourceId + " --->|\"") + label) + "\"| ") + targetId);
               var this$17 = $n($as_sci_List(transitionsStr.sr_ObjectRef__f_elem));
-              var ev$32 = new $c_sci_$colon$colon(elem$1$1, this$17);
-              transitionsStr.sr_ObjectRef__f_elem = ev$32;
-              ev$32 = null;
+              var ev$34 = new $c_sci_$colon$colon(elem$1$1, this$17);
+              transitionsStr.sr_ObjectRef__f_elem = ev$34;
+              ev$34 = null;
               if ((!$n($as_sci_Set(visited.sr_ObjectRef__f_elem)).contains__O__Z(nextState$1))) {
                 var this$18 = $n($as_sci_Set(visited.sr_ObjectRef__f_elem));
-                var ev$33 = $as_sci_Set(this$18.incl__O__sci_SetOps(nextState$1));
-                visited.sr_ObjectRef__f_elem = ev$33;
-                ev$33 = null;
+                var ev$35 = $as_sci_Set(this$18.incl__O__sci_SetOps(nextState$1));
+                visited.sr_ObjectRef__f_elem = ev$35;
+                ev$35 = null;
                 var this$19 = $n($as_sci_List(queue.sr_ObjectRef__f_elem));
-                var ev$34 = $as_sci_List($f_sc_StrictOptimizedSeqOps__appended__O__O(this$19, nextState$1));
-                queue.sr_ObjectRef__f_elem = ev$34;
-                ev$34 = null
+                var ev$36 = $as_sci_List($f_sc_StrictOptimizedSeqOps__appended__O__O(this$19, nextState$1));
+                queue.sr_ObjectRef__f_elem = ev$36;
+                ev$36 = null
               };
               break matchResult2
             };
@@ -13480,9 +13480,9 @@ $c_Lrta_frontend_RTAAPI$.prototype.applySavedWeights__T__T = (function(weightsJs
               var lbl = $p_Lrta_frontend_RTAAPI$__stringToQName__T__Lrta_syntax_Program2$QName(this, $f_sc_IterableOnceOps__mkString__T__T__T__T(this$7, "", "_", ""));
               var this$11 = $n($as_sci_Map(newWeights.sr_ObjectRef__f_elem));
               var self = new $c_T4(from, to, id, lbl);
-              var ev$35 = $as_sci_Map(this$11.updated__O__O__sci_MapOps(self, p$2));
-              newWeights.sr_ObjectRef__f_elem = ev$35;
-              ev$35 = null
+              var ev$37 = $as_sci_Map(this$11.updated__O__O__sci_MapOps(self, p$2));
+              newWeights.sr_ObjectRef__f_elem = ev$37;
+              ev$37 = null
             };
             break matchResult5
           };
@@ -14124,63 +14124,69 @@ $c_Lrta_frontend_RTAAPI$.prototype.trainWithDataStream__T__T = (function(jsonEve
 });
 $c_Lrta_frontend_RTAAPI$.prototype.getExamples__T = (function() {
   $n($m_s_package$().s_package$__f_List);
-  var $$x18 = $m_sr_ScalaRunTime$();
+  var $$x20 = $m_sr_ScalaRunTime$();
   $m_sc_StringOps$();
   var y = $m_sc_StringOps$().stripMargin$extension__T__C__T("name CheatSheet_Reference\r\n        |// ==========================================\r\n        |// RTA DSL - QUICK REFERENCE GUIDE\r\n        |// ==========================================\r\n        |\r\n        |// 1. GLOBAL SETTINGS\r\n        |// ------------------------------------------\r\n        |// Determines how remaining probability is distributed when a rule steals weight.\r\n        |// Options: normalize (default), equal, proportional\r\n        |calibration proportional\r\n        |\r\n        |// Uncomment the line below to use empirical frequency (ignores rules)\r\n        |// training \r\n        |\r\n        |// 2. VARIABLES AND INITIAL STATE\r\n        |// ------------------------------------------\r\n        |int counter = 0\r\n        |int flag = 1\r\n        |\r\n        |\r\n        |init start\r\n        |\r\n        |// 3. SIMPLE TRANSITIONS & AGGREGATIONS\r\n        |// ------------------------------------------\r\n        |// Syntax: source ---> target: label (weight) aggregation disabled?\r\n        |// Aggregations define how the weight is calculated when this action triggers a rule.\r\n        |// Options: arith (default), prod, max, min, geom\r\n        |\r\n        |start ---> state1: actA (0.4) max\r\n        |start ---> state2: actB (0.6)\r\n        |\r\n        |// Transitions can start manually disabled\r\n        |state1 ---> end: hiddenAct (1.0) disabled\r\n        |\r\n        |// 4. GUARDS AND UPDATES\r\n        |// ------------------------------------------\r\n        |// Syntax: ... if (condition) then { variable' := new_value }\r\n        |state1 ---> state1: loop if (counter < 5 AND flag == 1) then {\r\n        |    counter' := counter + 1\r\n        |}\r\n        |\r\n        |// OR\r\n        |\r\n        |//state1 ---> state1: loop if (counter < 5 AND flag == 1)\r\n        |\r\n        |// OR\r\n        |\r\n        |//state1 ---> state1: loop counter' := counter + 1\r\n        |\r\n        |\r\n        |// 5. HYPER-EDGES (DYNAMIC RULES)\r\n        |// ------------------------------------------\r\n        |// Syntax: trigger_label ->> target_label: rule_name (weight) aggregation\r\n        |// ->> (ENABLE / BUFF): Increases target's probability\r\n        |// --! (DISABLE / DEBUFF): Decreases target's probability\r\n        |\r\n        |// Example: Every time 'actA' is fired, it buffs 'actB'\r\n        |actA ->> actB: buff_B (0.8)\r\n        |\r\n        |// Example: Every time 'actB' is fired, it severely debuffs 'actA'\r\n        |actB --! actA: debuff_A (0.1)\r\n        |\r\n        |\r\n        |// Rules can also be guarded and update variables\r\n        |loop ->> hiddenAct: unlock (1.0) if (counter == 4) then {\r\n        |    flag' := 0\r\n        |}\r\n        |\r\n        |// 6. MODULAR SCOPES (Sub-Automata)\r\n        |// ------------------------------------------\r\n        |// You can encapsulate logic in specific modules\r\n        |aut WorkerRobot {\r\n        |    init idle\r\n        |    idle ---> working: startWork (1.0)\r\n        |}", 124);
-  var $$x17 = new $c_T2("CheatSheet", y);
+  var $$x19 = new $c_T2("CheatSheet", y);
   $m_sc_StringOps$();
   var y$1 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name suene\r\n      |\r\n      |init u\r\n      |\r\n      |u--->u:uu(0.8)\r\n      |u ---> v: uv (0.2)\r\n      |v ---> w: vw (0.8)\r\n      |w ---> u: wu (0.4)\r\n      |w ---> w: ww (0.6)\r\n      |v ---> z:vz (0.2)\r\n      ", 124);
-  var $$x16 = new $c_T2("Suene", y$1);
+  var $$x18 = new $c_T2("Suene", y$1);
   $m_sc_StringOps$();
   var y$2 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name MM\r\n      |init x\r\n      |x ---> x: xx(0.7)\r\n      |x ---> y: xy (0.2)\r\n      |x ---> z:xz (0.1)\r\n      |z ---> y: zy (0.3) disabled\r\n      |z ---> z: zz (0.2)\r\n      |z ---> v: vz (0.5)\r\n      |xy ->> zy: xyyz (0.4)\r\n      ", 124);
-  var $$x15 = new $c_T2("MM", y$2);
+  var $$x17 = new $c_T2("MM", y$2);
   $m_sc_StringOps$();
   var y$3 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name NN\r\n      |init x\r\n      |x ---> x: xx(0.8)\r\n      |x ---> z: xz (0.2) disabled\r\n      |y ---> x:yx (0.1)\r\n      |y ---> y:yy (0.9)\r\n      |z ---> y: zy (0.4)\r\n      |z ---> z: zz (0.6)\r\n      |yx ->> xz: yxxz (0.3)\r\n      ", 124);
-  var $$x14 = new $c_T2("NN", y$3);
+  var $$x16 = new $c_T2("NN", y$3);
   $m_sc_StringOps$();
   var y$4 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name AdvancedBot\r\n        |init Home\r\n        |Home ---> Office: go_work (0.5)\r\n        |Home ---> Station: go_charge (0.5)\r\n        |Home ---> Home: socialize (0.8)\r\n        |Home ---> Home: battery_low\r\n        |Home ---> Home: no_money\r\n        |Office ---> Home: go_home (1.0)\r\n        |Office ---> Office: easy_task (0.7)\r\n        |Office ---> Office: high_stress\r\n        |Station ---> Home: finish_charge (1.0)\r\n        |battery_low ->> go_charge (0.6)\r\n        |battery_low --! go_work (0.4)\r\n        |no_money ->> go_work (0.7)\r\n        |high_stress ->> easy_task (0.2)\r\n        |finish_charge ->> socialize (0.1)", 124);
-  var $$x13 = new $c_T2("Recommender", y$4);
+  var $$x15 = new $c_T2("Recommender", y$4);
   $m_sc_StringOps$();
   var y$5 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name DroneSystem\r\n      |init Home\r\n      |Home ---> Flying: launch (1.0)\r\n      |Flying ---> Delivered: success (0.8)\r\n      |Flying ---> Crashed: fail (0.2)\r\n      |Delivered ---> Home: return (1.0)\r\n      |fail ->> return (1.0)\r\n    ", 124);
-  var $$x12 = new $c_T2("DroneSystem", y$5);
+  var $$x14 = new $c_T2("DroneSystem", y$5);
   $m_sc_StringOps$();
   var y$6 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name Simple\r\n      |init s0\r\n      |s0 ---> s1: a\r\n      |s1 ---> s0: b\r\n      |a  --! a: offA", 124);
-  var $$x11 = new $c_T2("Simple", y$6);
+  var $$x13 = new $c_T2("Simple", y$6);
   $m_sc_StringOps$();
   var y$7 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name Conditions\r\n      |int counter = 0\r\n      |init start\r\n      |start ---> middle: step1  if (counter < 2) then {\r\n      |  counter' := counter + 1\r\n      |}\r\n      |middle ---> endN: activateStep2 if (counter == 1)", 124);
-  var $$x10 = new $c_T2("Conditions", y$7);
+  var $$x12 = new $c_T2("Conditions", y$7);
   $m_sc_StringOps$();
   var y$8 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name LikeAlgorithm\r\n      |init Feed\r\n      |Feed ---> Watch: watch\r\n      |Watch ---> Watch: like\r\n      |Watch ---> Feed: dontLike\r\n      |Watch ---> Feed: refresh disabled\r\n      |Feed ---> List: watchLike disabled\r\n      |List ---> Watch: watch2\r\n      |watch ->> dontLike: wd\r\n      |like --! dontLike: ld\r\n      |like ->> refresh: lr\r\n      |like ->> watchLike: lw\r\n      |dontLike --! watchLike: dw", 124);
-  var $$x9 = new $c_T2("LikeAlgorithm", y$8);
+  var $$x11 = new $c_T2("LikeAlgorithm", y$8);
   $m_sc_StringOps$();
   var y$9 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name GRG\r\n      |int a_active   = 1\r\n      |int b_active   = 0\r\n      |int c_active = 0\r\n      |\r\n      |init s0\r\n      |\r\n      |s0 ---> s1: aa  if (a_active == 1) then {\r\n      |  b_active' := 1;\r\n      |  if (c_active == 1) then {\r\n      |  \ta_active' := 0\r\n      |  }\r\n      |}\r\n      |\r\n      |s1 ---> s0: bb  if (b_active == 1) then {\r\n      |  c_active' := 1;\r\n      |  if (a_active == 0) then {\r\n      |  \tb_active' := 0\r\n      |  }\r\n      |}\r\n      |\r\n      |s1 ---> s2: cc  if (c_active == 1)\r\n      |\r\n      |\r\n      |aa --! aa: offA2 disabled\r\n      |aa ->> bb: onB if (b_active == 0)\r\n      |bb ->> offA2: onOffA if (c_active == 0)\r\n      |", 124);
-  var $$x8 = new $c_T2("GRG", y$9);
+  var $$x10 = new $c_T2("GRG", y$9);
   $m_sc_StringOps$();
   var y$10 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name Vending\r\n      |init Insert\r\n      |Insert ---> Coffee: ct50\r\n      |Insert ---> Chocolate: eur1\r\n      |Coffee ---> Insert: GetCoffee\r\n      |Chocolate ---> Insert: GetChoc\r\n      |\r\n      |eur1 --! ct50\r\n      |eur1 --! eur1\r\n      |ct50 --! ct50: lastct50 disabled\r\n      |ct50 --! eur1\r\n      |ct50 ->> lastct50", 124);
-  var $$x7 = new $c_T2("Vending (max eur1)", y$10);
+  var $$x9 = new $c_T2("Vending (max eur1)", y$10);
   $m_sc_StringOps$();
   var y$11 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name Vending\r\n      |init pay\r\n      |pay ---> select: insertCoin\r\n      |select ---> soda: askSoda\r\n      |select ---> beer: askBeer\r\n      |soda ---> pay: getSoda\r\n      |beer ---> pay: getBeer\r\n      |\r\n      |askSoda --! askSoda: noSoda disabled\r\n      |askBeer --! askBeer: noBeer\r\n      |askSoda ->> noSoda", 124);
-  var $$x6 = new $c_T2("Vending (max 3prod)", y$11);
+  var $$x8 = new $c_T2("Vending (max 3prod)", y$11);
   $m_sc_StringOps$();
   var y$12 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name BPI_2012_Automated;\r\n    |init A_SUBMITTED;\r\n    |A_PARTLYSUBMITTED -A_DECLINED-> A_DECLINED : e1 (0.5312)\r\n    |A_PARTLYSUBMITTED -A_PREACCEPTED-> A_PREACCEPTED : e2 (0.0734)\r\n    |A_PARTLYSUBMITTED -W_Afhandelen_leads-> W_Afhandelen_leads : e3 (0.3954)\r\n    |W_Afhandelen_leads -W_Afhandelen_leads-> W_Afhandelen_leads : e4 (0.5110)\r\n    |W_Afhandelen_leads -A_PREACCEPTED-> A_PREACCEPTED : e5 (0.0675)\r\n    |W_Afhandelen_leads -W_Completeren_aanvraag-> W_Completeren_aanvraag : e6 (0.0675)\r\n    |W_Afhandelen_leads -A_DECLINED-> A_DECLINED : e7 (0.3539)\r\n    |A_SUBMITTED -A_PARTLYSUBMITTED-> A_PARTLYSUBMITTED : e8 (1.0000)\r\n    |W_Completeren_aanvraag -W_Completeren_aanvraag-> W_Completeren_aanvraag : e9 (0.5168)\r\n    |W_Completeren_aanvraag -A_CANCELLED-> A_CANCELLED : e10 (0.0826)\r\n    |W_Completeren_aanvraag -W_Afhandelen_leads-> W_Afhandelen_leads : e11 (0.1530)\r\n    |W_Completeren_aanvraag -A_DECLINED-> A_DECLINED : e12 (0.2476)\r\n    |A_DECLINED -W_Completeren_aanvraag-> W_Completeren_aanvraag : e13 (0.2360)\r\n    |A_DECLINED -W_Afhandelen_leads-> W_Afhandelen_leads : e14 (0.7640)\r\n    |A_PREACCEPTED -W_Completeren_aanvraag-> W_Completeren_aanvraag : e15 (1.0000)\r\n    |A_CANCELLED -W_Completeren_aanvraag-> W_Completeren_aanvraag : e16 (1.0000)", 124);
-  var $$x5 = new $c_T2("BPI SIMPLE", y$12);
+  var $$x7 = new $c_T2("BPI SIMPLE", y$12);
   $m_sc_StringOps$();
-  var y$13 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name BPI_2012_Automated;\r\n    |init A_SUBMITTED;\r\n    |A_ACCEPTED -O_SELECTED-> O_SELECTED : e1 (0.5631)\r\n    |A_ACCEPTED -A_FINALIZED-> A_FINALIZED : e2 (0.4086)\r\n    |A_ACCEPTED -W_Completeren_aanvraag-> W_Completeren_aanvraag : e3 (0.0145)\r\n    |A_ACCEPTED -A_CANCELLED-> A_CANCELLED : e4 (0.0090)\r\n    |A_ACCEPTED -A_DECLINED-> A_DECLINED : e5 (0.0049)\r\n    |A_FINALIZED -O_CREATED-> O_CREATED : e6 (0.5797)\r\n    |A_FINALIZED -O_SELECTED-> O_SELECTED : e7 (0.4203)\r\n    |O_ACCEPTED -A_ACTIVATED-> A_ACTIVATED : e8 (0.2523)\r\n    |O_ACCEPTED -A_APPROVED-> A_APPROVED : e9 (0.2916)\r\n    |O_ACCEPTED -A_REGISTERED-> A_REGISTERED : e10 (0.3437)\r\n    |O_ACCEPTED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e11 (0.1025)\r\n    |O_ACCEPTED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e12 (0.0098)\r\n    |A_PREACCEPTED -W_Completeren_aanvraag-> W_Completeren_aanvraag : e13 (1.0000)\r\n    |O_DECLINED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e14 (0.3990)\r\n    |O_DECLINED -A_DECLINED-> A_DECLINED : e15 (0.5224)\r\n    |O_DECLINED -W_Nabellen_offertes-> W_Nabellen_offertes : e16 (0.0337)\r\n    |O_DECLINED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e17 (0.0449)\r\n    |O_SELECTED -A_FINALIZED-> A_FINALIZED : e18 (0.4135)\r\n    |O_SELECTED -O_CREATED-> O_CREATED : e19 (0.4478)\r\n    |O_SELECTED -O_CANCELLED-> O_CANCELLED : e20 (0.1385)\r\n    |O_SELECTED -W_Nabellen_offertes-> W_Nabellen_offertes : e21 (0.0001)\r\n    |A_APPROVED -O_ACCEPTED-> O_ACCEPTED : e22 (0.2110)\r\n    |A_APPROVED -A_REGISTERED-> A_REGISTERED : e23 (0.3037)\r\n    |A_APPROVED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e24 (0.1224)\r\n    |A_APPROVED -A_ACTIVATED-> A_ACTIVATED : e25 (0.3513)\r\n    |A_APPROVED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e26 (0.0116)\r\n    |W_Wijzigen_contractgegevens -W_Valideren_aanvraag-> W_Valideren_aanvraag : e27 (0.2500)\r\n    |W_Wijzigen_contractgegevens -W_Wijzigen_contractgegevens-> W_Wijzigen_contractgegevens : e28 (0.6250)\r\n    |W_Wijzigen_contractgegevens -W_Nabellen_offertes-> W_Nabellen_offertes : e29 (0.1250)\r\n    |O_CREATED -O_SENT-> O_SENT : e30 (1.0000)\r\n    |W_Afhandelen_leads -W_Afhandelen_leads-> W_Afhandelen_leads : e31 (0.4879)\r\n    |W_Afhandelen_leads -A_PREACCEPTED-> A_PREACCEPTED : e32 (0.1755)\r\n    |W_Afhandelen_leads -W_Completeren_aanvraag-> W_Completeren_aanvraag : e33 (0.1756)\r\n    |W_Afhandelen_leads -A_DECLINED-> A_DECLINED : e34 (0.1559)\r\n    |W_Afhandelen_leads -W_Beoordelen_fraude-> W_Beoordelen_fraude : e35 (0.0051)\r\n    |W_Afhandelen_leads -A_CANCELLED-> A_CANCELLED : e36 (0.0001)\r\n    |A_SUBMITTED -A_PARTLYSUBMITTED-> A_PARTLYSUBMITTED : e37 (1.0000)\r\n    |O_SENT -W_Nabellen_offertes-> W_Nabellen_offertes : e38 (0.9435)\r\n    |O_SENT -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e39 (0.0563)\r\n    |O_SENT -W_Completeren_aanvraag-> W_Completeren_aanvraag : e40 (0.0001)\r\n    |O_CANCELLED -O_CREATED-> O_CREATED : e41 (0.2885)\r\n    |O_CANCELLED -A_CANCELLED-> A_CANCELLED : e42 (0.2272)\r\n    |O_CANCELLED -O_SELECTED-> O_SELECTED : e43 (0.3084)\r\n    |O_CANCELLED -W_Nabellen_offertes-> W_Nabellen_offertes : e44 (0.1517)\r\n    |O_CANCELLED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e45 (0.0207)\r\n    |O_CANCELLED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e46 (0.0036)\r\n    |A_ACTIVATED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e47 (0.4190)\r\n    |A_ACTIVATED -A_REGISTERED-> A_REGISTERED : e48 (0.2431)\r\n    |A_ACTIVATED -A_APPROVED-> A_APPROVED : e49 (0.2128)\r\n    |A_ACTIVATED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e50 (0.0396)\r\n    |A_ACTIVATED -O_ACCEPTED-> O_ACCEPTED : e51 (0.0855)\r\n    |A_PARTLYSUBMITTED -A_PREACCEPTED-> A_PREACCEPTED : e52 (0.3707)\r\n    |A_PARTLYSUBMITTED -A_DECLINED-> A_DECLINED : e53 (0.2620)\r\n    |A_PARTLYSUBMITTED -W_Afhandelen_leads-> W_Afhandelen_leads : e54 (0.3621)\r\n    |A_PARTLYSUBMITTED -W_Beoordelen_fraude-> W_Beoordelen_fraude : e55 (0.0051)\r\n    |O_SENT_BACK -W_Valideren_aanvraag-> W_Valideren_aanvraag : e56 (1.0000)\r\n    |W_Valideren_aanvraag -W_Nabellen_offertes-> W_Nabellen_offertes : e57 (0.1802)\r\n    |W_Valideren_aanvraag -A_REGISTERED-> A_REGISTERED : e58 (0.0126)\r\n    |W_Valideren_aanvraag -W_Valideren_aanvraag-> W_Valideren_aanvraag : e59 (0.3238)\r\n    |W_Valideren_aanvraag -O_ACCEPTED-> O_ACCEPTED : e60 (0.0629)\r\n    |W_Valideren_aanvraag -W_Wijzigen_contractgegevens-> W_Wijzigen_contractgegevens : e61 (0.0002)\r\n    |W_Valideren_aanvraag -A_DECLINED-> A_DECLINED : e62 (0.0177)\r\n    |W_Valideren_aanvraag -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e63 (0.3273)\r\n    |W_Valideren_aanvraag -A_APPROVED-> A_APPROVED : e64 (0.0271)\r\n    |W_Valideren_aanvraag -O_DECLINED-> O_DECLINED : e65 (0.0193)\r\n    |W_Valideren_aanvraag -A_ACTIVATED-> A_ACTIVATED : e66 (0.0110)\r\n    |W_Valideren_aanvraag -O_CANCELLED-> O_CANCELLED : e67 (0.0061)\r\n    |W_Valideren_aanvraag -O_SELECTED-> O_SELECTED : e68 (0.0059)\r\n    |W_Valideren_aanvraag -W_Beoordelen_fraude-> W_Beoordelen_fraude : e69 (0.0051)\r\n    |W_Valideren_aanvraag -A_CANCELLED-> A_CANCELLED : e70 (0.0007)\r\n    |W_Nabellen_offertes -W_Completeren_aanvraag-> W_Completeren_aanvraag : e71 (0.0989)\r\n    |W_Nabellen_offertes -W_Nabellen_offertes-> W_Nabellen_offertes : e72 (0.7114)\r\n    |W_Nabellen_offertes -O_SENT_BACK-> O_SENT_BACK : e73 (0.0641)\r\n    |W_Nabellen_offertes -W_Valideren_aanvraag-> W_Valideren_aanvraag : e74 (0.0632)\r\n    |W_Nabellen_offertes -O_SELECTED-> O_SELECTED : e75 (0.0151)\r\n    |W_Nabellen_offertes -O_CANCELLED-> O_CANCELLED : e76 (0.0307)\r\n    |W_Nabellen_offertes -A_DECLINED-> A_DECLINED : e77 (0.0005)\r\n    |W_Nabellen_offertes -A_CANCELLED-> A_CANCELLED : e78 (0.0155)\r\n    |W_Nabellen_offertes -W_Wijzigen_contractgegevens-> W_Wijzigen_contractgegevens : e79 (0.0000)\r\n    |W_Nabellen_offertes -O_DECLINED-> O_DECLINED : e80 (0.0004)\r\n    |W_Nabellen_offertes -O_CREATED-> O_CREATED : e81 (0.0000)\r\n    |A_REGISTERED -A_APPROVED-> A_APPROVED : e82 (0.2588)\r\n    |A_REGISTERED -A_ACTIVATED-> A_ACTIVATED : e83 (0.2984)\r\n    |A_REGISTERED -O_ACCEPTED-> O_ACCEPTED : e84 (0.1479)\r\n    |A_REGISTERED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e85 (0.2690)\r\n    |A_REGISTERED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e86 (0.0258)\r\n    |A_CANCELLED -W_Completeren_aanvraag-> W_Completeren_aanvraag : e87 (0.3485)\r\n    |A_CANCELLED -W_Nabellen_offertes-> W_Nabellen_offertes : e88 (0.2170)\r\n    |A_CANCELLED -O_CANCELLED-> O_CANCELLED : e89 (0.4015)\r\n    |A_CANCELLED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e90 (0.0265)\r\n    |A_CANCELLED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e91 (0.0065)\r\n    |W_Beoordelen_fraude -W_Completeren_aanvraag-> W_Completeren_aanvraag : e92 (0.0099)\r\n    |W_Beoordelen_fraude -W_Beoordelen_fraude-> W_Beoordelen_fraude : e93 (0.6046)\r\n    |W_Beoordelen_fraude -A_DECLINED-> A_DECLINED : e94 (0.0939)\r\n    |W_Beoordelen_fraude -W_Valideren_aanvraag-> W_Valideren_aanvraag : e95 (0.1532)\r\n    |W_Beoordelen_fraude -W_Afhandelen_leads-> W_Afhandelen_leads : e96 (0.1384)\r\n    |W_Completeren_aanvraag -W_Completeren_aanvraag-> W_Completeren_aanvraag : e97 (0.7183)\r\n    |W_Completeren_aanvraag -A_ACCEPTED-> A_ACCEPTED : e98 (0.0966)\r\n    |W_Completeren_aanvraag -W_Nabellen_offertes-> W_Nabellen_offertes : e99 (0.0948)\r\n    |W_Completeren_aanvraag -A_CANCELLED-> A_CANCELLED : e100 (0.0212)\r\n    |W_Completeren_aanvraag -W_Afhandelen_leads-> W_Afhandelen_leads : e101 (0.0476)\r\n    |W_Completeren_aanvraag -A_DECLINED-> A_DECLINED : e102 (0.0206)\r\n    |W_Completeren_aanvraag -W_Beoordelen_fraude-> W_Beoordelen_fraude : e103 (0.0001)\r\n    |W_Completeren_aanvraag -O_SELECTED-> O_SELECTED : e104 (0.0005)\r\n    |W_Completeren_aanvraag -A_FINALIZED-> A_FINALIZED : e105 (0.0004)\r\n    |A_DECLINED -W_Completeren_aanvraag-> W_Completeren_aanvraag : e106 (0.2646)\r\n    |A_DECLINED -O_DECLINED-> O_DECLINED : e107 (0.0911)\r\n    |A_DECLINED -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e108 (0.0119)\r\n    |A_DECLINED -W_Afhandelen_leads-> W_Afhandelen_leads : e109 (0.5311)\r\n    |A_DECLINED -W_Beoordelen_fraude-> W_Beoordelen_fraude : e110 (0.0136)\r\n    |A_DECLINED -W_Valideren_aanvraag-> W_Valideren_aanvraag : e111 (0.0827)\r\n    |A_DECLINED -W_Nabellen_offertes-> W_Nabellen_offertes : e112 (0.0050)\r\n    |W_Nabellen_incomplete_dossiers -W_Valideren_aanvraag-> W_Valideren_aanvraag : e113 (0.2207)\r\n    |W_Nabellen_incomplete_dossiers -W_Nabellen_incomplete_dossiers-> W_Nabellen_incomplete_dossiers : e114 (0.7468)\r\n    |W_Nabellen_incomplete_dossiers -O_DECLINED-> O_DECLINED : e115 (0.0020)\r\n    |W_Nabellen_incomplete_dossiers -O_SELECTED-> O_SELECTED : e116 (0.0040)\r\n    |W_Nabellen_incomplete_dossiers -O_SENT_BACK-> O_SENT_BACK : e117 (0.0081)\r\n    |W_Nabellen_incomplete_dossiers -O_CANCELLED-> O_CANCELLED : e118 (0.0061)\r\n    |W_Nabellen_incomplete_dossiers -O_ACCEPTED-> O_ACCEPTED : e119 (0.0044)\r\n    |W_Nabellen_incomplete_dossiers -A_APPROVED-> A_APPROVED : e120 (0.0018)\r\n    |W_Nabellen_incomplete_dossiers -A_DECLINED-> A_DECLINED : e121 (0.0015)\r\n    |W_Nabellen_incomplete_dossiers -A_ACTIVATED-> A_ACTIVATED : e122 (0.0009)\r\n    |W_Nabellen_incomplete_dossiers -A_CANCELLED-> A_CANCELLED : e123 (0.0029)\r\n    |W_Nabellen_incomplete_dossiers -A_REGISTERED-> A_REGISTERED : e124 (0.0008)\r\n    |W_Nabellen_incomplete_dossiers -W_Wijzigen_contractgegevens-> W_Wijzigen_contractgegevens : e125 (0.0000)", 124);
-  var $$x4 = new $c_T2("BPI COMPLETE", y$13);
+  var y$13 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name ECommerce_Journey;\r\n    |init Start;\r\n\r\n    |Start -enter_view-> view : e1 (0.9995)\r\n    |Start -enter_cart-> cart : e2 (0.0003)\r\n    |Start -enter_purchase-> purchase : e3 (0.0001)\r\n    |\r\n    |cart -cart-> cart : e4 (0.1943)\r\n    |cart -exit_site-> exit_site : e5 (0.1057)\r\n    |cart -purchase-> purchase : e6 (0.3371)\r\n    |cart -view-> view : e7 (0.3629)\r\n    |purchase -cart-> cart : e8 (0.0031)\r\n    |purchase -exit_site-> exit_site : e9 (0.3919)\r\n    |purchase -purchase-> purchase : e10 (0.0012)\r\n    |purchase -view-> view : e11 (0.6038)\r\n    |view -cart-> cart : e12 (0.0182)\r\n    |view -exit_site-> exit_site : e13 (0.2172)\r\n    |view -purchase-> purchase : e14 (0.0105)\r\n    |view -view-> view : e15 (0.7542)\r\n    |\r\n    |exit_site -loop-> exit_site : e16 (1.0000)", 124);
+  var $$x6 = new $c_T2("commerce", y$13);
   $m_sc_StringOps$();
-  var y$14 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name ECommerce_Journey;\r\n    |init Start;\r\n\r\n    |Start -enter_view-> view : e1 (0.9995)\r\n    |Start -enter_cart-> cart : e2 (0.0003)\r\n    |Start -enter_purchase-> purchase : e3 (0.0001)\r\n    |\r\n    |cart -cart-> cart : e4 (0.1943)\r\n    |cart -exit_site-> exit_site : e5 (0.1057)\r\n    |cart -purchase-> purchase : e6 (0.3371)\r\n    |cart -view-> view : e7 (0.3629)\r\n    |purchase -cart-> cart : e8 (0.0031)\r\n    |purchase -exit_site-> exit_site : e9 (0.3919)\r\n    |purchase -purchase-> purchase : e10 (0.0012)\r\n    |purchase -view-> view : e11 (0.6038)\r\n    |view -cart-> cart : e12 (0.0182)\r\n    |view -exit_site-> exit_site : e13 (0.2172)\r\n    |view -purchase-> purchase : e14 (0.0105)\r\n    |view -view-> view : e15 (0.7542)\r\n    |\r\n    |exit_site -loop-> exit_site : e16 (1.0000)", 124);
-  var $$x3 = new $c_T2("commerce", y$14);
+  var y$14 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name coin\r\n      |init s0\r\n      |int d = 0;\r\n      |// Lancamentos de moeda (cada linha um \"passo\")\r\n      |\r\n      |s0 -a-> s1: coin (0.5)\r\n      |s1 -a-> s3: coin (0.5)\r\n      |s2 -a-> s5: coin (0.5)\r\n      |\r\n      |s0 -b-> s2: coin (0.5)\r\n      |s1 -b-> s4: coin (0.5)\r\n      |s2 -b-> s6: coin (0.5)\r\n      |\r\n      |// Resultados finais ou novos lancamentos\r\n      |\r\n      |s3 -a-> s1: coin (0.5)\r\n      |s4 -a-> s7: coin (0.5) d':= 2\r\n      |s5 -a-> s7: coin (0.5) d':= 4\r\n      |s6 -a-> s2: coin (0.5)\r\n      |\r\n      |s3 -b-> s7: coin (0.5) d':= 1\r\n      |s4 -b-> s7: coin (0.5) d':= 3\r\n      |s5 -b-> s7: coin (0.5) d':= 5\r\n      |s6 -b-> s7: coin (0.5) d':= 6\r\n      |\r\n      |// Loop no estado final para o modelo nao travar\r\n      |s7 ---> s7: loop", 124);
+  var $$x5 = new $c_T2("coin", y$14);
   $m_sc_StringOps$();
-  var y$15 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name coin\r\n      |init s0\r\n      |int d = 0;\r\n      |// Lancamentos de moeda (cada linha um \"passo\")\r\n      |\r\n      |s0 -a-> s1: coin (0.5)\r\n      |s1 -a-> s3: coin (0.5)\r\n      |s2 -a-> s5: coin (0.5)\r\n      |\r\n      |s0 -b-> s2: coin (0.5)\r\n      |s1 -b-> s4: coin (0.5)\r\n      |s2 -b-> s6: coin (0.5)\r\n      |\r\n      |// Resultados finais ou novos lancamentos\r\n      |\r\n      |s3 -a-> s1: coin (0.5)\r\n      |s4 -a-> s7: coin (0.5) d':= 2\r\n      |s5 -a-> s7: coin (0.5) d':= 4\r\n      |s6 -a-> s2: coin (0.5)\r\n      |\r\n      |s3 -b-> s7: coin (0.5) d':= 1\r\n      |s4 -b-> s7: coin (0.5) d':= 3\r\n      |s5 -b-> s7: coin (0.5) d':= 5\r\n      |s6 -b-> s7: coin (0.5) d':= 6\r\n      |\r\n      |// Loop no estado final para o modelo nao travar\r\n      |s7 ---> s7: loop", 124);
-  var $$x2 = new $c_T2("coin", y$15);
+  var y$15 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name Moeda_Viciada_Tempo\r\n        |calibration proportional\r\n        |\r\n        |int passos = 0\r\n        |int lado = 0\r\n        |init lancar\r\n        |\r\n        |\r\n        |lancar ---> lancar: cara (0.5) if (passos < 5) then {\r\n        |    passos' := passos + 1\r\n        |    lado' := 0\r\n        |}\r\n        |\r\n        |lancar ---> lancar: coroa (0.5) if (passos < 5) then {\r\n        |    passos' := passos + 1\r\n        |    lado' := 1\r\n        |}\r\n        |\r\n        |cara ->> cara: viciar (1.0)", 124);
+  var $$x4 = new $c_T2("Moeda1", y$15);
   $m_sc_StringOps$();
-  var y$16 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name Moeda_Viciada_Tempo\r\n        |calibration proportional\r\n        |\r\n        |int passos = 0\r\n        |int lado = 0\r\n        |init lancar\r\n        |\r\n        |\r\n        |lancar ---> lancar: cara (0.5) if (passos < 5) then {\r\n        |    passos' := passos + 1\r\n        |    lado' := 0\r\n        |}\r\n        |\r\n        |lancar ---> lancar: coroa (0.5) if (passos < 5) then {\r\n        |    passos' := passos + 1\r\n        |    lado' := 1\r\n        |}\r\n        |\r\n        |cara ->> cara: viciar (1.0)", 124);
-  var $$x1 = new $c_T2("Moeda1", y$16);
+  var y$16 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name Coin\r\n      |\r\n      |calibration proportional\r\n      |\r\n      |init start\r\n      |\r\n      |start -toss -> tails : toss1 (0.500)\r\n      |start -toss -> heads : toss2 (0.500)\r\n      |tails -toss -> heads : tossHeads1 (0.500)\r\n      |tails -toss -> tails : tossTails (0.500)\r\n      |heads -toss -> tails : tossTails (0.500)\r\n      |heads -toss -> heads : tossHeads2 (0.500)\r\n      |\r\n      |tossHeads1 ->> tossHeads1 : c1 (0.100)\r\n      |tossHeads2 ->> tossHeads2 : c2 (0.100)\r\n      |\r\n      |toss2 ->> tossHeads1 : c3 (0.100)\r\n      |toss2 ->> tossHeads2 : c4 (0.100)", 124);
+  var $$x3 = new $c_T2("Moeda2", y$16);
   $m_sc_StringOps$();
-  var y$17 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name Moeda2\r\n      |calibration proportional\r\n      |init start\r\n      |\r\n      |\r\n      |start -lancar-> coroa: lancar1\r\n      |start -lancar-> cara: lancar2\r\n      |\r\n      |coroa -lancar-> cara: lancarCara1\r\n      |coroa -lancar-> coroa: lancarCoroa\r\n      |cara -lancar-> coroa: lancarCoroa\r\n      |cara -lancar-> cara: lancarCara2\r\n      |\r\n      |\r\n      |lancarCara1 ->> lancarCara1:c1\r\n      |lancarCara2 ->>lancarCara2:c2\r\n      |lancar2 ->>lancarCara1:c3\r\n      |lancar2 ->> lancarCara2:c4", 124);
-  var elems = $n($$x18).wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x17, $$x16, $$x15, $$x14, $$x13, $$x12, $$x11, $$x10, $$x9, $$x8, $$x7, $$x6, $$x5, $$x4, $$x3, $$x2, $$x1, new $c_T2("Moeda2", y$17)]));
+  var y$17 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name EX1\r\n        |possibilisticView\r\n        |hideTau\r\n        |\r\n        |init w1\r\n        |\r\n        |w1 ---> w2: w12\r\n        |w2 ---> w1: w21 disabled\r\n        |\r\n        |w12 ->> w21: onW\r\n        |\r\n        |w1 ---> w3: w13\r\n        |w3 ---> w1: w31 disabled\r\n        |\r\n        |w13 --! w31: onW2\r\n        |w13 ->> w12: offW", 124);
+  var $$x2 = new $c_T2("EX1", y$17);
+  $m_sc_StringOps$();
+  var y$18 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name EX2\r\n        |paradigm fuzzy\r\n        |\r\n        |init w1\r\n        |\r\n        |w1 ---> w2: w12 (0.5)\r\n        |w2 ---> w1: w21 (1.0) disabled\r\n        |\r\n        |w12 ->> w21: onW (0.5)\r\n        |\r\n        |w1 ---> w3: w13 (0.5)\r\n        |w3 ---> w1: w31 (1.0) disabled\r\n        |\r\n        |w13 --! w31: onW2 (0.1)\r\n        |w13 ->> w12: offW (0.1)", 124);
+  var $$x1 = new $c_T2("EX2", y$18);
+  $m_sc_StringOps$();
+  var y$19 = $m_sc_StringOps$().stripMargin$extension__T__C__T("name EX\r\n       |init w1\r\n        |\r\n        |w1 ---> w2: w12 (0.5)\r\n        |w2 ---> w1: w21 (1.0) disabled\r\n        |\r\n        |w12 ->> w21: onW (0.5)\r\n        |\r\n        |w1 ---> w3: w13 (0.5)\r\n        |w3 ---> w1: w31 (1.0) disabled\r\n        |\r\n        |w13 --! w31: onW2 (0.1)\r\n        |w13 ->> w12: offW (0.1)", 124);
+  var elems = $n($$x20).wrapRefArray__AO__sci_ArraySeq(new ($d_T2.getArrayOf().constr)([$$x19, $$x18, $$x17, $$x16, $$x15, $$x14, $$x13, $$x12, $$x11, $$x10, $$x9, $$x8, $$x7, $$x6, $$x5, $$x4, $$x3, $$x2, $$x1, new $c_T2("EX3", y$19)]));
   var examples = $m_sci_Nil$().prependedAll__sc_IterableOnce__sci_List(elems);
-  var this$76 = $n(examples);
+  var this$84 = $n(examples);
   var f = ((x$1) => {
     var x$1$1 = $as_T2(x$1);
     if ((x$1$1 !== null)) {
@@ -14190,13 +14196,13 @@ $c_Lrta_frontend_RTAAPI$.prototype.getExamples__T = (function() {
     };
     throw new $c_s_MatchError(x$1$1)
   });
-  if ((this$76 === $m_sci_Nil$())) {
-    var $$x19 = $m_sci_Nil$()
+  if ((this$84 === $m_sci_Nil$())) {
+    var $$x21 = $m_sci_Nil$()
   } else {
-    var arg1 = this$76.head__O();
+    var arg1 = this$84.head__O();
     var h = new $c_sci_$colon$colon(f(arg1), $m_sci_Nil$());
     var t = h;
-    var rest = $as_sci_List(this$76.tail__O());
+    var rest = $as_sci_List(this$84.tail__O());
     while ((rest !== $m_sci_Nil$())) {
       var arg1$1 = $n(rest).head__O();
       var nx = new $c_sci_$colon$colon(f(arg1$1), $m_sci_Nil$());
@@ -14204,10 +14210,10 @@ $c_Lrta_frontend_RTAAPI$.prototype.getExamples__T = (function() {
       t = nx;
       rest = $as_sci_List($n(rest).tail__O())
     };
-    var $$x19 = h
+    var $$x21 = h
   };
-  var this$77 = $n($$x19);
-  return (("{" + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$77, "", ",", "")) + "}")
+  var this$85 = $n($$x21);
+  return (("{" + $f_sc_IterableOnceOps__mkString__T__T__T__T(this$85, "", ",", "")) + "}")
 });
 $c_Lrta_frontend_RTAAPI$.prototype.getCurrentStateText__T = (function() {
   var this$1 = $n(this.Lrta_frontend_RTAAPI$__f_currentGraph);
@@ -14347,25 +14353,16 @@ $c_Lrta_frontend_RTAAPI$.prototype.findBestPath__sjs_js_Dynamic__T = (function(p
   };
   throw new $c_s_MatchError(x92)
 });
-$c_Lrta_frontend_RTAAPI$.prototype.getCurrentStateMermaid = (function() {
-  return this.getCurrentStateMermaid__T()
-});
-$c_Lrta_frontend_RTAAPI$.prototype.getStats = (function() {
-  return this.getStats__T()
-});
-$c_Lrta_frontend_RTAAPI$.prototype.getUpdatedSource = (function() {
-  return this.getUpdatedSource__T()
-});
-$c_Lrta_frontend_RTAAPI$.prototype.findBestPath = (function(arg) {
-  return this.findBestPath__sjs_js_Dynamic__T(arg)
-});
-$c_Lrta_frontend_RTAAPI$.prototype.exportDeltaCutModel = (function(arg) {
-  var prep0 = $uD(arg);
-  return this.exportDeltaCutModel__D__T(prep0)
-});
-$c_Lrta_frontend_RTAAPI$.prototype.trainWithDataStream = (function(arg) {
+$c_Lrta_frontend_RTAAPI$.prototype.trainMassiveRaw = (function(arg) {
   var prep0 = $as_T(arg);
-  return this.trainWithDataStream__T__T(prep0)
+  return this.trainMassiveRaw__T__T(prep0)
+});
+$c_Lrta_frontend_RTAAPI$.prototype.getExamples = (function() {
+  return this.getExamples__T()
+});
+$c_Lrta_frontend_RTAAPI$.prototype.loadModel = (function(arg) {
+  var prep0 = $as_T(arg);
+  return this.loadModel__T__T(prep0)
 });
 $c_Lrta_frontend_RTAAPI$.prototype.runPdl = (function(arg, arg$2, arg$3, arg$4, arg$5) {
   var prep0 = $as_T(arg);
@@ -14375,46 +14372,8 @@ $c_Lrta_frontend_RTAAPI$.prototype.runPdl = (function(arg, arg$2, arg$3, arg$4, 
   var prep4 = $uD(arg$5);
   return this.runPdl__T__T__I__I__D__T(prep0, prep1, prep2, prep3, prep4)
 });
-$c_Lrta_frontend_RTAAPI$.prototype.translateToGLTS = (function() {
-  return this.translateToGLTS__T()
-});
-$c_Lrta_frontend_RTAAPI$.prototype.checkProblems = (function() {
-  return this.checkProblems__T()
-});
-$c_Lrta_frontend_RTAAPI$.prototype.loadModel = (function(arg) {
-  var prep0 = $as_T(arg);
-  return this.loadModel__T__T(prep0)
-});
-$c_Lrta_frontend_RTAAPI$.prototype.trainBatch = (function(arg) {
-  var prep0 = $as_T(arg);
-  return this.trainBatch__T__T(prep0)
-});
-$c_Lrta_frontend_RTAAPI$.prototype.trainSingleSession = (function(arg) {
-  var prep0 = $as_T(arg);
-  return this.trainSingleSession__T__T(prep0)
-});
-$c_Lrta_frontend_RTAAPI$.prototype.applySavedWeights = (function(arg) {
-  var prep0 = $as_T(arg);
-  return this.applySavedWeights__T__T(prep0)
-});
-$c_Lrta_frontend_RTAAPI$.prototype.undo = (function() {
-  return this.undo__T()
-});
-$c_Lrta_frontend_RTAAPI$.prototype.getAllStepsMermaid = (function() {
-  return this.getAllStepsMermaid__T()
-});
-$c_Lrta_frontend_RTAAPI$.prototype.getExamples = (function() {
-  return this.getExamples__T()
-});
 $c_Lrta_frontend_RTAAPI$.prototype.getPrismModel2 = (function() {
   return this.getPrismModel2__T()
-});
-$c_Lrta_frontend_RTAAPI$.prototype.getCurrentStateText = (function() {
-  return this.getCurrentStateText__T()
-});
-$c_Lrta_frontend_RTAAPI$.prototype.trainMassiveRaw = (function(arg) {
-  var prep0 = $as_T(arg);
-  return this.trainMassiveRaw__T__T(prep0)
 });
 $c_Lrta_frontend_RTAAPI$.prototype.mergeModels = (function(arg, arg$2, arg$3, arg$4) {
   var prep0 = $as_T(arg);
@@ -14422,6 +14381,20 @@ $c_Lrta_frontend_RTAAPI$.prototype.mergeModels = (function(arg, arg$2, arg$3, ar
   var prep2 = $as_T(arg$3);
   var prep3 = $as_T(arg$4);
   return this.mergeModels__T__T__T__T__T(prep0, prep1, prep2, prep3)
+});
+$c_Lrta_frontend_RTAAPI$.prototype.getUpdatedSource = (function() {
+  return this.getUpdatedSource__T()
+});
+$c_Lrta_frontend_RTAAPI$.prototype.applySavedWeights = (function(arg) {
+  var prep0 = $as_T(arg);
+  return this.applySavedWeights__T__T(prep0)
+});
+$c_Lrta_frontend_RTAAPI$.prototype.trainWithDataStream = (function(arg) {
+  var prep0 = $as_T(arg);
+  return this.trainWithDataStream__T__T(prep0)
+});
+$c_Lrta_frontend_RTAAPI$.prototype.translateToGLTS = (function() {
+  return this.translateToGLTS__T()
 });
 $c_Lrta_frontend_RTAAPI$.prototype.getMcrl2 = (function() {
   return this.getMcrl2__T()
@@ -14432,6 +14405,39 @@ $c_Lrta_frontend_RTAAPI$.prototype.takeStep = (function(arg) {
 });
 $c_Lrta_frontend_RTAAPI$.prototype.getCurrentStateMermaidSimple = (function() {
   return this.getCurrentStateMermaidSimple__T()
+});
+$c_Lrta_frontend_RTAAPI$.prototype.findBestPath = (function(arg) {
+  return this.findBestPath__sjs_js_Dynamic__T(arg)
+});
+$c_Lrta_frontend_RTAAPI$.prototype.getCurrentStateText = (function() {
+  return this.getCurrentStateText__T()
+});
+$c_Lrta_frontend_RTAAPI$.prototype.trainSingleSession = (function(arg) {
+  var prep0 = $as_T(arg);
+  return this.trainSingleSession__T__T(prep0)
+});
+$c_Lrta_frontend_RTAAPI$.prototype.trainBatch = (function(arg) {
+  var prep0 = $as_T(arg);
+  return this.trainBatch__T__T(prep0)
+});
+$c_Lrta_frontend_RTAAPI$.prototype.undo = (function() {
+  return this.undo__T()
+});
+$c_Lrta_frontend_RTAAPI$.prototype.exportDeltaCutModel = (function(arg) {
+  var prep0 = $uD(arg);
+  return this.exportDeltaCutModel__D__T(prep0)
+});
+$c_Lrta_frontend_RTAAPI$.prototype.getCurrentStateMermaid = (function() {
+  return this.getCurrentStateMermaid__T()
+});
+$c_Lrta_frontend_RTAAPI$.prototype.getAllStepsMermaid = (function() {
+  return this.getAllStepsMermaid__T()
+});
+$c_Lrta_frontend_RTAAPI$.prototype.getStats = (function() {
+  return this.getStats__T()
+});
+$c_Lrta_frontend_RTAAPI$.prototype.checkProblems = (function() {
+  return this.checkProblems__T()
 });
 var $d_Lrta_frontend_RTAAPI$ = new $TypeData().initClass({
   Lrta_frontend_RTAAPI$: 0

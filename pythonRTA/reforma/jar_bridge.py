@@ -99,13 +99,15 @@ class JarBridge:
         Run:  java -jar <jar> <args...>
         Returns stdout.  Raises JarError on non-zero exit.
         """
-        cmd = [self.java_bin, "-jar", self.jar_path, *args]
+        # Forçamos o Java a usar UTF-8 no Windows
+        cmd = [self.java_bin, "-Dfile.encoding=UTF-8", "-jar", self.jar_path, *args]
         result = subprocess.run(
             cmd,
             input=stdin_data,
             capture_output=True,
             text=True,
             encoding="utf-8",
+            errors="replace"
         )
         if result.returncode != 0:
             raise JarError(
@@ -179,12 +181,13 @@ class JarBridge:
         Reads and returns the content of this output file.
         JAR progress/logs go to stderr — ignored here.
         """
-        cmd = [self.java_bin, "-jar", self.jar_path, *args]
+        cmd = [self.java_bin, "-Dfile.encoding=UTF-8", "-jar", self.jar_path, *args]
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             encoding="utf-8",
+            errors="replace"
         )
         if result.returncode != 0:
             raise JarError(
@@ -196,7 +199,7 @@ class JarBridge:
                 f"JAR did not generate the expected output file: {out_path}\n"
                 f"stderr: {result.stderr.strip()}"
             )
-        with open(out_path, "r", encoding="utf-8") as f:
+        with open(out_path, "r", encoding="utf-8", errors="replace") as f:
             return f.read()
 
     def merge_models(self, sourceA: str, sourceB: str, op_type: str, agg: str) -> str:

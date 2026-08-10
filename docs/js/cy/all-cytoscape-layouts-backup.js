@@ -1745,5 +1745,571 @@ window.RTA_DEFAULT_LAYOUTS  =
       }
     },
     "edges": {}
+  },
+
+  "cyLayout_name_BPI_2012_Automated": {
+    "nodes": {
+      "event_A_PARTLYSUBMITTED_W_Afhandelen_leads_W_Afhandelen_leads_e3": {
+        "x": 612.8624161073825,
+        "y": 390.78299776286354
+      },
+      "event_W_Completeren_aanvraag_W_Completeren_aanvraag_W_Completeren_aanvraag_e9": {
+        "x": 1745.8581166976107,
+        "y": 409.5964564008079
+      },
+      "A_SUBMITTED": {
+        "x": -59.639821029082775,
+        "y": 382.68680089485457
+      },
+      "event_A_PARTLYSUBMITTED_A_DECLINED_A_DECLINED_e1": {
+        "x": 707.3769574944073,
+        "y": 96.46756152125279
+      },
+      "event_A_PREACCEPTED_W_Completeren_aanvraag_W_Completeren_aanvraag_e15": {
+        "x": 1257.6298228200403,
+        "y": 718.3581166976107
+      },
+      "A_CANCELLED": {
+        "x": 1766.790997402591,
+        "y": 757.8987139146559
+      },
+      "W_Completeren_aanvraag": {
+        "x": 1426.5,
+        "y": 483
+      },
+      "event_A_CANCELLED_W_Completeren_aanvraag_W_Completeren_aanvraag_e16": {
+        "x": 1672.7117849332594,
+        "y": 626.0510141542533
+      },
+      "event_W_Afhandelen_leads_W_Afhandelen_leads_W_Afhandelen_leads_e4": {
+        "x": 655.761744966443,
+        "y": 217.36241610738256
+      },
+      "event_A_DECLINED_W_Afhandelen_leads_W_Afhandelen_leads_e14": {
+        "x": 882.4786666370233,
+        "y": 160.09458688940182
+      },
+      "event_W_Completeren_aanvraag_A_DECLINED_A_DECLINED_e12": {
+        "x": 1437.2303085342924,
+        "y": 164.15835955473668
+      },
+      "event_W_Afhandelen_leads_A_PREACCEPTED_A_PREACCEPTED_e5": {
+        "x": 818.7339239331988,
+        "y": 529.3038582560323
+      },
+      "event_W_Afhandelen_leads_A_DECLINED_A_DECLINED_e7": {
+        "x": 968.844585808992,
+        "y": 242.55877020142157
+      },
+      "W_Afhandelen_leads": {
+        "x": 821.417225950783,
+        "y": 376.0357941834452
+      },
+      "event_W_Completeren_aanvraag_W_Afhandelen_leads_W_Afhandelen_leads_e11": {
+        "x": 1092.8934977735653,
+        "y": 428.26527569570914
+      },
+      "event_A_PARTLYSUBMITTED_A_PREACCEPTED_A_PREACCEPTED_e2": {
+        "x": 593.0861297539151,
+        "y": 692.4586129753915
+      },
+      "A_PARTLYSUBMITTED": {
+        "x": 378.5,
+        "y": 379
+      },
+      "event_A_SUBMITTED_A_PARTLYSUBMITTED_A_PARTLYSUBMITTED_e8": {
+        "x": 162.44519015659955,
+        "y": 404.8076062639821
+      },
+      "A_PREACCEPTED": {
+        "x": 1005.8066255058529,
+        "y": 757.3592776813681
+      },
+      "A_DECLINED": {
+        "x": 1067.0906040268455,
+        "y": 111.95078299776287
+      },
+      "event_W_Completeren_aanvraag_A_CANCELLED_A_CANCELLED_e10": {
+        "x": 1520.126207421134,
+        "y": 705.6105315398788
+      },
+      "event_W_Afhandelen_leads_W_Completeren_aanvraag_W_Completeren_aanvraag_e6": {
+        "x": 1105.8665617810532,
+        "y": 523.111331910971
+      },
+      "event_A_DECLINED_W_Completeren_aanvraag_W_Completeren_aanvraag_e13": {
+        "x": 1260.1804658627125,
+        "y": 270.0213059368836
+      }
+    },
+    "edges": {
+      "s_to_a_A_PARTLYSUBMITTED_event_A_PARTLYSUBMITTED_A_DECLINED_A_DECLINED_e1": {
+        "distances": [
+          -119.17999227832803
+        ],
+        "weights": [
+          0.5498085448561726
+        ]
+      },
+      "s_to_a_W_Completeren_aanvraag_event_W_Completeren_aanvraag_W_Afhandelen_leads_W_Afhandelen_leads_e11": {
+        "distances": [
+          15.403787004217037
+        ],
+        "weights": [
+          0.40925822952204444
+        ]
+      },
+      "a_to_s_event_A_DECLINED_W_Completeren_aanvraag_W_Completeren_aanvraag_e13_W_Completeren_aanvraag": {
+        "distances": [
+          1.3232272336339153
+        ],
+        "weights": [
+          0.4304054009582524
+        ]
+      },
+      "s_to_a_W_Afhandelen_leads_event_W_Afhandelen_leads_A_DECLINED_A_DECLINED_e7": {
+        "distances": [
+          3.4947134243720224
+        ],
+        "weights": [
+          0.47668888136552146
+        ]
+      },
+      "a_to_s_event_W_Afhandelen_leads_A_DECLINED_A_DECLINED_e7_A_DECLINED": {
+        "distances": [
+          -1.7384124534845975
+        ],
+        "weights": [
+          0.5636902782134202
+        ]
+      },
+      "a_to_s_event_W_Completeren_aanvraag_W_Afhandelen_leads_W_Afhandelen_leads_e11_W_Afhandelen_leads": {
+        "distances": [
+          4.812154075357399
+        ],
+        "weights": [
+          0.4849343451066564
+        ]
+      },
+      "s_to_a_A_DECLINED_event_A_DECLINED_W_Completeren_aanvraag_W_Completeren_aanvraag_e13": {
+        "distances": [
+          5.404292032213013
+        ],
+        "weights": [
+          0.5178314793691127
+        ]
+      },
+      "a_to_s_event_A_PARTLYSUBMITTED_A_DECLINED_A_DECLINED_e1_A_DECLINED": {
+        "distances": [
+          -83.2332451507466
+        ],
+        "weights": [
+          0.600150832020147
+        ]
+      }
+    }
+  },
+
+  "cyLayout_name_AdvancedBot": {
+    "nodes": {
+      "event_Home_Home_battery_low_battery_low": {
+        "x": 58.873527070054976,
+        "y": 426.6195850825112
+      },
+      "event_battery_low_go_charge_battery_lowtaugo_charge_battery_lowtaugo_charge": {
+        "x": 516.6584232049825,
+        "y": 340.7020745874439
+      },
+      "event_Office_Office_high_stress_high_stress": {
+        "x": 783.8054773450922,
+        "y": 625.8120331499749
+      },
+      "event_Station_Home_finish_charge_finish_charge": {
+        "x": 175.57518728281067,
+        "y": 181.85601657498756
+      },
+      "event_high_stress_easy_task_high_stresstaueasy_task_high_stresstaueasy_task": {
+        "x": 923.3460168463879,
+        "y": 493.73917016502236
+      },
+      "event_finish_charge_socialize_finish_chargetausocialize_finish_chargetausocialize": {
+        "x": 122.2198347929257,
+        "y": 38.650166021275574
+      },
+      "Home": {
+        "x": 19.78178425376192,
+        "y": 321.9670124312406
+      },
+      "event_battery_low_go_work_battery_lowtaugo_work_battery_lowtaugo_work": {
+        "x": 414.12817430876936,
+        "y": 618.8646058012457
+      },
+      "Station": {
+        "x": 318.641535628949,
+        "y": 157.53058093876433
+      },
+      "event_Home_Office_go_work_go_work": {
+        "x": 463.94327817384163,
+        "y": 510.4109958562532
+      },
+      "event_Office_Home_go_home_go_home": {
+        "x": 464.05012485520706,
+        "y": 427.86601630358723
+      },
+      "event_no_money_go_work_no_moneytaugo_work_no_moneytaugo_work": {
+        "x": -18.584232049825317,
+        "y": 524.2580911624315
+      },
+      "event_Home_Home_no_money_no_money": {
+        "x": -88.83954337364202,
+        "y": 371.3316182324863
+      },
+      "Office": {
+        "x": 645.3480914338318,
+        "y": 501.7219917125062
+      },
+      "event_Home_Home_socialize_socialize": {
+        "x": -6.109958562531187,
+        "y": 192.28659751375187
+      },
+      "event_Office_Office_easy_task_easy_task": {
+        "x": 750.6604154602895,
+        "y": 402.82817430876935
+      },
+      "event_Home_Station_go_charge_go_charge": {
+        "x": 265.83398369641276,
+        "y": 258.3230290062281
+      }
+    },
+    "edges": {}
+  },
+
+
+  "cyLayout_name_Coin": {
+    "nodes": {
+      "event_toss2_tossHeads2_c4_c4": {
+        "x": 2.9537239419527346,
+        "y": 250.90334301952493
+      },
+      "event_start_heads_toss_toss2": {
+        "x": 236.60078742028892,
+        "y": 318.986442225606
+      },
+      "event_toss2_tossHeads1_c3_c3": {
+        "x": 450.2842562224805,
+        "y": 292.86141339229556
+      },
+      "heads": {
+        "x": 110.59361021639292,
+        "y": 117.36056022002997
+      },
+      "event_heads_heads_toss_tossHeads2": {
+        "x": -40.48199144110579,
+        "y": 31.392178452516234
+      },
+      "start": {
+        "x": 518.6644809460385,
+        "y": 463.9399790098651
+      },
+      "tails": {
+        "x": 803.75,
+        "y": 113.475
+      },
+      "event_heads_tails_toss_tossTails": {
+        "x": 479.4171281112402,
+        "y": -8.419011623429814
+      },
+      "event_tossHeads1_tossHeads1_c1_c1": {
+        "x": 470.1657006950929,
+        "y": 70.4424929880741
+      },
+      "event_start_tails_toss_toss1": {
+        "x": 715.0609572962532,
+        "y": 407.33811446606813
+      },
+      "event_tossHeads2_tossHeads2_c2_c2": {
+        "x": -100.99806835102832,
+        "y": -44.8537078963587
+      },
+      "event_tails_tails_toss_tossTails": {
+        "x": 951.3499999999999,
+        "y": 89.475
+      },
+      "event_tails_heads_toss_tossHeads1": {
+        "x": 493.2872504107655,
+        "y": 195.47799418828507
+      }
+    },
+    "edges": {
+      "a_to_s_event_start_heads_toss_toss2_heads": {
+        "distances": [
+          -83.01321320963196
+        ],
+        "weights": [
+          0.583342002713638
+        ]
+      },
+      "rule_to_event_toss2_tossHeads2_c4_c4_event_heads_heads_toss_tossHeads2": {
+        "distances": [
+          -75.9236832318482
+        ],
+        "weights": [
+          0.5290586698066435
+        ]
+      },
+      "a_to_s_event_tails_heads_toss_tossHeads1_heads": {
+        "distances": [
+          -40.95179343278694
+        ],
+        "weights": [
+          0.3676121880757556
+        ]
+      },
+      "a_to_s_event_heads_tails_toss_tossTails_tails": {
+        "distances": [
+          -74.53962619020056
+        ],
+        "weights": [
+          0.45889594167055076
+        ]
+      },
+      "s_to_a_start_event_start_heads_toss_toss2": {
+        "distances": [
+          -28.18854300549969
+        ],
+        "weights": [
+          0.48390872583222083
+        ]
+      },
+      "rule_from_event_start_heads_toss_toss2_event_toss2_tossHeads2_c4_c4": {
+        "distances": [
+          -48.7375785359
+        ],
+        "weights": [
+          0.6021713484310195
+        ]
+      },
+      "s_to_a_heads_event_heads_tails_toss_tossTails": {
+        "distances": [
+          -81.81253760353643
+        ],
+        "weights": [
+          0.5240807972190754
+        ]
+      },
+      "s_to_a_tails_event_tails_heads_toss_tossHeads1": {
+        "distances": [
+          -39.78143415400139
+        ],
+        "weights": [
+          0.46480102300318504
+        ]
+      }
+    }
+  },
+
+  "cyLayout_name_EX1": {
+    "nodes": {
+      "w2": {
+        "x": 383.5197253315035,
+        "y": -136.15044005044822
+      },
+      "w1": {
+        "x": 217.89999999999998,
+        "y": 102.15
+      },
+      "w3": {
+        "x": 434.7007297536677,
+        "y": 407.3206375235881
+      },
+      "event_w3_w1_w31_w31": {
+        "x": 484.2629641188392,
+        "y": 226.58703588116072
+      },
+      "event_w3_w3_tau_deadlock": {
+        "x": 716.3,
+        "y": 109.15
+      },
+      "event_w2_w2_tau_deadlock": {
+        "x": 116.30000000000001,
+        "y": 35.95000000000002
+      },
+      "event_w1_w2_w12_w12": {
+        "x": 415.7338913456467,
+        "y": -24.738388123693554
+      },
+      "event_w1_w3_w13_w13": {
+        "x": 241.98524358817969,
+        "y": 324.67344927345624
+      },
+      "event_w13_w12_offW_offW": {
+        "x": 401.595450225854,
+        "y": 122.03491527300173
+      },
+      "event_w2_w1_w21_w21": {
+        "x": 214.88568363862788,
+        "y": -43.59872293108162
+      },
+      "event_w12_w21_onW_onW": {
+        "x": 313.1170955676079,
+        "y": -33.402558830497355
+      },
+      "event_w13_w31_onW2_onW2": {
+        "x": 385.4078879343537,
+        "y": 293.92290195820544
+      }
+    },
+    "edges": {
+      "rule_from_event_w1_w2_w12_w12_event_w12_w21_onW_onW": {
+        "distances": [
+          -2.715250421996503
+        ],
+        "weights": [
+          0.6059452316184102
+        ]
+      },
+      "rule_to_event_w12_w21_onW_onW_event_w2_w1_w21_w21": {
+        "distances": [
+          -2.8377136361688233
+        ],
+        "weights": [
+          0.48474266644135405
+        ]
+      }
+    }
+  },
+
+  "cyLayout_name_EX": {
+    "nodes": {
+      "event_w12_w21_onW_onW": {
+        "x": 144.36862685510403,
+        "y": 82.57381807487074
+      },
+      "w2": {
+        "x": 262.0999999999999,
+        "y": -3.9499999999999886
+      },
+      "w1": {
+        "x": 66.1,
+        "y": 276.05
+      },
+      "w3": {
+        "x": 369.9,
+        "y": 565.05
+      },
+      "event_w3_w1_w31_w31": {
+        "x": 355.5,
+        "y": 321.85
+      },
+      "event_w3_w3_tau_deadlock": {
+        "x": 467.5,
+        "y": 609.05
+      },
+      "event_w2_w2_tau_deadlock": {
+        "x": 348.70000000000005,
+        "y": -58.94999999999999
+      },
+      "event_w13_w31_onW2_onW2": {
+        "x": 271.1271988537296,
+        "y": 430.09511472715633
+      },
+      "event_w1_w2_w12_w12": {
+        "x": 250.5,
+        "y": 125.25
+      },
+      "event_w1_w3_w13_w13": {
+        "x": 49.30000000000001,
+        "y": 438.05
+      },
+      "event_w13_w12_offW_offW": {
+        "x": 239.89999999999998,
+        "y": 346.65
+      },
+      "event_w2_w1_w21_w21": {
+        "x": 41.97533898707182,
+        "y": 47.157102758174474
+      }
+    },
+    "edges": {
+      "rule_from_event_w1_w2_w12_w12_event_w12_w21_onW_onW": {
+        "distances": [
+          2.180224997870219
+        ],
+        "weights": [
+          0.47786601703812837
+        ]
+      },
+      "rule_to_event_w12_w21_onW_onW_event_w2_w1_w21_w21": {
+        "distances": [
+          6.5915061613089385
+        ],
+        "weights": [
+          0.5624281723073522
+        ]
+      }
+    }
+  },
+
+   "cyLayout_name_EX2": {
+    "nodes": {
+      "w2": {
+        "x": 354.54137672587603,
+        "y": -67.80587002261225
+      },
+      "w3": {
+        "x": 444.7097705456873,
+        "y": 438.99707460769366
+      },
+      "event_w13_w12_offW_offW": {
+        "x": 258.343813584788,
+        "y": 280.9773357771894
+      },
+      "event_w1_w3_w13_w13": {
+        "x": 190.1472275104887,
+        "y": 378.4524474459217
+      },
+      "event_w13_w31_onW2_onW2": {
+        "x": 331.965468427505,
+        "y": 343.49022945431267
+      },
+      "event_w1_w2_w12_w12": {
+        "x": 354.5882336311924,
+        "y": 101.33504726659318
+      },
+      "event_w12_w21_onW_onW": {
+        "x": 238.0552622178189,
+        "y": 38.60598763437099
+      },
+      "event_w3_w1_w31_w31": {
+        "x": 441.98403438811073,
+        "y": 295.32703633193483
+      },
+      "w1": {
+        "x": 168.13696939941698,
+        "y": 193.43615679044302
+      },
+      "event_w2_w1_w21_w21": {
+        "x": 122.57865061127606,
+        "y": 9.161308009994578
+      }
+    },
+    "edges": {
+      "rule_from_event_w1_w2_w12_w12_event_w12_w21_onW_onW": {
+        "distances": [
+          4.650618708840582
+        ],
+        "weights": [
+          0.4734129264221702
+        ]
+      },
+      "rule_to_event_w12_w21_onW_onW_event_w2_w1_w21_w21": {
+        "distances": [
+          -5.3433453775118736
+        ],
+        "weights": [
+          0.5130563633882637
+        ]
+      }
+    }
   }
 }
