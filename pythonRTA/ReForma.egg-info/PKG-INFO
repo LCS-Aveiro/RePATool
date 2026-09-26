@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: ReForma
-Version: 0.1.75
+Version: 0.3
 Summary: Python bindings for the RePA/ReForma probabilistic automaton tool
 Author-email: Joshua Dourado <joshuadourado@ua.pt>
 License: MIT

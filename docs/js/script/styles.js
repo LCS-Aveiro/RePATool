@@ -78,9 +78,10 @@ function getCytoscapeStyles() {
 
                     if (p !== undefined) {
                         const isRule = ele.hasClass('rule-node');
-                        if (isRule) return `${baseName}\n(${p.toFixed(3)})`;
-                        const nm = (data.transID == data.lbl ? "" : data.transID);
-                        return `${nm}\n(${p.toFixed(3)})`;
+                        const paradigm = window.lastModelData?.paradigm || "probabilistic";
+                        const prefix = (paradigm === "fuzzy" && !isRule) ? "F" : "P";
+                        if (isRule) return `${baseName}\n(Δ=${p.toFixed(3)})`;
+                        return `${baseName}\n(${prefix}=${p.toFixed(3)})`;
                     }
                     return data.label || "";
                 },

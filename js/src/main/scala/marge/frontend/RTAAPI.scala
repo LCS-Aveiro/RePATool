@@ -726,23 +726,23 @@ object RTAAPI {
         |w3 ---> w1: w31 disabled
         |
         |w13 --! w31: onW2
-        |w13 ->> w12: offW""".stripMargin,
+        |w12 --! w13: offW""".stripMargin,
         "EX2" ->
         """name EX2
         |paradigm fuzzy
         |
         |init w1
         |
-        |w1 ---> w2: w12 (0.5)
+        |w1 ---> w2: w12 (0.5) prod
         |w2 ---> w1: w21 (1.0) disabled
         |
-        |w12 ->> w21: onW (0.5)
+        |w12 ->> w21: onW (0.1)
         |
-        |w1 ---> w3: w13 (0.5)
+        |w1 ---> w3: w13 (0.5) prod
         |w3 ---> w1: w31 (1.0) disabled
         |
         |w13 --! w31: onW2 (0.1)
-        |w13 ->> w12: offW (0.1)""".stripMargin,
+        |w12 --! w13: offW (0.1)""".stripMargin,
         "EX3" ->
         """name EX
        |init w1
@@ -750,13 +750,13 @@ object RTAAPI {
         |w1 ---> w2: w12 (0.5)
         |w2 ---> w1: w21 (1.0) disabled
         |
-        |w12 ->> w21: onW (0.5)
+        |w12 ->> w21: onW (0.1)
         |
         |w1 ---> w3: w13 (0.5)
         |w3 ---> w1: w31 (1.0) disabled
         |
         |w13 --! w31: onW2 (0.1)
-        |w13 ->> w12: offW (0.1)""".stripMargin,
+        |w12 --! w13: offW (0.1) prod""".stripMargin,
 
 
     )

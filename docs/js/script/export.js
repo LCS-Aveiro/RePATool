@@ -360,3 +360,57 @@ function _getPctlEvalState() {
     }
     return evalState;
 }
+
+
+
+function downloadPDF() {
+    if (!currentCytoscapeInstance) {
+        alert("Carregue o modelo primeiro.");
+        return;
+    }
+
+    if (!window.jspdf) {
+        alert("A biblioteca jsPDF não pôde ser carregada.");
+        return;
+    }
+
+    const pngData = currentCytoscapeInstance.png({
+        full: true,
+        bg: '#ffffff',
+        scale: 3
+    });
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "pt",
+        format: "a4"
+    });
+
+    const img = new Image();
+    img.onload = function() {
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+
+        const imgRatio = img.width / img.height;
+        const pdfRatio = pdfWidth / pdfHeight;
+
+        let finalWidth = pdfWidth;
+        let finalHeight = pdfHeight;
+        let marginX = 0;
+        let marginY = 0;
+
+        if (imgRatio > pdfRatio) {
+            finalHeight = pdfWidth / imgRatio;
+            marginY = (pdfHeight - finalHeight) / 2;
+        } else {
+            finalWidth = pdfHeight * imgRatio;
+            marginX = (pdfWidth - finalWidth) / 2;
+        }
+
+        pdf.addImage(pngData, 'PNG', marginX, marginY, finalWidth, finalHeight);
+        pdf.save("rta-graph.pdf");
+    };
+    
+    img.src = pngData;
+}

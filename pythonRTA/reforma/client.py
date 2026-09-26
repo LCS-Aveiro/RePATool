@@ -85,6 +85,7 @@ class ReForma:
         df, 
         session_col: str = 'user_session', 
         event_col: str = 'event_type', 
+        sub_event_col: Optional[str] = None,
         time_col: str = 'event_time', 
         model_name: str = "MinedModel",
         save_model_path: Optional[str] = None,
@@ -96,6 +97,7 @@ class ReForma:
         :param df: Pandas DataFrame containing the dataset.
         :param session_col: Column name identifying user sessions.
         :param event_col: Column name containing the action/event.
+        :param sub_event_col: Optional column name for sub-events (e.g., categories).
         :param time_col: Column name containing the timestamp.
         :param model_name: Name to give the automaton.
         :param save_model_path: If set, saves the generated .rta code to this file path.
@@ -107,19 +109,27 @@ class ReForma:
             import re
         except ImportError:
             raise RuntimeError("To use process mining you need to install: pip install pandas")
+        
         def sanitize(text):
             return re.sub(r'[^a-zA-Z0-9_]', '_', str(text))
 
-        df = df.dropna(subset=[session_col])
-        df = df.sort_values(by=[session_col, time_col])
+        df_work = df.dropna(subset=[session_col]).copy()
+        df_work = df_work.sort_values(by=[session_col, time_col])
 
-        df['next_event'] = df.groupby(session_col)[event_col].shift(-1).fillna('exit')
+        if sub_event_col and sub_event_col in df_work.columns:
+            df_work[sub_event_col] = df_work[sub_event_col].fillna('other').astype(str)
+            parsed_sub = df_work[sub_event_col].apply(lambda x: str(x).split('.')[-1])
+            df_work['__target_event'] = df_work[event_col].astype(str) + "_" + parsed_sub
+        else:
+            df_work['__target_event'] = df_work[event_col].astype(str)
 
-        df['clean_event'] = df[event_col].apply(sanitize)
-        df['clean_next'] = df['next_event'].apply(sanitize)
+        df_work['next_event'] = df_work.groupby(session_col)['__target_event'].shift(-1).fillna('exit')
 
-        first_events = df.groupby(session_col)['clean_event'].first().value_counts()
-        transitions = df.groupby(['clean_event', 'clean_next']).size().reset_index(name='count')
+        df_work['clean_event'] = df_work['__target_event'].apply(sanitize)
+        df_work['clean_next']  = df_work['next_event'].apply(sanitize)
+
+        first_events = df_work.groupby(session_col)['clean_event'].first().value_counts()
+        transitions = df_work.groupby(['clean_event', 'clean_next']).size().reset_index(name='count')
 
         rta_output = [
             f"name {model_name};",
@@ -132,7 +142,6 @@ class ReForma:
         mapping = {}
         edge_counter = 1
 
-        total_starts = first_events.sum()
         for event_type, count in first_events.items():
             label_id = f"e{edge_counter}"
             rta_output.append(f"Start -enter_{event_type}-> {event_type} : {label_id}")
@@ -143,7 +152,6 @@ class ReForma:
 
         for source in transitions['clean_event'].unique():
             df_source = transitions[transitions['clean_event'] == source]
-            total_out = df_source['count'].sum()
             
             for _, row in df_source.iterrows():
                 src, tgt = row['clean_event'], row['clean_next']
@@ -157,12 +165,12 @@ class ReForma:
         rta_output.append("\n// Loop at the final state to avoid deadlock in PRISM")
         rta_output.append(f"exit -loop-> exit : {loop_edge_id} (1.0000)")
 
-        df['edge_tuple'] = list(zip(df['clean_event'], df['clean_next']))
-        df['edge_id'] = df['edge_tuple'].map(mapping)
+        df_work['edge_tuple'] = list(zip(df_work['clean_event'], df_work['clean_next']))
+        df_work['edge_id'] = df_work['edge_tuple'].map(mapping)
 
-        first_in_session = df.groupby(session_col)['clean_event'].first()
+        first_in_session = df_work.groupby(session_col)['clean_event'].first()
         start_edges = first_in_session.apply(lambda e: mapping.get(('Start', e)))
-        internal_edges = df.groupby(session_col)['edge_id'].apply(list)
+        internal_edges = df_work.groupby(session_col)['edge_id'].apply(list)
 
         traces = []
         for session_id in internal_edges.index:
