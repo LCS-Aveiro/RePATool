@@ -1,10 +1,23 @@
+
+
+
+
 # RePA Tool (Reconfigurable Probabilistic Automata: Animated Analysis)
 
 RePA is a formal verification and animation tool for Labelled Reactive Graphs. It was developed at the Department of Mathematics, University of Aveiro, with the support of FCT (Foundation for Science and Technology).
 
+
+## Lineage & Acknowledgements
+
+**RePA** (Reconfigurable Probabilistic Automata) builds upon and extends the foundational concepts of **Marge** (Labelled Reactive Graphs). 
+
+For more details on the original Marge tool and the underlying theory of Reactive Graphs, please refer to the foundational paper:
+📄 *Reactive Graphs in Action* - [https://arxiv.org/abs/2407.14705](https://arxiv.org/abs/2407.14705)
+
+
 ---
 
-## 📋 Features
+## Features
 
 *   **Visual Editor:** Write Reactive Graph syntax with syntax highlighting.
 *   **Interactive Simulation:** Click on nodes/transitions to step through the system.
@@ -23,7 +36,7 @@ To build and run this project from source, you need:
 
 ---
 
-## 🚀 Building the Project
+## Building the Project
 
 Start the SBT console (ensure you are using Java 17):
 
@@ -47,7 +60,7 @@ repaJS/fastLinkJS
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 *   `shared/` - Core logic (Parser, Semantics, Converters) shared between JS and JVM.
 *   `js/` - Frontend logic (Cytoscape integration, DOM manipulation, RePAAPI).
@@ -55,7 +68,7 @@ repaJS/fastLinkJS
 
 ---
 
-## 📝 Example Model
+## Example Model
 
 ```RePA
 init s0
