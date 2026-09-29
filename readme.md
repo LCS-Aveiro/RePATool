@@ -12,7 +12,7 @@ RePA is a formal verification and animation tool for Labelled Reactive Graphs. I
 **RePA** (Reconfigurable Probabilistic Automata) builds upon and extends the foundational concepts of **Marge** (Labelled Reactive Graphs). 
 
 For more details on the original Marge tool and the underlying theory of Reactive Graphs, please refer to the foundational paper:
-📄 *Reactive Graphs in Action* - [https://arxiv.org/abs/2407.14705](https://arxiv.org/abs/2407.14705)
+📄 *Reactive Graphs in Action* - [https://link.springer.com/chapter/10.1007/978-3-031-71261-6_6](https://link.springer.com/chapter/10.1007/978-3-031-71261-6_6)
 
 
 ---
