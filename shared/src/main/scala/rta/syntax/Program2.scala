@@ -10,20 +10,34 @@ object Program2:
 
   type Rel[A,B] = Map[A,Set[B]]
   def empty[A,B] = Map[A,Set[B]]().withDefaultValue(Set())
-  def add[A,B](ab:(A,B), r:Rel[A,B]) = r + (ab._1 -> (r(ab._1)+(ab._2)))
-  def join[A,B](r1:Rel[A,B], r2:Rel[A,B]) = r1 ++ (r2.map(ab => ab._1 -> (r1(ab._1)++(ab._2))))
+  def add[A,B](ab:(A,B), r:Rel[A,B]) = r + (ab._1 -> (r.getOrElse(ab._1, Set.empty[B]) + ab._2))
+  def join[A,B](r1:Rel[A,B], r2:Rel[A,B]) = r1 ++ r2.map(ab => ab._1 -> (r1.getOrElse(ab._1, Set.empty[B]) ++ ab._2))
+
+  def fmtWeight(w: Double): String = {
+    val s = f"$w%.6f".replace(',', '.')
+    val trimmed = s.reverse.dropWhile(_ == '0').reverse
+    val decimals = trimmed.length - trimmed.indexOf('.') - 1
+    if (decimals >= 3) trimmed else trimmed + "0" * (3 - decimals)
+  }
 
   private def isGlobalControlVar(q: QName): Boolean = q.n.mkString.contains("_")
 
   case class QName(n:List[String]):
-    override def toString = n.mkString("/")
+    @transient private lazy val cachedHash: Int = n.##
+    override def hashCode(): Int = cachedHash
+    override def equals(o: Any): Boolean = o match {
+      case q: QName => (this eq q) || (cachedHash == q.hashCode && ((n eq q.n) || n == q.n))
+      case _ => false
+    }
+    @transient private lazy val cachedString: String = n.mkString("/")
+    override def toString = cachedString
     def show = if n.isEmpty then "-" else toString
     def /(other:QName) = if (other.n.isEmpty) other else if (n.isEmpty) other else QName(n ::: other.n)
     def /(other:String) = QName(n:::List(other))
 
-    def /(e:EdgeMap):EdgeMap = e.map((src, targets) => (this / src) -> targets.map((to, id, lbl) => (this / to, this / id, this / lbl)))
+    def /(e:EdgeMap):EdgeMap = e.map((src, targets) => (this / src) -> targets.map((to, id, lbl) => (this / to, this / id, this / lbl))).withDefaultValue(Set())
     def /(es:Edges): Edges = es.map((src, to, id, lbl) => (this / src, this / to, this / id, this / lbl))
-    def /-(lblsMap:Map[QName,Edges]): Map[QName,Edges] = lblsMap.map((lbl, edges) => (this / lbl) -> (this / edges))
+    def /-(lblsMap:Map[QName,Edges]): Map[QName,Edges] = lblsMap.map((lbl, edges) => (this / lbl) -> (this / edges)).withDefaultValue(Set())
     def /-(ns:Set[QName]): Set[QName] = ns.map(n => this / n)
     def scope: QName = if n.isEmpty then this else QName(n.init)
 
@@ -122,151 +136,186 @@ object Program2:
                      trainingMethod: String = "laplace",
                      trainingAgg: String = "arith",
                      trainingLambda: Double = 1.0,
-                     weightExprs: Map[Edge, UpdateExpr] = Map()
+                     weightExprs: Map[Edge, UpdateExpr] = Map(),
+                     trainCounts: Map[Edge, Double] = Map()
                     ):
-    def union(other: RxGraph, aggName: String): RxGraph = {
-      val allEdgeKeys = this.lbls.keySet ++ other.lbls.keySet
-      var newRx = RxGraph().copy(trainingMode = this.trainingMode || other.trainingMode)
 
-      newRx = newRx.copy(
+    @transient private lazy val cachedHash: Int = (inits, act, val_env).##
+    override def hashCode(): Int = cachedHash
+    override def equals(o: Any): Boolean = o match {
+      case r: RxGraph =>
+        def same(a: AnyRef, b: AnyRef): Boolean = (a eq b) || a == b
+        (this eq r) || (
+          hashCode == r.hashCode &&
+          same(inits, r.inits) && same(act, r.act) && same(val_env, r.val_env) &&
+          same(weights, r.weights) && same(trainCounts, r.trainCounts) &&
+          same(edg, r.edg) && same(on, r.on) && same(off, r.off) && same(lbls, r.lbls) &&
+          same(functions, r.functions) && same(edgeConditions, r.edgeConditions) && same(edgeUpdates, r.edgeUpdates) &&
+          same(edgeAggregations, r.edgeAggregations) && same(weightExprs, r.weightExprs) &&
+          trainingMode == r.trainingMode && paradigm == r.paradigm && distributionMode == r.distributionMode &&
+          trainingMethod == r.trainingMethod && trainingAgg == r.trainingAgg && trainingLambda == r.trainingLambda
+        )
+      case _ => false
+    }
+
+    def groundEdges: Edges = for (src, ts) <- edg.toSet; (t, id, l) <- ts yield (src, t, id, l)
+    def onEdges: Edges = for (src, ts) <- on.toSet; (t, id, l) <- ts yield (src, t, id, l)
+    def offEdges: Edges = for (src, ts) <- off.toSet; (t, id, l) <- ts yield (src, t, id, l)
+
+    private def isGround(e: Edge): Boolean = edg.getOrElse(e._1, Set.empty).contains((e._2, e._3, e._4))
+    private def isOn(e: Edge): Boolean = on.getOrElse(e._1, Set.empty).contains((e._2, e._3, e._4))
+    private def isOff(e: Edge): Boolean = off.getOrElse(e._1, Set.empty).contains((e._2, e._3, e._4))
+
+    private def withSettingsOf(other: RxGraph): RxGraph = {
+      val d = RxGraph()
+      def pick[T](a: T, b: T, default: T): T = if (a != default) a else b
+      copy(
+        trainingMode = trainingMode || other.trainingMode,
+        paradigm = pick(paradigm, other.paradigm, d.paradigm),
+        distributionMode = pick(distributionMode, other.distributionMode, d.distributionMode),
+        trainingMethod = pick(trainingMethod, other.trainingMethod, d.trainingMethod),
+        trainingAgg = pick(trainingAgg, other.trainingAgg, d.trainingAgg),
+        trainingLambda = pick(trainingLambda, other.trainingLambda, d.trainingLambda)
+      )
+    }
+
+    def union(other: RxGraph, aggName: String): RxGraph = {
+      var newRx = RxGraph().withSettingsOf(this).withSettingsOf(other).copy(
         inits = this.inits ++ other.inits,
         val_env = this.val_env ++ other.val_env,
         functions = this.functions ++ other.functions
       )
-
-      for (label <- allEdgeKeys) {
-        val edgesM = this.lbls.getOrElse(label, Set())
-        val edgesN = other.lbls.getOrElse(label, Set())
-        val allEdgesForLabel = edgesM ++ edgesN
-
-        for (e <- allEdgesForLabel) {
-          val inM = edgesM.contains(e)
-          val inN = edgesN.contains(e)
-
-          val wM = this.weights.getOrElse(e, 0.0)
-          val wN = other.weights.getOrElse(e, 0.0)
-          val finalWeight = if (inM && inN) Aggregation.compute(aggName, wM, wN, (wM + wN) / 2) else if (inM) wM else wN
-
-          val isActM = this.act.contains(e)
-          val isActN = other.act.contains(e)
-          val shouldBeActive = isActM || isActN
-
-          val isStandard = this.edg.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) || other.edg.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
-          val isOnRule = this.on.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) || other.on.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
-          val isOffRule = this.off.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) || other.off.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
-
-          val cond = this.edgeConditions.get(e).flatten.orElse(other.edgeConditions.get(e).flatten)
-          val upd = this.edgeUpdates.getOrElse(e, other.edgeUpdates.getOrElse(e, Nil))
-          val wExpr = this.weightExprs.get(e).orElse(other.weightExprs.get(e))
-
-          if (isStandard) newRx = newRx.addEdge(e._1, e._2, e._3, e._4, cond, upd, finalWeight, "", wExpr)
-          if (isOnRule) newRx = newRx.addOn(e._1, e._2, e._3, e._4, cond, upd, finalWeight, "", wExpr)
-          if (isOffRule) newRx = newRx.addOff(e._1, e._2, e._3, e._4, cond, upd, finalWeight, "", wExpr)
-          if (!shouldBeActive) newRx = newRx.deactivate(e._1, e._2, e._3, e._4)
-        }
+      val allEdges = (this.lbls.valuesIterator ++ other.lbls.valuesIterator).flatten.toSet
+      for (e <- allEdges) {
+        val inM = this.lbls.getOrElse(e._4, Set.empty).contains(e)
+        val inN = other.lbls.getOrElse(e._4, Set.empty).contains(e)
+        val wM = this.weights.getOrElse(e, 0.0)
+        val wN = other.weights.getOrElse(e, 0.0)
+        val finalWeight = if (inM && inN) Aggregation.compute(aggName, wM, wN, (wM + wN) / 2) else if (inM) wM else wN
+        val cond = this.edgeConditions.get(e).flatten.orElse(other.edgeConditions.get(e).flatten)
+        val upd = this.edgeUpdates.getOrElse(e, other.edgeUpdates.getOrElse(e, Nil))
+        val wExpr = this.weightExprs.get(e).orElse(other.weightExprs.get(e))
+        val agg = this.edgeAggregations.get(e).orElse(other.edgeAggregations.get(e)).getOrElse("")
+        if (this.isGround(e) || other.isGround(e)) newRx = newRx.addEdge(e._1, e._2, e._3, e._4, cond, upd, finalWeight, agg, wExpr)
+        if (this.isOn(e) || other.isOn(e)) newRx = newRx.addOn(e._1, e._2, e._3, e._4, cond, upd, finalWeight, agg, wExpr)
+        if (this.isOff(e) || other.isOff(e)) newRx = newRx.addOff(e._1, e._2, e._3, e._4, cond, upd, finalWeight, agg, wExpr)
+        if (!(this.act.contains(e) || other.act.contains(e))) newRx = newRx.deactivate(e._1, e._2, e._3, e._4)
       }
-      newRx
-    }
-
-    def applyDeltaCut(delta: Double): RxGraph = {
-      val newEdg = edg.map { case (src, targets) => src -> targets.filter(t => weights.getOrElse((src, t._1, t._2, t._3), 1.0) >= delta) }.filter(_._2.nonEmpty)
-      val newOn = on.map { case (src, targets) => src -> targets.filter(t => weights.getOrElse((src, t._1, t._2, t._3), 0.1) >= delta) }.filter(_._2.nonEmpty)
-      val newOff = off.map { case (src, targets) => src -> targets.filter(t => weights.getOrElse((src, t._1, t._2, t._3), 0.1) >= delta) }.filter(_._2.nonEmpty)
-
-      this.copy(edg = newEdg.toMap.withDefaultValue(Set()), on = newOn.toMap.withDefaultValue(Set()), off = newOff.toMap.withDefaultValue(Set()))
+      newRx.normalized
     }
 
     def intersection(other: RxGraph, aggName: String): RxGraph = {
-      val commonLabels = this.lbls.keySet.intersect(other.lbls.keySet)
-      val commonInits = this.inits.intersect(other.inits)
-      
-      var newRx = RxGraph().copy(
-        inits = commonInits,
+      var newRx = RxGraph().withSettingsOf(this).withSettingsOf(other).copy(
+        inits = this.inits.intersect(other.inits),
         val_env = this.val_env.filter { case (k, v) => other.val_env.get(k).contains(v) },
         functions = this.functions ++ other.functions
       )
-
-      for (label <- commonLabels) {
-        val commonEdges = this.lbls(label).intersect(other.lbls(label))
-        for (e <- commonEdges) {
-          val wM = this.weights.getOrElse(e, 0.0)
-          val wN = other.weights.getOrElse(e, 0.0)
-          val finalWeight = Aggregation.compute(aggName, wM, wN, (wM + wN) / 2)
-
-          val isActM = this.act.contains(e)
-          val isActN = other.act.contains(e)
-          val shouldBeActive = isActM && isActN
-
-          val isStandard = this.edg.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) && other.edg.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
-          val isOnRule = this.on.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) && other.on.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
-          val isOffRule = this.off.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e) && other.off.getOrElse(e._1, Set()).exists(t => (e._1, t._1, t._2, t._3) == e)
-
-          val cond = this.edgeConditions.get(e).flatten 
-          val upd = this.edgeUpdates.getOrElse(e, Nil)
-          val wExpr = this.weightExprs.get(e).orElse(other.weightExprs.get(e))
-
-          if (isStandard) newRx = newRx.addEdge(e._1, e._2, e._3, e._4, cond, upd, finalWeight, "", wExpr)
-          if (isOnRule) newRx = newRx.addOn(e._1, e._2, e._3, e._4, cond, upd, finalWeight, "", wExpr)
-          if (isOffRule) newRx = newRx.addOff(e._1, e._2, e._3, e._4, cond, upd, finalWeight, "", wExpr)
-          if (!shouldBeActive) newRx = newRx.deactivate(e._1, e._2, e._3, e._4)
-        }
+      for (label <- this.lbls.keySet.intersect(other.lbls.keySet);
+           e <- this.lbls.getOrElse(label, Set.empty).intersect(other.lbls.getOrElse(label, Set.empty))) {
+        val wM = this.weights.getOrElse(e, 0.0)
+        val wN = other.weights.getOrElse(e, 0.0)
+        val finalWeight = Aggregation.compute(aggName, wM, wN, (wM + wN) / 2)
+        val cond = this.edgeConditions.get(e).flatten
+        val upd = this.edgeUpdates.getOrElse(e, Nil)
+        val wExpr = this.weightExprs.get(e).orElse(other.weightExprs.get(e))
+        val agg = this.edgeAggregations.getOrElse(e, "")
+        if (this.isGround(e) && other.isGround(e)) newRx = newRx.addEdge(e._1, e._2, e._3, e._4, cond, upd, finalWeight, agg, wExpr)
+        if (this.isOn(e) && other.isOn(e)) newRx = newRx.addOn(e._1, e._2, e._3, e._4, cond, upd, finalWeight, agg, wExpr)
+        if (this.isOff(e) && other.isOff(e)) newRx = newRx.addOff(e._1, e._2, e._3, e._4, cond, upd, finalWeight, agg, wExpr)
+        if (!(this.act.contains(e) && other.act.contains(e))) newRx = newRx.deactivate(e._1, e._2, e._3, e._4)
       }
-      newRx
+      newRx.normalized
+    }
+
+    def normalized: RxGraph = {
+      if (paradigm == "fuzzy") return this
+      var w = weights
+      for ((src, ts) <- edg) {
+        val active = ts.toList.map(t => (src, t._1, t._2, t._3)).filter(act.contains)
+        val total = active.map(e => w.getOrElse(e, 1.0)).sum
+        if (total > 0) active.foreach(e => w += (e -> w.getOrElse(e, 1.0) / total))
+      }
+      copy(weights = w)
+    }
+
+    def applyDeltaCut(delta: Double): RxGraph = {
+      val pruned: Edges =
+        groundEdges.filter(e => weights.getOrElse(e, 1.0) < delta) ++
+        (onEdges ++ offEdges).filter(e => weights.getOrElse(e, 0.1) < delta)
+      if (pruned.isEmpty) return this
+      def cut(m: EdgeMap): EdgeMap =
+        m.map { case (src, ts) => src -> ts.filterNot(t => pruned.contains((src, t._1, t._2, t._3))) }
+         .filter(_._2.nonEmpty).withDefaultValue(Set())
+      this.copy(
+        edg = cut(edg), on = cut(on), off = cut(off),
+        lbls = lbls.map { case (l, es) => l -> (es -- pruned) }.filter(_._2.nonEmpty).withDefaultValue(Set()),
+        act = act -- pruned,
+        weights = weights -- pruned,
+        edgeConditions = edgeConditions -- pruned,
+        edgeUpdates = edgeUpdates -- pruned,
+        edgeAggregations = edgeAggregations -- pruned,
+        weightExprs = weightExprs -- pruned
+      ).normalized
     }
 
     def toRta: String = {
       val sb = new StringBuilder
-      
-      inits.foreach(i => sb.append(s"init ${i.show}\n"))
+      val nm = ReLang.name
+
+      if (paradigm != "probabilistic") sb.append(s"paradigm $paradigm\n")
+      if (distributionMode != "normalize") sb.append(s"calibration $distributionMode\n")
+      if (trainingMode) {
+        if (trainingMethod == "aggregation") sb.append(s"training aggregation $trainingAgg(${UpdateExpr.num(trainingLambda)})\n")
+        else sb.append("training laplace\n")
+      }
+      inits.toList.map(nm).sorted.foreach(i => sb.append(s"init $i\n"))
       sb.append("\n")
 
-      val_env.foreach { case (k, v) => 
-        if (!k.show.startsWith("__")) {
-          v match {
-            case RuntimeValue.VInt(value, minOpt, maxOpt) => 
-              val bounds = if(minOpt.isDefined && maxOpt.isDefined) s" [${minOpt.get}..${maxOpt.get}]" else ""
-              sb.append(s"int ${k.show}$bounds = $value\n")
-            case RuntimeValue.VFloat(value, minOpt, maxOpt) =>
-              val bounds = if(minOpt.isDefined && maxOpt.isDefined) s" [${minOpt.get}..${maxOpt.get}]" else ""
-              sb.append(s"float ${k.show}$bounds = $value\n")
-            case RuntimeValue.VBool(value) => 
-              sb.append(s"bool ${k.show} = $value\n")
-            case RuntimeValue.VArray(values, isDyn, maxOpt) =>
-              val dynStr = if(isDyn) "dyn " else ""
-              val bound = maxOpt.map(m => s" [max=$m]").getOrElse("")
-              sb.append(s"${dynStr}int[] ${k.show}$bound = [...]\n")
-          }
+      val vars = val_env.toList.filterNot(_._1.show.startsWith("__")).sortBy(_._1.show)
+      vars.foreach { case (k, v) =>
+        v match {
+          case RuntimeValue.VInt(value, Some(lo), Some(hi)) => sb.append(s"int ${nm(k)} [$lo..$hi] = $value\n")
+          case RuntimeValue.VInt(value, _, _) => sb.append(s"int ${nm(k)} = $value\n")
+          case RuntimeValue.VFloat(value, Some(lo), Some(hi)) =>
+            sb.append(s"float ${nm(k)} [${UpdateExpr.num(lo)}..${UpdateExpr.num(hi)}] = ${UpdateExpr.num(value)}\n")
+          case RuntimeValue.VFloat(value, _, _) => sb.append(s"float ${nm(k)} = ${UpdateExpr.num(value)}\n")
+          case RuntimeValue.VBool(value) => sb.append(s"bool ${nm(k)} = $value\n")
+          case arr @ RuntimeValue.VArray(values, isDyn, maxOpt) =>
+            val elemType = values.headOption match {
+              case Some(_: RuntimeValue.VFloat) => "float"
+              case Some(_: RuntimeValue.VBool) => "bool"
+              case _ => "int"
+            }
+            val bound = maxOpt.map(m => s" [max=$m]").getOrElse("")
+            sb.append(s"${if (isDyn) "dyn " else ""}$elemType[] ${nm(k)}$bound = ${ReLang.value(arr)}\n")
         }
       }
-      if (val_env.nonEmpty) sb.append("\n")
+      if (vars.nonEmpty) sb.append("\n")
 
-      val allSimple = for { (src, targets) <- edg.toList; (trg, id, lbl) <- targets } yield (src, trg, id, lbl)
-      allSimple.sortBy(_._1.toString).foreach { case (s, t, id, l) =>
-        val edge = (s, t, id, l)
-        val w = weights.getOrElse(edge, 1.0)
-        val wFormatted = f"$w%.3f"
-        val isDisabled = !act.contains(edge)
-        val agg = edgeAggregations.getOrElse(edge, "arith")
-        val aggStr = if (agg != "arith") s" $agg" else ""
-        
-        val line = if (id == l) s"${s.show} ---> ${t.show}: ${l.show}" else s"${s.show} -${id.show}-> ${t.show}: ${l.show}"
-        sb.append(s"$line ($wFormatted)$aggStr${if (isDisabled) " disabled" else ""}\n")
+      functions.values.toList.sortBy(_.name.show).foreach { f =>
+        sb.append(s"def ${nm(f.name)}(${f.params.map(nm).mkString(", ")}) {\n")
+        f.body.foreach(st => sb.append(s"  ${ReLang.statement(st)}\n"))
+        sb.append("}\n\n")
       }
 
-      val allOn = for { (src, targets) <- on.toList; (trg, id, lbl) <- targets } yield (src, trg, id, lbl)
-      allOn.foreach { case (s, t, id, l) =>
-        val edge = (s, t, id, l)
-        val w = weights.getOrElse(edge, 0.1)
-        sb.append(s"${s.show} ->> ${t.show}: ${l.show} (${f"$w%.3f"})\n")
+      def line(e: Edge, arrow: String, defaultW: Double): String = {
+        val (s, t, id, l) = e
+        val head = if (id == l) s"${nm(s)} ${if (arrow == "->") "--->" else arrow} ${nm(t)} : ${nm(l)}"
+                   else s"${nm(s)} -${nm(id)}$arrow ${nm(t)} : ${nm(l)}"
+        val w = weightExprs.get(e).map(ReLang.expr).getOrElse(fmtWeight(weights.getOrElse(e, defaultW)))
+        val agg = edgeAggregations.get(e).filter(a => a.nonEmpty && a != "arith").map(a => s" $a").getOrElse("")
+        val disabled = if (act.contains(e)) "" else " disabled"
+        val cond = edgeConditions.getOrElse(e, None).map(c => s" if (${ReLang.condition(c)})").getOrElse("")
+        val upd = edgeUpdates.getOrElse(e, Nil) match {
+          case Nil => ""
+          case ss => s" then { ${ss.map(ReLang.statement).mkString("; ")} }"
+        }
+        s"$head ($w)$agg$disabled$cond$upd\n"
       }
-
-      val allOff = for { (src, targets) <- off.toList; (trg, id, lbl) <- targets } yield (src, trg, id, lbl)
-      allOff.foreach { case (s, t, id, l) =>
-        val edge = (s, t, id, l)
-        val w = weights.getOrElse(edge, 0.1)
-        sb.append(s"${s.show} --x ${t.show}: ${l.show} (${f"$w%.3f"})\n")
-      }
-
+      val byText = Ordering.by[Edge, String](e => s"${nm(e._1)} ${nm(e._4)} ${nm(e._2)} ${nm(e._3)}")
+      groundEdges.toList.sorted(using byText).foreach(e => sb.append(line(e, "->", 1.0)))
+      onEdges.toList.sorted(using byText).foreach(e => sb.append(line(e, "->>", 0.1)))
+      offEdges.toList.sorted(using byText).foreach(e => sb.append(line(e, "--x", 0.1)))
       sb.toString()
     }
 
@@ -277,53 +326,51 @@ object Program2:
          |[edges] ${showEdgeMap(edg)}
          |[on]    ${showEdgeMap(on)}
          |[off]   ${showEdgeMap(off)}
-         |[weights] ${weights.map(kv => s"${showEdge(kv._1)} -> ${f"${kv._2}%.3f"}").mkString(", ")}"""
-    
+         |[weights] ${weights.map(kv => s"${showEdge(kv._1)} -> ${fmtWeight(kv._2)}").mkString(", ")}""".stripMargin
+
     def states = for (src, dests) <- edg.toSet; (d, _, _) <- dests; st <- Set(src, d) yield st
 
-    def addEdge(s1:QName, s2:QName, transId:QName, label:QName, cond: Option[Condition] = None, upd: List[Statement] = Nil, w: Double = 1.0, agg: String = "", wExpr: Option[UpdateExpr] = None) = {
-      val edge: Edge = (s1, s2, transId, label)
-      val newAggs = if (agg.nonEmpty) edgeAggregations + (edge -> agg) else edgeAggregations
-      val newExprs = wExpr.map(e => weightExprs + (edge -> e)).getOrElse(weightExprs)
-      this.copy(edg = add(s1 -> (s2, transId, label), edg), lbls = add(label -> edge, lbls), act = act + edge, edgeConditions = edgeConditions + (edge -> cond), edgeUpdates = edgeUpdates + (edge -> upd), weights = weights + (edge -> w), edgeAggregations = newAggs, weightExprs = newExprs)
+    private def withEdge(edge: Edge, cond: Option[Condition], upd: List[Statement], w: Double, agg: String, wExpr: Option[UpdateExpr]): RxGraph = {
+      val dynExpr = wExpr.filterNot(UpdateExpr.isConstant)
+      this.copy(
+        lbls = add(edge._4 -> edge, lbls), act = act + edge,
+        edgeConditions = edgeConditions + (edge -> cond), edgeUpdates = edgeUpdates + (edge -> upd),
+        weights = weights + (edge -> w),
+        edgeAggregations = if (agg.nonEmpty) edgeAggregations + (edge -> agg) else edgeAggregations,
+        weightExprs = dynExpr.map(e => weightExprs + (edge -> e)).getOrElse(weightExprs - edge)
+      )
     }
 
-    def addOn(s1: QName, s2: QName, transId: QName, label: QName, cond: Option[Condition] = None, upd: List[Statement] = Nil, w: Double = 1.0, agg: String = "", wExpr: Option[UpdateExpr] = None) = {
-      val edge: Edge = (s1, s2, transId, label)
-      val newAggs = if (agg.nonEmpty) edgeAggregations + (edge -> agg) else edgeAggregations
-      val newExprs = wExpr.map(e => weightExprs + (edge -> e)).getOrElse(weightExprs)
-      this.copy(on = add(s1 -> (s2, transId, label), on), lbls = add(label -> edge, lbls), act = act + edge, edgeConditions = edgeConditions + (edge -> cond), edgeUpdates = edgeUpdates + (edge -> upd), weights = weights + (edge -> w), edgeAggregations = newAggs, weightExprs = newExprs)
-    }
+    def addEdge(s1:QName, s2:QName, transId:QName, label:QName, cond: Option[Condition] = None, upd: List[Statement] = Nil, w: Double = 1.0, agg: String = "", wExpr: Option[UpdateExpr] = None) =
+      withEdge((s1, s2, transId, label), cond, upd, w, agg, wExpr).copy(edg = add(s1 -> (s2, transId, label), edg))
 
-    def addOff(s1: QName, s2: QName, transId: QName, label: QName, cond: Option[Condition] = None, upd: List[Statement] = Nil, w: Double = 1.0, agg: String = "", wExpr: Option[UpdateExpr] = None) = {
-      val edge: Edge = (s1, s2, transId, label)
-      val newAggs = if (agg.nonEmpty) edgeAggregations + (edge -> agg) else edgeAggregations
-      val newExprs = wExpr.map(e => weightExprs + (edge -> e)).getOrElse(weightExprs)
-      this.copy(off = add(s1 -> (s2, transId, label), off), lbls = add(label -> edge, lbls), act = act + edge, edgeConditions = edgeConditions + (edge -> cond), edgeUpdates = edgeUpdates + (edge -> upd), weights = weights + (edge -> w), edgeAggregations = newAggs, weightExprs = newExprs)
-    }
+    def addOn(s1: QName, s2: QName, transId: QName, label: QName, cond: Option[Condition] = None, upd: List[Statement] = Nil, w: Double = 1.0, agg: String = "", wExpr: Option[UpdateExpr] = None) =
+      withEdge((s1, s2, transId, label), cond, upd, w, agg, wExpr).copy(on = add(s1 -> (s2, transId, label), on))
+
+    def addOff(s1: QName, s2: QName, transId: QName, label: QName, cond: Option[Condition] = None, upd: List[Statement] = Nil, w: Double = 1.0, agg: String = "", wExpr: Option[UpdateExpr] = None) =
+      withEdge((s1, s2, transId, label), cond, upd, w, agg, wExpr).copy(off = add(s1 -> (s2, transId, label), off))
 
     def deactivate(s1:QName, s2:QName, tId:QName, l:QName) = this.copy(act = act - ((s1, s2, tId, l)))
     def addInit(s:QName) = this.copy(inits = inits + s)
     def addVariable(name: QName, value: RuntimeValue) = this.copy(val_env = val_env + (name -> value))
 
-    def ++(r:RxGraph) =
-      RxGraph(
-        join(edg,r.edg),join(on,r.on),join(off,r.off),
-        join(lbls,r.lbls),inits++r.inits,act++r.act,
-        val_env ++ r.val_env, functions ++ r.functions,
-        edgeConditions ++ r.edgeConditions, edgeUpdates ++ r.edgeUpdates,
-        weights ++ r.weights, edgeAggregations ++ r.edgeAggregations,
-        trainingMode = this.trainingMode || r.trainingMode, distributionMode = this.distributionMode,
+    def ++(r:RxGraph): RxGraph =
+      this.withSettingsOf(r).copy(
+        edg = join(edg, r.edg), on = join(on, r.on), off = join(off, r.off),
+        lbls = join(lbls, r.lbls), inits = inits ++ r.inits, act = act ++ r.act,
+        val_env = val_env ++ r.val_env, functions = functions ++ r.functions,
+        edgeConditions = edgeConditions ++ r.edgeConditions, edgeUpdates = edgeUpdates ++ r.edgeUpdates,
+        weights = weights ++ r.weights, edgeAggregations = edgeAggregations ++ r.edgeAggregations,
         weightExprs = weightExprs ++ r.weightExprs
       )
 
-  object RxGraph: 
+  object RxGraph:
     def apply(): RxGraph = RxGraph(
       edg = Map().withDefaultValue(Set()), on = Map().withDefaultValue(Set()), off = Map().withDefaultValue(Set()),
       lbls = Map().withDefaultValue(Set()), inits = Set(), act = Set(),
       val_env = Map(), functions = Map(),
-      edgeConditions = Map().withDefaultValue(None), edgeUpdates = Map().withDefaultValue(Nil), 
-      weights = Map(), edgeAggregations = Map(), 
+      edgeConditions = Map().withDefaultValue(None), edgeUpdates = Map().withDefaultValue(Nil),
+      weights = Map(), edgeAggregations = Map(),
       trainingMode = false, paradigm = "probabilistic", distributionMode = "normalize",
       weightExprs = Map()
     )

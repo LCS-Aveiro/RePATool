@@ -14,7 +14,7 @@ object Parser2 {
     private var col = 1
 
     private def peek: Char = if (pos < input.length) input(pos) else '\u0000'
-    
+
     private def advance(): Char = {
       val c = peek
       pos += 1
@@ -26,8 +26,11 @@ object Parser2 {
     private def isAlpha(c: Char) = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'
     private def isDigit(c: Char) = c >= '0' && c <= '9'
 
-    def scanAll(): List[Token] = {
-      var tokens = List.empty[Token]
+    private val unaryContext = Set("", "(", ",", ":=", "=", "+", "-", "*", "/", "<", ">", "<=", ">=", "==", "!=",
+      "[", "..", "&&", "||", "AND", "OR", "return", "{", ";")
+
+    def scanAll(): IndexedSeq[Token] = {
+      var tokens = Vector.empty[Token]
       while (pos < input.length) {
         val c = peek
         if (isSpace(c)) {
@@ -42,7 +45,8 @@ object Parser2 {
           }
           if (peek == '\'') str += advance()
           tokens = tokens :+ Token(str, startLine, startCol)
-        } else if (isDigit(c) || (c == '-' && isDigit(if(pos+1 < input.length) input(pos+1) else '\u0000'))) {
+        } else if (isDigit(c) || (c == '-' && isDigit(if(pos+1 < input.length) input(pos+1) else '\u0000')
+                                     && unaryContext.contains(tokens.lastOption.map(_.value).getOrElse("")))) {
           val startLine = line; val startCol = col
           var str = ""
           if (peek == '-') str += advance()
@@ -55,9 +59,9 @@ object Parser2 {
         } else {
           val startLine = line; val startCol = col
           var sym = advance().toString
-          
+
           val longSymbols = List("--->", "->>", "--!", "--x", "->", "-->", "==", "!=", "<=", ">=", "&&", "||", ":=", "..")
-          
+
           var matchedLong = false
           for (op <- longSymbols if !matchedLong) {
             val potential = sym + input.substring(pos, Math.min(input.length, pos + op.length - 1))
@@ -74,18 +78,18 @@ object Parser2 {
     }
   }
 
-  private class TokenReader(val tokens: List[Token]) {
+  private class TokenReader(val tokens: IndexedSeq[Token]) {
     var pos = 0
     def current: String = if (pos < tokens.length) tokens(pos).value else ""
     def peekNext: String = if (pos + 1 < tokens.length) tokens(pos + 1).value else ""
     def hasNext: Boolean = pos < tokens.length
     def consume(): String = { val t = current; pos += 1; t }
     def eat(s: String): Boolean = { if (current == s) { pos += 1; true } else false }
-    
-    def expect(s: String): Unit = { 
+
+    def expect(s: String): Unit = {
       if (!eat(s)) {
         val t = if (pos < tokens.length) tokens(pos) else Token("FIM DO FICHEIRO", -1, -1)
-        throw new RuntimeException(s"Erro na Linha ${t.line}, Coluna ${t.col}:\nEra esperado '$s', mas encontrou-se '${t.value}'.") 
+        throw new RuntimeException(s"Erro na Linha ${t.line}, Coluna ${t.col}:\nEra esperado '$s', mas encontrou-se '${t.value}'.")
       }
     }
 
@@ -100,13 +104,24 @@ object Parser2 {
       }
       if (s.contains(".")) QName(s.split('.').toList) else QName(List(s))
     }
-    
+
+    def expectOneOf(what: String, valid: Set[String]): String = {
+      val t = if (pos < tokens.length) tokens(pos) else Token("FIM DO FICHEIRO", -1, -1)
+      if (!valid.contains(t.value))
+        throw new RuntimeException(s"Erro na Linha ${t.line}, Coluna ${t.col}:\nValor inválido para '$what': '${t.value}'. Valores aceites: ${valid.toList.sorted.mkString(", ")}.")
+      consume()
+    }
+
     def tryParseInt(): Int = consume().toInt
     def tryParseDouble(): Double = consume().toDouble
   }
 
+  val validCalibrations: Set[String] = Set("normalize", "equal", "proportional", "revise_equal")
+  val validParadigms: Set[String] = Set("probabilistic", "fuzzy")
+
   def parseProgram(str: String): RxGraph = {
-    val lexer = new Lexer(str)
+    val cleaned = if (str.startsWith("\uFEFF")) str.substring(1) else str
+    val lexer = new Lexer(cleaned)
     val tokens = lexer.scanAll()
     val reader = new TokenReader(tokens)
     val rx = parseBlock(reader)
@@ -120,7 +135,7 @@ object Parser2 {
     val transitionWeights: Map[Edge, Double] = bySource.flatMap { case (src, edges) =>
       val activeFromSource = edges.filter(rx.act.contains)
       val assigned: Map[Edge, Double] = edges.map { e => (e, rx.weights.getOrElse(e, 1.0)) }.toMap
-      
+
       if (rx.paradigm == "fuzzy") {
         assigned.map { case (e, w) => e -> Math.max(0.0, Math.min(1.0, w)) }
       } else {
@@ -147,24 +162,25 @@ object Parser2 {
           val method = reader.consume()
           rx = rx.copy(trainingMethod = method)
           if (method == "aggregation") {
-             val aggKeywords = Set("arith", "prod", "max", "min", "geom")
+             val aggKeywords = Set("arith", "prod", "max", "min", "geom", "mean", "ema")
              if (aggKeywords.contains(reader.current)) rx = rx.copy(trainingAgg = reader.consume())
-             if (reader.eat("(")) { 
+             if (reader.eat("(")) {
                val expr = parseExpr(reader)
                val evaluated = rta.backend.RxSemantics.evalExpr(expr, rx.val_env, rx)
                rx = rx.copy(trainingLambda = Condition.extractDouble(evaluated))
-               reader.expect(")") 
+               reader.expect(")")
              }
           }
         }
       }
-      else if (reader.eat("calibration")) rx = rx.copy(distributionMode = reader.consume())
-      else if (reader.eat("paradigm")) rx = rx.copy(paradigm = reader.consume())
-      
+      else if (reader.eat("calibration")) rx = rx.copy(distributionMode = reader.expectOneOf("calibration", validCalibrations))
+      else if (reader.eat("paradigm")) rx = rx.copy(paradigm = reader.expectOneOf("paradigm", validParadigms))
+      else if (reader.eat("name")) reader.consume()
+
       else if (Set("int", "float", "bool", "dyn").contains(reader.current)) {
         var isDyn = false
         if (reader.eat("dyn")) isDyn = true
-        val typeStr = reader.consume() 
+        val typeStr = reader.consume()
         var isArray = false
         if (reader.current == "[" && reader.peekNext == "]") {
             reader.consume(); reader.consume()
@@ -174,7 +190,7 @@ object Parser2 {
         var minInt: Option[Int] = None; var maxInt: Option[Int] = None
         var minFloat: Option[Double] = None; var maxFloat: Option[Double] = None
         var maxSize: Option[Int] = None
-        
+
         if (reader.eat("[")) {
             if (isArray) {
                 reader.expect("max"); reader.expect("="); maxSize = Some(reader.tryParseInt())
@@ -186,7 +202,7 @@ object Parser2 {
             reader.expect("]")
         }
         reader.expect("=")
-        
+
         val rv: RuntimeValue = if (isArray) {
             reader.expect("[")
             var vals = List.empty[RuntimeValue]
@@ -216,7 +232,7 @@ object Parser2 {
         }
         rx = rx.copy(val_env = rx.val_env + (name -> rv))
       }
-      
+
       else if (reader.eat("def")) {
         val fName = reader.parseQName()
         reader.expect("(")
@@ -238,8 +254,8 @@ object Parser2 {
       }
       else if (reader.current == ";") reader.consume()
       else rx = parseEdge(reader, rx)
-      
-      reader.eat(";") 
+
+      reader.eat(";")
     }
     rx
   }
@@ -249,9 +265,15 @@ object Parser2 {
     var transId = QName(Nil)
     var arrow = ""
 
-    if (reader.current == "-") { reader.consume(); transId = reader.parseQName(); arrow = reader.consume() } 
-    else if (reader.current == "--->") { arrow = "->"; reader.consume() } 
+    def here: Token = if (reader.pos < reader.tokens.length) reader.tokens(reader.pos) else Token("FIM DO FICHEIRO", -1, -1)
+    var arrowTok = here
+    if (reader.current == "-") { reader.consume(); transId = reader.parseQName(); arrowTok = here; arrow = reader.consume() }
+    else if (reader.current == "--->") { arrow = "->"; reader.consume() }
     else { arrow = reader.consume() }
+    if (!Set("->", "-->", "->>", "--!", "--x").contains(arrow))
+      throw new RuntimeException(
+        s"Erro na Linha ${arrowTok.line}, Coluna ${arrowTok.col}:\nDepois de '${from.show}' era esperada uma seta (--->, -id->, ->>, --!), mas encontrou-se '${arrowTok.value}'.\n" +
+        "Numa aresta, o peso e a agregação vêm depois do rótulo, por esta ordem: s ---> t : rotulo (0.5) prod")
 
     val to = reader.parseQName()
     var label = QName(Nil)
@@ -262,13 +284,13 @@ object Parser2 {
     var parsedWeight: Option[Double] = None
     var parsedWeightExpr: Option[UpdateExpr] = None
     var aggType: String = ""
-    
-    if (reader.eat("(")) { 
+
+    if (reader.eat("(")) {
       val expr = parseExpr(reader)
       parsedWeightExpr = Some(expr)
       val evaluated = rta.backend.RxSemantics.evalExpr(expr, rx.val_env, rx)
       parsedWeight = Some(Condition.extractDouble(evaluated))
-      reader.expect(")") 
+      reader.expect(")")
     }
     if (Set("arith", "prod", "max", "min", "geom").contains(reader.current)) aggType = reader.consume()
 
@@ -283,7 +305,7 @@ object Parser2 {
        else if (t == "if") {
          reader.consume(); cond = Some(parseCondition(reader))
          if (reader.eat("then")) { reader.expect("{"); updates = updates ::: parseStatementsBlock(reader); reader.expect("}") }
-       } 
+       }
        else if (t == "then") {
          reader.consume()
          reader.expect("{")
@@ -332,13 +354,19 @@ object Parser2 {
   private def parsePrimary(reader: TokenReader): UpdateExpr = {
     if (reader.eat("(")) {
       val e = parseExpr(reader); reader.expect(")"); e
+    } else if (reader.eat("-")) {
+      parsePrimary(reader) match {
+        case UpdateExpr.LitInt(i) => UpdateExpr.LitInt(-i)
+        case UpdateExpr.LitFloat(f) => UpdateExpr.LitFloat(-f)
+        case e => UpdateExpr.MathOp(UpdateExpr.LitInt(0), "-", e)
+      }
     } else if (reader.eat("true")) { UpdateExpr.LitBool(true)
     } else if (reader.eat("false")) { UpdateExpr.LitBool(false)
     } else if (reader.eat("[")) {
       var elems = List.empty[UpdateExpr]
-      if (reader.current != "]") { 
+      if (reader.current != "]") {
           elems = elems :+ parseExpr(reader)
-          while(reader.eat(",")) { elems = elems :+ parseExpr(reader) } 
+          while(reader.eat(",")) { elems = elems :+ parseExpr(reader) }
       }
       reader.expect("]")
       UpdateExpr.LitArray(elems)
@@ -346,51 +374,76 @@ object Parser2 {
     } else if (reader.current.matches("-?\\d+")) { UpdateExpr.LitInt(reader.tryParseInt())
     } else {
       val q = reader.parseQName()
-      if (reader.eat("(")) { 
+      if (reader.eat("(")) {
          var args = List.empty[UpdateExpr]
-         if (reader.current != ")") { 
+         if (reader.current != ")") {
              args = args :+ parseExpr(reader)
-             while(reader.eat(",")) { args = args :+ parseExpr(reader) } 
+             while(reader.eat(",")) { args = args :+ parseExpr(reader) }
          }
          reader.expect(")")
          UpdateExpr.FuncCall(q, args)
-      } else if (reader.eat("[")) { 
+      } else if (reader.eat("[")) {
          val idx = parseExpr(reader); reader.expect("]")
          UpdateExpr.ArrayAccess(q, idx)
       } else {
-         UpdateExpr.Var(q) 
+         UpdateExpr.Var(q)
       }
     }
   }
 
-  private def parseCondition(reader: TokenReader): Condition = {
-    def parseAtom(): Condition = {
-      if (reader.eat("(")) { val c = parseCondition(reader); reader.expect(")"); c }
-      else {
-        val lhs = parseExpr(reader)
-        val op = reader.consume()
-        if (Set("==", "!=", "<=", ">=", "<", ">", "=").contains(op)) {
-           val rhs = parseExpr(reader)
-           lhs match {
-             case UpdateExpr.FuncCall(metric, List(UpdateExpr.Var(lbl))) if Set("P", "F", "not_p").contains(metric.show) =>
-                 rhs match {
-                   case UpdateExpr.LitFloat(d) => Condition.WeightCheck(lbl, metric.show, op, d)
-                   case UpdateExpr.LitInt(i) => Condition.WeightCheck(lbl, metric.show, op, i.toDouble)
-                   case _ => AtomicCond(lhs, op, rhs)
-                 }
-               case _ => AtomicCond(lhs, op, rhs)
-             }
-        } else throw new RuntimeException(s"Operador de comparação inválido '$op'.\n[ Perto de: ... ${reader.tokens.slice(Math.max(0, reader.pos-4), reader.pos+4).map(_.value).mkString(" ")} ... ]")
-      }
-    }
+  private val comparisonOps = Set("==", "!=", "<=", ">=", "<", ">", "=")
+  private val arithOps = Set("+", "-", "*", "/")
 
-    var left = parseAtom()
-    while (List("AND", "&&", "OR", "||").contains(reader.current)) {
-      val op = reader.consume()
-      val right = parseAtom()
-      if (op == "OR" || op == "||") left = Or(left, right) else left = And(left, right)
+  private def parseCondition(reader: TokenReader): Condition = {
+    var left = parseCondAnd(reader)
+    while (reader.current == "OR" || reader.current == "||") {
+      reader.consume()
+      left = Or(left, parseCondAnd(reader))
     }
     left
+  }
+
+  private def parseCondAnd(reader: TokenReader): Condition = {
+    var left = parseCondAtom(reader)
+    while (reader.current == "AND" || reader.current == "&&") {
+      reader.consume()
+      left = And(left, parseCondAtom(reader))
+    }
+    left
+  }
+
+  private def parseCondAtom(reader: TokenReader): Condition = {
+    if (reader.current == "(") {
+      val save = reader.pos
+      val asCond: Option[Condition] =
+        try {
+          reader.consume()
+          val c = parseCondition(reader)
+          reader.expect(")")
+          if (comparisonOps.contains(reader.current) || arithOps.contains(reader.current)) None else Some(c)
+        } catch { case _: RuntimeException => None }
+      asCond match {
+        case Some(c) => c
+        case None => reader.pos = save; parseComparison(reader)
+      }
+    } else parseComparison(reader)
+  }
+
+  private def parseComparison(reader: TokenReader): Condition = {
+    val lhs = parseExpr(reader)
+    val op = reader.consume()
+    if (comparisonOps.contains(op)) {
+      val rhs = parseExpr(reader)
+      lhs match {
+        case UpdateExpr.FuncCall(metric, List(UpdateExpr.Var(lbl))) if Set("P", "F", "not_p").contains(metric.show) =>
+          rhs match {
+            case UpdateExpr.LitFloat(d) => Condition.WeightCheck(lbl, metric.show, op, d)
+            case UpdateExpr.LitInt(i) => Condition.WeightCheck(lbl, metric.show, op, i.toDouble)
+            case _ => AtomicCond(lhs, op, rhs)
+          }
+        case _ => AtomicCond(lhs, op, rhs)
+      }
+    } else throw new RuntimeException(s"Operador de comparação inválido '$op'.\n[ Perto de: ... ${reader.tokens.slice(Math.max(0, reader.pos-4), reader.pos+4).map(_.value).mkString(" ")} ... ]")
   }
 
   private def parseStatementsBlock(reader: TokenReader): List[Statement] = {
@@ -412,7 +465,7 @@ object Parser2 {
             stmts = stmts :+ ForeachStmt(iter, arr, body)
         } else if (reader.eat("return")) {
             stmts = stmts :+ ReturnStmt(parseExpr(reader))
-        } else if (reader.eat("print")) { 
+        } else if (reader.eat("print")) {
             reader.expect("(")
             val expr = parseExpr(reader)
             reader.expect(")")
@@ -427,13 +480,13 @@ object Parser2 {
 
   private def parseUpdate(reader: TokenReader): Statement = {
     val qRaw = reader.parseQName()
-    
+
     val q = if (qRaw.n.last.endsWith("'")) QName(qRaw.n.init :+ qRaw.n.last.dropRight(1)) else qRaw
-    
+
     if (reader.eat("[")) {
       val idx = parseExpr(reader)
       reader.expect("]")
-      if (reader.current == "'") reader.consume() 
+      if (reader.current == "'") reader.consume()
       reader.expect(":=")
       ArrayAssignStmt(q, idx, parseExpr(reader))
     } else {

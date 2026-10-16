@@ -13,6 +13,7 @@ import rta.backend.{RxSemantics, PdlEvaluator, PrismConverter2, AnalyseLTS, Trai
 object RTACLI {
 
   def main(args: Array[String]): Unit = {
+    java.util.Locale.setDefault(java.util.Locale.ROOT)
     if (args.isEmpty || args(0) == "-server") {
       runServerMode()
     } else {
@@ -20,9 +21,26 @@ object RTACLI {
     }
   }
 
+  private def applyHistory(graph: RxGraph, history: String): RxGraph = {
+    var cur = graph
+    for (raw <- history.split(',') if raw.trim.nonEmpty) {
+      val step = raw.trim
+      val candidates = RxSemantics.nextEdge(cur).toList
+        .filter { case (e, _) => e._4.show == step || s"${e._4.show}(${e._3.show})" == step }
+        .sortBy(t => Program2.showEdge(t._1))
+      candidates match {
+        case Nil => throw new RuntimeException(s"Step '$step' is not enabled in state ${cur.inits.map(_.show).mkString(",")}.")
+        case (_, next) :: rest =>
+          if (rest.nonEmpty) System.err.println(s"[WARN] Step '$step' is ambiguous (${candidates.map(c => s"${c._1._4.show}(${c._1._3.show}) -> ${c._1._2.show}").mkString(", ")}); taking the first.")
+          cur = next
+      }
+    }
+    cur
+  }
+
   def runCliMode(args: Array[String]): Unit = {
     val command = args(0)
-    
+
     if (command == "-help" || args.length < 2) {
       printHelp()
       return
@@ -32,12 +50,12 @@ object RTACLI {
 
     try {
       val rawSource = Source.fromFile(inputFile).mkString
-      // Remove the "name" command so the parser works in the CLI
       val cleanSource = rawSource.replaceAll("(?m)^\\s*name\\s+[a-zA-Z0-9_]+[;\\s]*\n?", "")
-      val graph = Parser2.parseProgram(cleanSource)
+      // the parser reads "name" itself: parsing the original text keeps the line numbers of error messages right
+      val graph = Parser2.parseProgram(rawSource)
 
       command match {
-        
+
         case "-text" =>
           println(graph.toString)
 
@@ -47,39 +65,35 @@ object RTACLI {
         case "-translate" | "-glts" =>
           val translation = RTATranslator.translate_syntax(graph, cleanSource)
           saveOrPrint(translation, args, 2)
-        
+
+        case "-mcrl2" =>
+          saveOrPrint(rta.backend.MCRL2(graph), args, 2)
+
         case "-prism" =>
           val prismCode = PrismConverter2(graph, cleanSource)
           saveOrPrint(prismCode, args, 2)
-          
+
         case "-latex" =>
           println("Warning: LaTeX (TikZ) export is done from the visual rendering.")
           println("Please use Server Mode (no arguments) and export via the Graphical Interface.")
-        
+
         case "-step" =>
-          var currentGraph = graph
-          // If Python sends the history, simulate it first!
-          if (args.length > 2 && args(2).trim.nonEmpty) {
-             val steps = args(2).split(',')
-             for (step <- steps) {
-                 val transitions = RxSemantics.nextEdge(currentGraph)
-                 transitions.find(_._1._4.show == step).foreach { case (_, nextG) => currentGraph = nextG }
-             }
-          }
+          val currentGraph = applyHistory(graph, if (args.length > 2) args(2) else "")
           val transitions = RxSemantics.nextEdge(currentGraph)
-          
-          // Also print the updated variable state
-          if (currentGraph.val_env.nonEmpty) {
-             println(s"Variables: ${currentGraph.val_env.map(kv => s"${kv._1.show}=${kv._2}").mkString(", ")}")
+          val probs = RxSemantics.transitionProbabilities(currentGraph, transitions)
+
+          val userVars = currentGraph.val_env.filterNot(_._1.show.startsWith("__"))
+          if (userVars.nonEmpty) {
+             println(s"Variables: ${userVars.map(kv => s"${kv._1.show}=${kv._2}").mkString(", ")}")
           }
 
           if (transitions.isEmpty) println("Deadlock: No enabled transitions.")
           else {
             println(s"Current State: ${currentGraph.inits.mkString(", ")}")
             println("Enabled Transitions:")
-            transitions.foreach { case ((from, to, tId, lbl), _) =>
-              val weight = currentGraph.weights.getOrElse((from, to, tId, lbl), 1.0)
-              println(s"  - [${lbl.show}] from ${from.show} to ${to.show} (P=${f"$weight%.3f"})")
+            transitions.toList.sortBy(t => Program2.showEdge(t._1)).foreach { case (e @ (from, to, tId, lbl), _) =>
+              val p = probs.getOrElse(e, 1.0)
+              println(s"  - [${lbl.show}] from ${from.show} to ${to.show} (P=${f"$p%.3f"})")
             }
           }
 
@@ -125,7 +139,7 @@ object RTACLI {
           val targetInt = if (args.length > 4) args(4).toInt else 0
           val criterion = if (args.length > 5) args(5) else "max"
           val isMax = criterion == "max"
-          
+
           val goal: RxGraph => Boolean = targetType match {
             case "state" => AnalyseLTS.goalState(targetValue)
             case "variable" => AnalyseLTS.goalVariable(targetValue, targetInt)
@@ -144,15 +158,9 @@ object RTACLI {
         case "-cytoscape" =>
           var currentGraph = graph
           var outIdx = 2
-          if (args.length > 2) {
-             if (!args(2).endsWith(".json")) {
-                 val steps = args(2).split(',')
-                 for (step <- steps if step.nonEmpty) {
-                     val transitions = RxSemantics.nextEdge(currentGraph)
-                     transitions.find(_._1._4.show == step).foreach { case (_, nextG) => currentGraph = nextG }
-                 }
-                 outIdx = 3
-             }
+          if (args.length > 2 && !args(2).endsWith(".json")) {
+             currentGraph = applyHistory(graph, args(2))
+             outIdx = 3
           }
           val json = rta.backend.CytoscapeConverter(currentGraph)
           saveOrPrint(json, args, outIdx)
@@ -163,15 +171,8 @@ object RTACLI {
           } else {
             val stateStr = args(2)
             val formulaStr = args(3)
-            
-            var currentGraph = graph
-            if (args.length > 4 && args(4).trim.nonEmpty) {
-               val steps = args(4).split(',')
-               for (step <- steps) {
-                   val transitions = RxSemantics.nextEdge(currentGraph)
-                   transitions.find(_._1._4.show == step).foreach { case (_, nextG) => currentGraph = nextG }
-               }
-            }
+
+            val currentGraph = applyHistory(graph, if (args.length > 4) args(4) else "")
 
             val qnameRes = try { Right(QName(stateStr.split('.').toList)) } catch { case e: Exception => Left(e.getMessage) }
             qnameRes match {
@@ -180,78 +181,30 @@ object RTACLI {
                   println(s"Error: State '$stateStr' not found in the model.")
                 } else {
                   val formula = PdlParser.parsePdlFormula(formulaStr)
-                  val result = PdlEvaluator.evaluateFormula(startState, formula, currentGraph)
-                  println(s"Result: $result")
+                  println(PdlEvaluator.evaluateFormula(startState, formula, currentGraph))
                 }
               case Left(err) => println(s"Error reading state: $err")
             }
           }
 
-        case "-train" =>
+        case "-train" | "-train2" =>
           if (args.length < 3) {
-            println("Usage: -train <model.r> <training_data.txt> [output.r]")
+            println(s"Usage: $command <model.r> <training_data.txt> [output.r]")
           } else {
             val trainingFile = args(2)
-            println(s"Starting training (TrainingEngine) from $trainingFile ...")
-            
+            println(s"Starting training from $trainingFile ...")
             val startTime = System.currentTimeMillis()
-            val lines = Source.fromFile(trainingFile).getLines()
-            
-            val finalGraph = TrainingEngine.trainFromLines(
-              rx = graph,
-              lines = lines,
-              onProgress = (sessions, events) =>
-                println(s"Processed $sessions sessions ($events events)...")
-            )
-            
+            val src = Source.fromFile(trainingFile)
+            val finalGraph =
+              try TrainingEngine.trainFromLines(
+                rx = graph,
+                lines = src.getLines(),
+                onProgress = (sessions, events) => println(s"Processed $sessions sessions ($events events)...")
+              )
+              finally src.close()
             val elapsed = (System.currentTimeMillis() - startTime) / 1000.0
-            println(s"Training completed in $elapsed seconds.")
-            
-            val updatedSource = getUpdatedSource(finalGraph, rawSource)
-            saveOrPrint(updatedSource, args, 3)
-          }
-
-
-        case "-train2" =>
-          if (args.length < 3) {
-            println("Usage: -train2 <model.r> <training_data.txt> [output.r]")
-          } else {
-            val trainingFile = args(2)
-            println(s"Starting massive training from $trainingFile ...")
-            
-            var currentGraph = graph.copy(trainingMode = true)
-            var count = 0
-            val startTime = System.currentTimeMillis()
-
-            val lines = Source.fromFile(trainingFile).getLines()
-            
-            for (line <- lines) {
-              val tLine = line.trim
-              if (tLine.nonEmpty) {
-                val session = tLine.split(',').map(_.trim)
-                var sessionGraph = currentGraph.copy(inits = graph.inits)
-                
-                for (eventName <- session) {
-                  val nexts = RxSemantics.nextEdge(sessionGraph)
-                  val trans = nexts.find(_._1._4.show == eventName)
-                  trans.foreach { case (_, next) => sessionGraph = next }
-                }
-                currentGraph = sessionGraph
-              }
-              
-              count += 1
-              if (count % 100000 == 0) {
-                println(s"Processed $count lines...")
-              }
-            }
-
-            val finalGraph = currentGraph.copy(inits = graph.inits)
-            val elapsed = (System.currentTimeMillis() - startTime) / 1000.0
-            println(s"Training completed! $count sessions processed in $elapsed seconds.")
-
-            // Extract the updated source code
-            val updatedSource = getUpdatedSource(finalGraph, rawSource)
-            saveOrPrint(updatedSource, args, 3)
+            println(s"Training completed in $elapsed seconds. ${TrainingEngine.lastReport.summary}")
+            saveOrPrint(getUpdatedSource(finalGraph, rawSource), args, 3)
           }
 
         case "-lts" =>
@@ -261,33 +214,18 @@ object RTACLI {
       }
 
     } catch {
-      case e: java.io.FileNotFoundException => println(s"File not found: $inputFile")
-      case e: Exception => 
-        println("Error during execution:")
-        e.printStackTrace()
+      case e: java.io.FileNotFoundException =>
+        System.err.println(s"File not found: ${e.getMessage}")
+        System.exit(2)
+      case e: Exception =>
+        System.err.println(s"Error: ${e.getMessage}")
+        if (System.getenv("RTA_DEBUG") != null) e.printStackTrace()
+        System.exit(4)
     }
   }
 
-  def getUpdatedSource(graph: RxGraph, currentSource: String): String = {
-    val lines = currentSource.split("\r?\n")
-
-    val transRegex = """^(\s*[\w./]+)\s*(-[\w./]*->|->|->>|--!|--x|--->|---->|--#--)\s*([\w./]+)\s*:\s*([\w./]+)(\s*\([\d.]+\))?(.*)$""".r
-
-    val updatedLines = lines.map {
-      case line @ transRegex(fromStr, arrow, toStr, lblStr, oldWeight, rest) =>
-        val edgeWeightOpt = graph.weights.find { case (edge, w) => 
-          edge._4.show == lblStr.trim
-        }
-
-        edgeWeightOpt match {
-          case Some((_, weight)) =>
-            s"${fromStr.trim} $arrow ${toStr.trim} : ${lblStr.trim} (${f"$weight%.3f".replace(",", ".")})${rest}"
-          case None => line 
-        }
-      case other => other 
-    }
-    updatedLines.mkString("\n")
-  }
+  def getUpdatedSource(graph: RxGraph, currentSource: String): String =
+    rta.backend.SourceUpdater.updateWeights(graph, currentSource)
 
   private def saveOrPrint(content: String, args: Array[String], outIdx: Int): Unit = {
     if (args.length > outIdx) {
@@ -303,10 +241,10 @@ object RTACLI {
     var visited = Set[RxGraph](root)
     var queue = List(root)
     var transitionsStr = List[String]()
-    
+
     var stateToId = Map[RxGraph, Int](root -> 0)
     var idCounter = 0
-    
+
     def getId(g: RxGraph): Int = {
       if (stateToId.contains(g)) stateToId(g)
       else {
@@ -322,14 +260,14 @@ object RTACLI {
       val current = queue.head
       queue = queue.tail
       val sourceId = getId(current)
-      
+
       val nexts = RxSemantics.nextEdge(current)
-      
+
       for ((edge, nextState) <- nexts) {
         val targetId = getId(nextState)
-        val label = edge._4.show 
+        val label = edge._4.show
         transitionsStr = s"$sourceId -->|\"$label\"| $targetId" :: transitionsStr
-        
+
         if (!visited.contains(nextState)) {
           visited += nextState
           queue = queue :+ nextState
@@ -361,6 +299,7 @@ object RTACLI {
         |
         |Commands:
         |  -prism <file>                 : Export to PRISM (.pm)
+        |  -mcrl2 <file>                 : Export to mCRL2
         |  -translate <file>             : Translate code to GLTS
         |  -train <file> <train.txt>     : Train model with log and update weights
         |  -text <file>                  : Print textual state
@@ -404,7 +343,7 @@ object RTACLI {
     server.start()
     val url = s"http://localhost:${server.getAddress.getPort}/index.html"
     println(s"Graphical Interface running at: $url")
-    
+
     if (Desktop.isDesktopSupported && Desktop.getDesktop.isSupported(Desktop.Action.BROWSE)) {
       Desktop.getDesktop.browse(new URI(url))
     }

@@ -1,2 +1,6 @@
 networkx
 matplotlib
+
+[data]
+pandas
+numpy

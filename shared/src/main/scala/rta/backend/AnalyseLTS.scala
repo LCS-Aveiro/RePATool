@@ -1,5 +1,6 @@
 package rta.backend
 
+import rta.syntax.Program2
 import rta.syntax.Program2.{Edges, RxGraph, QName, Edge, showEdges}
 import scala.collection.mutable
 import rta.syntax.Condition
@@ -71,8 +72,30 @@ object AnalyseLTS:
 
     aux(Set(rx), Set(), 0, Set(), Nil, max)
 
+  /** Least probable *simple* path (no configuration visited twice): over arbitrary paths the infimum is 0 as soon
+    * as there is a cycle, which is not a useful answer. */
+  private def findLeastProbableSimplePath(start: RxGraph, goal: RxGraph => Boolean, maxNodes: Int): Option[PathResult] = {
+    var best: Option[PathResult] = None
+    var visitedNodes = 0
+    def dfs(cur: RxGraph, prob: Double, path: List[Edge], onPath: Set[RxGraph]): Unit = {
+      if (visitedNodes < maxNodes) {
+        visitedNodes += 1
+        if (goal(cur)) { if (best.forall(_.probability > prob)) best = Some(PathResult(path.reverse, prob, cur)) }
+        else {
+          val transitions = RxSemantics.nextEdge(cur)
+          val probs = RxSemantics.transitionProbabilities(cur, transitions)
+          for ((edge, nxt) <- transitions.toList.sortBy(t => Program2.showEdge(t._1)) if !onPath.contains(nxt))
+            dfs(nxt, prob * probs.getOrElse(edge, 0.0), edge :: path, onPath + nxt)
+        }
+      }
+    }
+    dfs(start, 1.0, Nil, Set(start))
+    best
+  }
+
   def findBestPath(start: RxGraph, goal: RxGraph => Boolean, isMax: Boolean = true, maxNodes: Int = 2000): Option[PathResult] = {
-    
+    if (!isMax) return findLeastProbableSimplePath(start, goal, maxNodes)
+
     val ordering = if (isMax) Ordering.by[(Double, RxGraph, List[Edge]), Double](_._1)
                    else Ordering.by[(Double, RxGraph, List[Edge]), Double](_._1).reverse
 
@@ -93,8 +116,10 @@ object AnalyseLTS:
         return Some(PathResult(path.reverse, prob, current))
       }
 
-      for ((edge, nextRx) <- RxSemantics.nextEdge(current)) {
-        val edgeProb = current.weights.getOrElse(edge, 1.0)
+      val transitions = RxSemantics.nextEdge(current)
+      val probs = RxSemantics.transitionProbabilities(current, transitions)
+      for ((edge, nextRx) <- transitions) {
+        val edgeProb = probs.getOrElse(edge, 0.0)
         val newProb = prob * edgeProb
 
         val shouldExplore = if (isMax) {

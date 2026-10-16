@@ -81,19 +81,21 @@ class ReForma:
 
     
     def create_from_dataframe(
-        self, 
-        df, 
-        session_col: str = 'user_session', 
-        event_col: str = 'event_type', 
+        self,
+        df,
+        session_col: str = 'user_session',
+        event_col: str = 'event_type',
         sub_event_col: Optional[str] = None,
-        time_col: str = 'event_time', 
+        time_col: str = 'event_time',
         model_name: str = "MinedModel",
         save_model_path: Optional[str] = None,
-        save_traces_path: Optional[str] = None
+        save_traces_path: Optional[str] = None,
+        initial_weights: str = "frequency",
+        session_order: str = "time"
     ) -> list[list[str]]:
         """
         Discovers the RePA model directly from a Pandas DataFrame.
-        
+
         :param df: Pandas DataFrame containing the dataset.
         :param session_col: Column name identifying user sessions.
         :param event_col: Column name containing the action/event.
@@ -102,34 +104,90 @@ class ReForma:
         :param model_name: Name to give the automaton.
         :param save_model_path: If set, saves the generated .rta code to this file path.
         :param save_traces_path: If set, saves the session logs (.txt) to this file path.
+        :param initial_weights: "frequency" (default) writes the observed transition frequencies (the maximum
+            likelihood estimate) as weights; "uniform" leaves the weights out, so every state starts uniform.
+        :param session_order: "time" (default) returns the sessions in the order they started, as they happened;
+            "id" returns them sorted by session identifier. The order matters when the sessions are replayed with
+            an aggregation of constant weight (``training aggregation ema(g)``).
         :return: A list of sessions (each session is a list of transition IDs).
         """
         try:
             import pandas as pd
+            import numpy as np
             import re
         except ImportError:
             raise RuntimeError("To use process mining you need to install: pip install pandas")
-        
-        def sanitize(text):
-            return re.sub(r'[^a-zA-Z0-9_]', '_', str(text))
+        if initial_weights not in ("frequency", "uniform"):
+            raise ValueError("initial_weights must be 'frequency' or 'uniform'")
+        if session_order not in ("time", "id"):
+            raise ValueError("session_order must be 'time' or 'id'")
 
-        df_work = df.dropna(subset=[session_col]).copy()
-        df_work = df_work.sort_values(by=[session_col, time_col])
+        has_sub = bool(sub_event_col) and sub_event_col in df.columns
+        cols = [session_col, time_col, event_col] + ([sub_event_col] if has_sub else [])
+        df_work = df.loc[df[session_col].notna(), cols]
+        # stable sort: events with the same timestamp keep the order of the log
+        df_work = df_work.sort_values(by=[session_col, time_col], kind="mergesort")
 
-        if sub_event_col and sub_event_col in df_work.columns:
-            df_work[sub_event_col] = df_work[sub_event_col].fillna('other').astype(str)
-            parsed_sub = df_work[sub_event_col].apply(lambda x: str(x).split('.')[-1])
-            df_work['__target_event'] = df_work[event_col].astype(str) + "_" + parsed_sub
+        # Every row gets the integer code of its (composite) event; all the work below is done on these codes.
+        ev = df_work[event_col].astype("category")
+        ev_codes = ev.cat.codes.to_numpy().astype(np.int64)
+        ev_names = [str(c) for c in ev.cat.categories]
+        if has_sub:
+            sub = df_work[sub_event_col].astype("category")
+            sub_names = [str(c) for c in sub.cat.categories] + ["other"]          # missing sub-events -> "other"
+            sub_codes = sub.cat.codes.to_numpy().astype(np.int64)
+            sub_codes[sub_codes < 0] = len(sub_names) - 1
+            # the last component of a category ("electronics.smartphone" -> "smartphone") is used, unless two
+            # different categories share it: those keep their full path
+            by_leaf: dict = {}
+            for c in sub_names:
+                by_leaf.setdefault(c.split('.')[-1], set()).add(c)
+            short = [c.split('.')[-1] if len(by_leaf[c.split('.')[-1]]) == 1 else c for c in sub_names]
+            combo = ev_codes * len(sub_names) + sub_codes
+            uniq, raw_codes = np.unique(combo, return_inverse=True)
+            raw_names = [f"{ev_names[u // len(sub_names)]}_{short[u % len(sub_names)]}" for u in uniq]
         else:
-            df_work['__target_event'] = df_work[event_col].astype(str)
+            raw_codes, raw_names = ev_codes, ev_names
+        raw_codes = np.asarray(raw_codes, dtype=np.int64)
 
-        df_work['next_event'] = df_work.groupby(session_col)['__target_event'].shift(-1).fillna('exit')
+        # One Re-Lang name per distinct event, distinct from each other, from the artificial states and from keywords.
+        reserved = {"Start", "exit", "init", "training", "calibration", "paradigm", "name", "int", "float", "bool",
+                    "dyn", "def", "aut", "if", "then", "disabled", "true", "false", "return", "print", "foreach",
+                    "in", "AND", "OR", "laplace", "aggregation", "arith", "prod", "max", "min", "geom"}
+        clean = [""] * len(raw_names)
+        used = set(reserved)
+        for i in sorted(range(len(raw_names)), key=lambda i: raw_names[i]):
+            base = re.sub(r'[^a-zA-Z0-9_]', '_', raw_names[i]).strip('_') or "event"
+            if base[0].isdigit() or base in reserved:
+                base = "ev_" + base
+            candidate, k = base, 2
+            while candidate in used:
+                candidate, k = f"{base}_{k}", k + 1
+            used.add(candidate)
+            clean[i] = candidate
+        K = len(clean)
+        names = clean + ["exit"]                                                # index K is the artificial exit
 
-        df_work['clean_event'] = df_work['__target_event'].apply(sanitize)
-        df_work['clean_next']  = df_work['next_event'].apply(sanitize)
+        # sessions are contiguous after the sort
+        sess_codes = pd.factorize(df_work[session_col], sort=False)[0]
+        new_sess = np.empty(len(sess_codes), dtype=bool)
+        new_sess[:1] = True
+        new_sess[1:] = sess_codes[1:] != sess_codes[:-1]
+        is_last = np.empty_like(new_sess)
+        is_last[:-1] = new_sess[1:]
+        is_last[-1:] = True
+        nxt = np.empty_like(raw_codes)
+        nxt[:-1] = raw_codes[1:]
+        nxt[is_last] = K
 
-        first_events = df_work.groupby(session_col)['clean_event'].first().value_counts()
-        transitions = df_work.groupby(['clean_event', 'clean_next']).size().reset_index(name='count')
+        firsts = raw_codes[new_sess]
+        first_counts = np.bincount(firsts, minlength=K)
+        pair = raw_codes * (K + 1) + nxt
+        pair_counts = np.bincount(pair, minlength=K * (K + 1))
+        out_totals = pair_counts.reshape(K, K + 1).sum(axis=1)
+
+        def weight(count, total) -> str:
+            return f" ({count / total:.6f})" if initial_weights == "frequency" else ""
 
         rta_output = [
             f"name {model_name};",
@@ -139,44 +197,40 @@ class ReForma:
             "init Start;\n"
         ]
 
-        mapping = {}
         edge_counter = 1
-
-        for event_type, count in first_events.items():
+        n_sessions = int(first_counts.sum())
+        start_label = np.empty(K, dtype=object)
+        for i in sorted((i for i in range(K) if first_counts[i] > 0), key=lambda i: (-first_counts[i], names[i])):
             label_id = f"e{edge_counter}"
-            rta_output.append(f"Start -enter_{event_type}-> {event_type} : {label_id}")
-            mapping[('Start', event_type)] = label_id
+            rta_output.append(f"Start -enter_{names[i]}-> {names[i]} : {label_id}{weight(first_counts[i], n_sessions)}")
+            start_label[i] = label_id
             edge_counter += 1
 
         rta_output.append("")
 
-        for source in transitions['clean_event'].unique():
-            df_source = transitions[transitions['clean_event'] == source]
-            
-            for _, row in df_source.iterrows():
-                src, tgt = row['clean_event'], row['clean_next']
-                label_id = f"e{edge_counter}"
-                
-                rta_output.append(f"{src} -{tgt}-> {tgt} : {label_id}")
-                mapping[(src, tgt)] = label_id
-                edge_counter += 1
+        pair_label = np.empty(K * (K + 1), dtype=object)
+        observed = [p for p in np.flatnonzero(pair_counts)]
+        for p in sorted(observed, key=lambda p: (names[p // (K + 1)], names[p % (K + 1)])):
+            src, tgt = names[p // (K + 1)], names[p % (K + 1)]
+            label_id = f"e{edge_counter}"
+            rta_output.append(f"{src} -{tgt}-> {tgt} : {label_id}{weight(pair_counts[p], out_totals[p // (K + 1)])}")
+            pair_label[p] = label_id
+            edge_counter += 1
 
         loop_edge_id = f"e{edge_counter}"
         rta_output.append("\n// Loop at the final state to avoid deadlock in PRISM")
         rta_output.append(f"exit -loop-> exit : {loop_edge_id} (1.0000)")
 
-        df_work['edge_tuple'] = list(zip(df_work['clean_event'], df_work['clean_next']))
-        df_work['edge_id'] = df_work['edge_tuple'].map(mapping)
-
-        first_in_session = df_work.groupby(session_col)['clean_event'].first()
-        start_edges = first_in_session.apply(lambda e: mapping.get(('Start', e)))
-        internal_edges = df_work.groupby(session_col)['edge_id'].apply(list)
-
-        traces = []
-        for session_id in internal_edges.index:
-            start_edge = start_edges[session_id]
-            path = [start_edge] + [e for e in internal_edges[session_id] if pd.notna(e)]
-            traces.append(path)
+        row_labels = pair_label[pair]
+        starts = np.flatnonzero(new_sess)
+        traces = [[start_label[f]] + chunk.tolist() for f, chunk in zip(firsts, np.split(row_labels, starts[1:]))]
+        if session_order == "time" and len(traces) > 1:
+            t = df_work[time_col]
+            if isinstance(t.dtype, pd.CategoricalDtype) and t.cat.categories.is_monotonic_increasing:
+                first_t = t.cat.codes.to_numpy()[starts]
+            else:
+                first_t = t.to_numpy()[starts]
+            traces = [traces[i] for i in np.argsort(first_t, kind="stable")]
 
         full_source = "\n".join(rta_output)
         self.load(full_source, name=model_name)
@@ -184,10 +238,12 @@ class ReForma:
         if save_model_path:
             with open(save_model_path, "w", encoding="utf-8") as f:
                 f.write(full_source)
-        
+
         if save_traces_path:
             with open(save_traces_path, "w", encoding="utf-8") as f:
-                f.write("\n".join(",".join(t) for t in traces))
+                for t in traces:
+                    f.write(",".join(t))
+                    f.write("\n")
 
         return traces
 
@@ -771,6 +827,11 @@ class ReForma:
         self._require_model()
         log_lines = [",".join(s) for s in sessions]
         updated_source = self._bridge.train(self._model.source, log_lines)
+        # the engine reports events that could not be replayed (unknown label, or not enabled at that point)
+        report = next((l for l in getattr(self._bridge, "last_stdout", "").splitlines() if "Warning:" in l), None)
+        if report:
+            import warnings
+            warnings.warn(report.split("Training completed")[-1].strip(), RuntimeWarning, stacklevel=2)
         self._model = ReFormaModel.from_string(updated_source, self._model.name)
         self._current_source = updated_source
         self._history = []
@@ -806,6 +867,11 @@ class ReForma:
         self._require_model()
         return self._bridge.get_prism(self._model.source)
 
+
+    def export_mcrl2(self) -> str:
+        """Export to mCRL2."""
+        self._require_model()
+        return self._bridge.get_mcrl2(self._model.source)
 
     def export_glts(self) -> str:
         """Translate to GLTS (imperative) format."""

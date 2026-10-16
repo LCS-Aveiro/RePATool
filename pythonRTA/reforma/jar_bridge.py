@@ -141,6 +141,9 @@ class JarBridge:
     def get_prism(self, source: str) -> str:
         return self._run_with_tempfile("-prism", source)
 
+    def get_mcrl2(self, source: str) -> str:
+        return self._run_with_tempfile("-mcrl2", source)
+
     def get_cytoscape(self, source: str, history: Optional[list[str]] = None) -> str:
         extra = [",".join(history)] if history else []
         return self._run_with_tempfile("-cytoscape", source, extra_args=extra)
@@ -193,6 +196,7 @@ class JarBridge:
             raise JarError(
                 f"JAR exited {result.returncode}:\n{result.stderr.strip()}"
             )
+        self.last_stdout = result.stdout or ""
         out_path = args[-1]
         if not os.path.exists(out_path):
             raise JarError(

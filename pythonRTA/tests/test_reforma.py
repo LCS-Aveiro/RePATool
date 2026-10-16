@@ -5,9 +5,9 @@ tests/test_reforma.py — full test suite (mocked, no real JAR needed).
 import pytest
 from unittest.mock import MagicMock, patch
 
-from reforma import reforma
+from reforma import ReForma as reforma
 
-from reforma.model import reformaModel, Transition, SimulationState
+from reforma.model import ReFormaModel as reformaModel, Transition, SimulationState
 from reforma.jar_bridge import JarBridge, JarError
 from reforma.client import _parse_pdl_result
 

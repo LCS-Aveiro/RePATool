@@ -88,7 +88,8 @@ class ReFormaModel:
     def from_file(cls, path: str) -> "ReFormaModel":
         with open(path, "r", encoding="utf-8") as f:
             source = f.read()
-        name = path.split("/")[-1].replace(".r", "")
+        import os
+        name = os.path.splitext(os.path.basename(path))[0]
         return cls(source=source, name=name)
 
     @classmethod

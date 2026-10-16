@@ -239,27 +239,7 @@ object RTAAPI {
   @JSExport
   def getUpdatedSource(): String = {
     currentGraph match {
-      case Some(graph) =>
-        val lines = currentSource.split("\n")
-        
-
-        val transRegex = """^(\s*[\w./]+)\s*(-[\w./]*->|->|->>|--!|--x|--->|---->|--#--)\s*([\w./]+)\s*:\s*([\w./]+)(\s*\([\d.]+\))?(.*)$""".r
-
-        val updatedLines = lines.map {
-          case line @ transRegex(fromStr, arrow, toStr, lblStr, oldWeight, rest) =>
-
-            val edgeWeightOpt = graph.weights.find { case (edge, w) => 
-              edge._4.show == lblStr.trim
-            }
-
-            edgeWeightOpt match {
-              case Some((_, weight)) =>
-                s"${fromStr.trim} $arrow ${toStr.trim} : ${lblStr.trim} (${f"$weight%.3f".replace(",", ".")})${rest}"
-              case None => line 
-            }
-          case other => other 
-        }
-        updatedLines.mkString("\n")
+      case Some(graph) => rta.backend.SourceUpdater.updateWeights(graph, currentSource)
 
       case None => currentSource
     }

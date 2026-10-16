@@ -106,13 +106,59 @@ object UpdateExpr {
 
   def show(expr: UpdateExpr, s: QName => String): String = expr match {
     case LitInt(i) => i.toString
-    case LitFloat(f) => f.toString
+    case LitFloat(f) => num(f)
     case LitBool(b) => b.toString
     case LitArray(elems) => elems.map(e => show(e, s)).mkString("[", ", ", "]")
     case Var(q) => s(q)
     case ArrayAccess(arr, idx) => s"${s(arr)}[${show(idx, s)}]"
-    case MathOp(l, op, r) => s"${show(l, s)} $op ${show(r, s)}"
+    case MathOp(l, op, r) =>
+      def operand(e: UpdateExpr) = e match {
+        case _: MathOp => s"(${show(e, s)})"
+        case _ => show(e, s)
+      }
+      s"${operand(l)} $op ${operand(r)}"
     case FuncCall(f, args) => s"${s(f)}(${args.map(a => show(a, s)).mkString(", ")})"
+  }
+
+  def num(d: Double): String = {
+    val plain = BigDecimal(d).bigDecimal.toPlainString
+    if (plain.contains('.')) plain else plain + ".0"
+  }
+
+  def isConstant(expr: UpdateExpr): Boolean = expr match {
+    case LitInt(_) | LitFloat(_) | LitBool(_) => true
+    case LitArray(elems) => elems.forall(isConstant)
+    case MathOp(l, _, r) => isConstant(l) && isConstant(r)
+    case _ => false
+  }
+}
+
+object ReLang {
+  def name(q: QName): String = q.n.mkString(".")
+
+  def expr(e: UpdateExpr): String = UpdateExpr.show(e, name)
+
+  def condition(c: Condition): String = c match {
+    case Condition.AtomicCond(l, op, r) => s"${expr(l)} $op ${expr(r)}"
+    case Condition.WeightCheck(lbl, metric, op, v) => s"$metric(${name(lbl)}) $op ${UpdateExpr.num(v)}"
+    case Condition.And(a, b) => s"(${condition(a)} AND ${condition(b)})"
+    case Condition.Or(a, b) => s"(${condition(a)} OR ${condition(b)})"
+  }
+
+  def statement(st: Statement): String = st match {
+    case AssignStmt(v, e) => s"${name(v)}' := ${expr(e)}"
+    case ArrayAssignStmt(a, i, e) => s"${name(a)}[${expr(i)}]' := ${expr(e)}"
+    case IfThenStmt(c, ts) => s"if (${condition(c)}) then { ${ts.map(statement).mkString("; ")} }"
+    case ForeachStmt(it, arr, body) => s"foreach (${name(it)} in ${name(arr)}) { ${body.map(statement).mkString("; ")} }"
+    case ReturnStmt(e) => s"return ${expr(e)}"
+    case PrintStmt(e) => s"print(${expr(e)})"
+  }
+
+  def value(v: RuntimeValue): String = v match {
+    case RuntimeValue.VInt(i, _, _) => i.toString
+    case RuntimeValue.VFloat(f, _, _) => UpdateExpr.num(f)
+    case RuntimeValue.VBool(b) => b.toString
+    case RuntimeValue.VArray(vs, _, _) => vs.map(value).mkString("[", ", ", "]")
   }
 }
 

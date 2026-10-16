@@ -1,16 +1,19 @@
 Metadata-Version: 2.4
 Name: ReForma
-Version: 0.3
+Version: 1.0.1
 Summary: Python bindings for the RePA/ReForma probabilistic automaton tool
 Author-email: Joshua Dourado <joshuadourado@ua.pt>
 License: MIT
 Classifier: Programming Language :: Python :: 3
 Classifier: Operating System :: OS Independent
 Classifier: Topic :: Scientific/Engineering
-Requires-Python: >=3.10
+Requires-Python: >=3.9
 Description-Content-Type: text/markdown
 Requires-Dist: networkx
 Requires-Dist: matplotlib
+Provides-Extra: data
+Requires-Dist: pandas; extra == "data"
+Requires-Dist: numpy; extra == "data"
 
 
 # ReForma — Reconfigurable Formal Automata in Python

@@ -883,6 +883,7 @@
     }
 }</pre></div>
         </div>
+        <p>The assignments of a transition (and of the rules it triggers) are <b>parallel</b>: every right-hand side and every <code>if</code> condition reads the values from <i>before</i> the transition, so <code>x' := y; y' := x</code> swaps <code>x</code> and <code>y</code>. Inside a <code>def</code> function body statements run in sequence.</p>
 
         <h3>Math expressions</h3>
         <table class="ref-table">

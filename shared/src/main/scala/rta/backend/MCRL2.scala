@@ -78,25 +78,22 @@ object MCRL2:
 
   def mkProc(s:QName, done:Set[QName]=Set())(using rx: RxGraph, mod: Set[QName]): List[String] =
     if done(s) then Nil else
-      val options = for next <- rx.edg(s)  yield
+      val options = for next <- rx.edg.getOrElse(s, Set())  yield
         val lbl = if hasToSync(next._2) then s"${mkMAction(next._2)}_1" else mkMAction(next._2)
         s"$lbl.P_${mkMAction(next._1)}"
-      val more = rx.edg(s).toList
-        .map(next => mkProc(next._1,(done++(rx.edg(s).map(_._1)-next._1))+s)) // done other destinations and s
+      val more = rx.edg.getOrElse(s, Set()).toList
+        .map(next => mkProc(next._1,(done++(rx.edg.getOrElse(s, Set()).map(_._1)-next._1))+s)) 
       if options.nonEmpty
       then s"P_${mkMAction(s)} = ${options.mkString(" + ")}" :: more.flatten
       else s"P_${mkMAction(s)} = delta" :: more.flatten
 
   def findActions(using rx: RxGraph, mod: Set[QName]): Map[QName,Set[String]] =
-    // for each modified label l, sync l1 -> l_1,l_2
     var acts = (for e<-mod yield
       e -> Set(s"${mkMAction(e)}_1",s"${mkMAction(e)}_2"))
       .toMap
-    // for each activated label l1->>l2:l3, sync l1 -> l1_1,act_l2
     for e<-rx.on; trg<-e._2 do
       acts = acts + (e._1 -> (acts.getOrElse(e._1,Set(mkMAction(e._1)))
         +s"act_${mkMAction(trg._1)}" ))
-    // for each deactivated label l1--x l2:l3, sync l1 -> l1_1,act_l2
     for e<-rx.off; trg<-e._2 do
       acts = acts + (e._1 -> (acts.getOrElse(e._1,Set(mkMAction(e._1)))
         +s"deact_${mkMAction(trg._1)}" ))
