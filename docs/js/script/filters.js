@@ -47,7 +47,7 @@ window.applyFilters = function () {
             }
         });
         if (isHideTau) {
-            currentCytoscapeInstance.elements('[label *= "tau"], .deadlock-node, .deadlock-edge').addClass('filtered-out');
+            currentCytoscapeInstance.elements('.deadlock-node, .deadlock-edge').addClass('filtered-out');
         }
     });
 
